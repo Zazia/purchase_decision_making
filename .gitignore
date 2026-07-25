@@ -1,0 +1,9 @@
+# 冗余压缩包(源文件已在仓库内)
+.agents/skills/*.zip
+
+# 不可访问文件(文件系统不支持 ACL,文件名编码异常)
+skills-improved/*.md
+
+# 系统文件
+.DS_Store
+Thumbs.db

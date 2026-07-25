@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苹果电脑购买决策分析报告 - 2026-07-24</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+:root {
+  --bg: #f8f9fa; --card: #ffffff; --border: #e2e8f0;
+  --text: #1a202c; --text2: #64748b; --accent: #0071e3;
+  --green: #34c759; --orange: #ff9500; --red: #ff3b30;
+  --frontier: #0071e3; --dominated: #cbd5e1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+       background: var(--bg); color: var(--text); line-height: 1.7; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+h1 { font-size: 1.6rem; margin-bottom: 4px; }
+h2 { font-size: 1.25rem; margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+h3 { font-size: 1.05rem; margin: 18px 0 8px; color: var(--text2); }
+.meta { color: var(--text2); font-size: 0.85rem; margin-bottom: 16px; }
+.conclusion-box { background: linear-gradient(135deg, #0071e3, #0051a8); color: white;
+  padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; }
+.conclusion-box p { font-size: 1.05rem; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; margin-bottom: 16px; }
+.chart-container { width: 100%; height: 450px; margin: 12px 0; }
+.chart-container.tall { height: 500px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 8px 0; }
+th, td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--border); }
+th { background: #f1f5f9; font-weight: 600; white-space: nowrap; }
+td.left { text-align: left; }
+tr.frontier-row { background: #eff6ff; }
+tr.over-budget { opacity: 0.6; }
+.risk-tag { color: var(--orange); font-size: 0.75rem; }
+.recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px; margin: 12px 0; }
+.rec-card { border-radius: 10px; padding: 16px; border: 2px solid; }
+.rec-card.eco { border-color: var(--green); background: #f0fdf4; }
+.rec-card.bal { border-color: var(--accent); background: #eff6ff; }
+.rec-card.perf { border-color: var(--orange); background: #fff7ed; }
+.rec-card h4 { font-size: 1rem; margin-bottom: 6px; }
+.rec-card .price { font-size: 1.4rem; font-weight: 700; }
+.rec-card .unit { font-size: 0.8rem; color: var(--text2); }
+.note { background: #fef3c7; border-left: 4px solid var(--orange); padding: 10px 14px;
+  margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+.info { background: #dbeafe; border-left: 4px solid var(--accent); padding: 10px 14px;
+  margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.75rem; }
+.tag-used { background: #fce7f3; color: #9f1239; }
+.tag-new { background: #d1fae5; color: #065f46; }
+.tag-est { background: #fef3c7; color: #92400e; }
+@media (max-width: 768px) {
+  .container { padding: 12px; }
+  h1 { font-size: 1.3rem; }
+  table { font-size: 0.72rem; }
+  th, td { padding: 4px 4px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>苹果电脑购买决策分析报告</h1>
+<p class="meta">分析日期: 2026-07-24 | SOP版本: v3.5 | 常量版本: v3.5 (2026-07-21) | 常量校验: 绿色(免检)</p>
+
+<!-- 第一部分: 结论与推荐方案 -->
+<div class="conclusion-box">
+  <p><strong>结论:</strong> 在5000元预算内，<strong>Mac mini M1 16G 256G</strong>（二手，1850元）持有60个月的月均成本仅<strong>28.2元/月</strong>，是经济档最优选择。
+若追求更高性能，<strong>Mac mini M4 16G 256G</strong>（新品(国补)，3824元）持有12个月月均143.3元/月，性能满足度达83.5%。
+台式机（Mac mini）在同等性能下成本显著低于笔记本（MacBook Air），若不需要便携强烈推荐台式机。</p></div>
+<h2>推荐方案</h2>
+<div class="recommendation-grid">
+<div class="rec-card eco">
+    <h4>经济档</h4>
+    <p><strong>Mac mini M1</strong> 16G 256G</p>
+    <p><span class="tag tag-used">二手</span></p>
+    <p class="price">28.2<span class="unit"> 元/月</span></p>
+    <p>性能满足度: 32.3% | 买入: 1850元</p>
+    <p>持有60月 | 残值: 660元 | 维修: 500元</p>
+  </div>
+<div class="rec-card bal">
+    <h4>均衡档</h4>
+    <p><strong>Mac mini M4</strong> 16G 256G</p>
+    <p><span class="tag tag-used">新品(国补)</span></p>
+    <p class="price">61.1<span class="unit"> 元/月</span></p>
+    <p>性能满足度: 65.5% | 买入: 3824元</p>
+    <p>持有60月 | 残值: 660元 | 维修: 500元</p>
+  </div>
+<div class="rec-card perf">
+    <h4>性能档</h4>
+    <p><strong>Mac mini M4</strong> 16G 256G</p>
+    <p><span class="tag tag-new">新品(国补)</span></p>
+    <p class="price">143.3<span class="unit"> 元/月</span></p>
+    <p>性能满足度: 83.5% | 买入: 3824元</p>
+    <p>持有12月 | 残值: 2205元 | 维修: 100元</p>
+  </div>
+</div>
+<div class="note">
+<strong>关键发现:</strong>
+<ul style="margin-left:16px; margin-top:4px;">
+<li><strong>台式机性价比远高于笔记本:</strong> Mac mini M1/M2 与 MacBook Air M1/M2 使用相同芯片，性能满足度完全相同，但 Mac mini 买入价低40-50%、无电池维修成本，月均成本低50-60%。</li>
+<li><strong>新品 vs 二手:</strong> Mac mini M4新品(国补3824元)性能最高但月均成本也最高；二手Mac mini M1(1850元)月均成本最低但性能最低。前沿上两者互补，非对立。</li>
+<li><strong>二手最佳选择:</strong> Mac mini M2(2350元)在性能和成本间取得最佳平衡，是二手中最划算的选择。</li>
+<li><strong>系统支持风险:</strong> M1机型(2020年发布)持有超过4个月即超出macOS支持期(72月)，M2机型持有超过30月也超期。超期后无法获取安全更新，但不影响日常使用。</li>
+<li><strong>涨价影响:</strong> 2026年6月25日苹果全球涨价18-25%，新品官方价上涨导致二手保值率水涨船高，当前二手买入价高于涨价前水平。</li>
+</ul>
+</div>
+
+<div class="info">
+<strong>便携性说明:</strong> 本分析以(月均成本, 性能满足度)为决策维度，未量化"便携性"。若您需要随身携带电脑，MacBook Air 的便携溢价约50-60元/月（相比同芯片Mac mini）。MacBook Air M1二手(3500元)是预算内唯一的便携选项。
+</div>
+
+<!-- 第二部分: 支撑证据 -->
+<h2>帕累托前沿图（核心图表）</h2>
+<p class="meta">横轴=月均成本(元/月, 越低越省) | 纵轴=持有期平均性能满足度%(越高越好) | 气泡大小=持有期净支出</p>
+<div id="chart-pareto" class="chart-container tall"></div>
+
+<h2>保值率曲线图</h2>
+<p class="meta">横轴=机龄(发布后月数) | 纵轴=保值率% | 数据来源: constants.json v3.5</p>
+<div id="chart-depreciation" class="chart-container"></div>
+
+<h2>各机型多持有期成本曲线</h2>
+<p class="meta">横轴=持有月数 | 纵轴=月均成本(元/月) | 每条线代表一个机型</p>
+<div id="chart-cost" class="chart-container"></div>
+
+<h2>完整候选方案计算表</h2>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>机型</th><th>配置</th><th>类型</th><th>持有月</th><th>买入价</th><th>残值</th><th>维修</th><th>月均成本</th><th>性能满足度</th><th>保值率</th><th>风险</th><th>状态</th></tr></thead>
+<tbody>
+<tr class="frontier-row"><td class="left">Mac mini M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>60</td><td>1850</td><td>660</td><td>500</td><td><strong>28.2</strong></td><td>32.3%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期56月</span></td><td><strong>前沿</strong></td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>48</td><td>1850</td><td>660</td><td>400</td><td><strong>33.1</strong></td><td>34.0%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期44月</span></td><td><strong>前沿</strong></td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M2</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>60</td><td>2350</td><td>660</td><td>500</td><td><strong>36.5</strong></td><td>42.4%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期30月</span></td><td><strong>前沿</strong></td></tr>
+<tr><td class="left">Mac mini M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>36</td><td>1850</td><td>660</td><td>300</td><td><strong>41.4</strong></td><td>36.1%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期32月</span></td><td>被Mac mini M2(支配</td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M2</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>48</td><td>2350</td><td>660</td><td>400</td><td><strong>43.5</strong></td><td>44.6%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期18月</span></td><td><strong>前沿</strong></td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M2</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>36</td><td>2350</td><td>660</td><td>300</td><td><strong>55.3</strong></td><td>47.3%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期6月</span></td><td><strong>前沿</strong></td></tr>
+<tr><td class="left">Mac mini M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>24</td><td>1850</td><td>660</td><td>200</td><td><strong>57.9</strong></td><td>38.4%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期20月</span></td><td>被Mac mini M2(支配</td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M4</td><td>16G 256G</td><td><span class="tag tag-new">新品(国补)</span></td><td>60</td><td>3824</td><td>660</td><td>500</td><td><strong>61.1</strong></td><td>65.5%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期9月</span></td><td><strong>前沿</strong></td></tr>
+<tr><td class="left">Mac mini M2</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>24</td><td>2350</td><td>870</td><td>200</td><td><strong>70.0</strong></td><td>50.4%</td><td>14.5%</td><td><span class="risk-tag">接近系统支持尾声(剩余6月)</span></td><td>被Mac mini M4(支配</td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M4</td><td>16G 256G</td><td><span class="tag tag-new">新品(国补)</span></td><td>48</td><td>3824</td><td>765</td><td>400</td><td><strong>72.1</strong></td><td>69.0%</td><td>12.75%</td><td><span class="risk-tag">接近系统支持尾声(剩余3月)</span></td><td><strong>前沿</strong></td></tr>
+<tr><td class="left">Mac mini M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>18</td><td>1850</td><td>660</td><td>150</td><td><strong>74.5</strong></td><td>39.7%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期14月</span></td><td>被Mac mini M2(支配</td></tr>
+<tr><td class="left">Mac mini M2</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>18</td><td>2350</td><td>1080</td><td>150</td><td><strong>78.9</strong></td><td>52.1%</td><td>18.0%</td><td><span class="risk-tag">接近系统支持尾声(剩余12月)</span></td><td>被Mac mini M4(支配</td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M4</td><td>16G 256G</td><td><span class="tag tag-new">新品(国补)</span></td><td>36</td><td>3824</td><td>1185</td><td>300</td><td><strong>81.6</strong></td><td>73.1%</td><td>19.75%</td><td>—</td><td><strong>前沿</strong></td></tr>
+<tr><td class="left">MacBook Air M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>60</td><td>3500</td><td>800</td><td>2799</td><td><strong>91.7</strong></td><td>32.3%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期56月</span></td><td>被Mac mini M1(支配</td></tr>
+<tr><td class="left">MacBook Pro 14 M1 Pro</td><td>16G 512G</td><td><span class="tag tag-used">二手</span></td><td>60</td><td>4400</td><td>2160</td><td>3299</td><td><strong>92.3</strong></td><td>23.2%</td><td>12.0%</td><td><span class="risk-tag">超出系统支持期45月</span></td><td>被MacBook Air 支配</td></tr>
+<tr><td class="left">Mac mini M2</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>12</td><td>2350</td><td>1290</td><td>100</td><td><strong>96.7</strong></td><td>54.0%</td><td>21.5%</td><td>—</td><td>被Mac mini M4(支配</td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M4</td><td>16G 256G</td><td><span class="tag tag-new">新品(国补)</span></td><td>24</td><td>3824</td><td>1620</td><td>200</td><td><strong>100.2</strong></td><td>77.9%</td><td>27.0%</td><td>—</td><td><strong>前沿</strong></td></tr>
+<tr><td class="left">MacBook Pro 14 M1 Pro</td><td>16G 512G</td><td><span class="tag tag-used">二手</span></td><td>48</td><td>4400</td><td>2160</td><td>2899</td><td><strong>107.1</strong></td><td>24.4%</td><td>12.0%</td><td><span class="risk-tag">超出系统支持期33月</span></td><td>被MacBook Air 支配</td></tr>
+<tr><td class="left">Mac mini M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>12</td><td>1850</td><td>660</td><td>100</td><td><strong>107.5</strong></td><td>41.2%</td><td>11.0%</td><td><span class="risk-tag">超出系统支持期8月</span></td><td>被Mac mini M2(支配</td></tr>
+<tr><td class="left">MacBook Air M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>48</td><td>3500</td><td>800</td><td>2499</td><td><strong>108.3</strong></td><td>34.0%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期44月</span></td><td>被Mac mini M1(支配</td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M4</td><td>16G 256G</td><td><span class="tag tag-new">新品(国补)</span></td><td>18</td><td>3824</td><td>1860</td><td>150</td><td><strong>117.5</strong></td><td>80.6%</td><td>31.0%</td><td>—</td><td><strong>前沿</strong></td></tr>
+<tr class="over-budget"><td class="left">MacBook Air M2</td><td>16G 256G</td><td><span class="tag tag-est">二手(估算)</span></td><td>60</td><td>5100</td><td>800</td><td>2799</td><td><strong>118.3</strong></td><td>42.4%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期36月</span></td><td>被Mac mini M2(支配</td></tr>
+<tr><td class="left">MacBook Pro 14 M1 Pro</td><td>16G 512G</td><td><span class="tag tag-used">二手</span></td><td>24</td><td>4400</td><td>2160</td><td>800</td><td><strong>126.7</strong></td><td>27.5%</td><td>12.0%</td><td><span class="risk-tag">超出系统支持期9月</span></td><td>被MacBook Air 支配</td></tr>
+<tr><td class="left">MacBook Pro 14 M1 Pro</td><td>16G 512G</td><td><span class="tag tag-used">二手</span></td><td>36</td><td>4400</td><td>2160</td><td>2499</td><td><strong>131.6</strong></td><td>25.8%</td><td>12.0%</td><td><span class="risk-tag">超出系统支持期21月</span></td><td>被MacBook Air 支配</td></tr>
+<tr><td class="left">MacBook Air M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>36</td><td>3500</td><td>800</td><td>2199</td><td><strong>136.1</strong></td><td>36.1%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期32月</span></td><td>被MacBook Air 支配</td></tr>
+<tr><td class="left">MacBook Air M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>24</td><td>3500</td><td>800</td><td>600</td><td><strong>137.5</strong></td><td>38.4%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期20月</span></td><td>被MacBook Air 支配</td></tr>
+<tr class="over-budget"><td class="left">MacBook Air M2</td><td>16G 256G</td><td><span class="tag tag-est">二手(估算)</span></td><td>48</td><td>5100</td><td>800</td><td>2499</td><td><strong>141.6</strong></td><td>44.6%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期24月</span></td><td>被Mac mini M2(支配</td></tr>
+<tr class="frontier-row"><td class="left">Mac mini M4</td><td>16G 256G</td><td><span class="tag tag-new">新品(国补)</span></td><td>12</td><td>3824</td><td>2205</td><td>100</td><td><strong>143.3</strong></td><td>83.5%</td><td>36.75%</td><td>—</td><td><strong>前沿</strong></td></tr>
+<tr><td class="left">MacBook Pro 14 M1 Pro</td><td>16G 512G</td><td><span class="tag tag-used">二手</span></td><td>18</td><td>4400</td><td>2160</td><td>600</td><td><strong>157.8</strong></td><td>28.5%</td><td>12.0%</td><td><span class="risk-tag">超出系统支持期3月</span></td><td>被MacBook Air 支配</td></tr>
+<tr><td class="left">MacBook Air M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>18</td><td>3500</td><td>800</td><td>450</td><td><strong>175.0</strong></td><td>39.7%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期14月</span></td><td>被MacBook Air 支配</td></tr>
+<tr class="over-budget"><td class="left">MacBook Air M2</td><td>16G 256G</td><td><span class="tag tag-est">二手(估算)</span></td><td>36</td><td>5100</td><td>800</td><td>2199</td><td><strong>180.5</strong></td><td>47.3%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期12月</span></td><td>被Mac mini M2(支配</td></tr>
+<tr><td class="left">MacBook Pro 14 M1 Pro</td><td>16G 512G</td><td><span class="tag tag-used">二手</span></td><td>12</td><td>4400</td><td>2520</td><td>400</td><td><strong>190.0</strong></td><td>29.5%</td><td>14.0%</td><td><span class="risk-tag">接近系统支持尾声(剩余3月)</span></td><td>被MacBook Air 支配</td></tr>
+<tr class="over-budget"><td class="left">MacBook Air M2</td><td>16G 256G</td><td><span class="tag tag-est">二手(估算)</span></td><td>24</td><td>5100</td><td>800</td><td>600</td><td><strong>204.2</strong></td><td>50.4%</td><td>8.0%</td><td><span class="risk-tag">接近系统支持尾声(剩余0月)</span></td><td>被Mac mini M2(支配</td></tr>
+<tr class="over-budget"><td class="left">MacBook Air M2</td><td>16G 256G</td><td><span class="tag tag-est">二手(估算)</span></td><td>18</td><td>5100</td><td>1150</td><td>450</td><td><strong>244.5</strong></td><td>52.1%</td><td>11.5%</td><td><span class="risk-tag">接近系统支持尾声(剩余6月)</span></td><td>被Mac mini M2(支配</td></tr>
+<tr><td class="left">MacBook Air M1</td><td>16G 256G</td><td><span class="tag tag-used">二手</span></td><td>12</td><td>3500</td><td>800</td><td>300</td><td><strong>250.0</strong></td><td>41.2%</td><td>8.0%</td><td><span class="risk-tag">超出系统支持期8月</span></td><td>被MacBook Air 支配</td></tr>
+<tr class="over-budget"><td class="left">MacBook Air M2</td><td>16G 256G</td><td><span class="tag tag-est">二手(估算)</span></td><td>12</td><td>5100</td><td>1500</td><td>300</td><td><strong>325.0</strong></td><td>54.0%</td><td>15.0%</td><td><span class="risk-tag">接近系统支持尾声(剩余12月)</span></td><td>被Mac mini M2(支配</td></tr>
+</tbody></table>
+</div>
+
+<h2>宏观因素分析与常量校验</h2>
+<div class="card">
+<h3>常量校验级别: 绿色(免检)</h3>
+<p>constants.json 最后更新日期: 2026-07-21，距今3天，在30天免检期内。期间无苹果新品发布、无新的重大行业价格事件（6月25日涨价事件发生在常量更新之前，已纳入常量数据）。直接使用，无需校验。</p>
+</div>
+<div class="card">
+<h3>已知宏观因素（已在常量中体现）</h3>
+<table>
+<tr><th>事件</th><th>时间</th><th>影响</th><th>对分析的影响</th></tr>
+<tr><td>苹果全球涨价</td><td>2026-06-25</td><td>Mac全系列涨价18-25%</td><td>新品官方价上涨→残值基准上升→二手残值同步上升→二手月均成本中的"残值回收"增加，部分对冲买入价上涨</td></tr>
+<tr><td>存储芯片价格暴涨</td><td>2026年上半年</td><td>DRAM/NAND价格上涨近100%</td><td>Mac mini M4 256G版因成本压力从官网下架，起售改为512G/5999元</td></tr>
+<tr><td>国补政策</td><td>2026年7月</td><td>第三批625亿元补贴覆盖29省市</td><td>新品电商到手价低于官方价15-20%，Mac mini M4国补后3824元</td></tr>
+<tr><td>Mac mini M5即将发布</td><td>预计2026 Q3</td><td>新品发布冲击</td><td>M4及其前代可能进一步贬值，但持有12月以上时冲击已吸收</td></tr>
+</table>
+</div>
+
+<h2>维修成本估算明细</h2>
+<div class="card">
+<table>
+<tr><th>品类</th><th>电池更换费</th><th>电池寿命周期</th><th>年均故障维修费</th><th>说明</th></tr>
+<tr><td>MacBook Air</td><td>1,299元</td><td>36个月</td><td>300元/年</td><td>便携设备，含屏幕/主板/接口故障风险</td></tr>
+<tr><td>Mac mini</td><td>0元(无电池)</td><td>—</td><td>100元/年</td><td>台式机故障率低，仅含接口/主板故障</td></tr>
+<tr><td>MacBook Pro</td><td>1,299元</td><td>36个月</td><td>400元/年</td><td>Pro线故障维修成本较高</td></tr>
+</table>
+<p class="meta" style="margin-top:8px;">公式: 预期维修成本 = floor(持有月数/36) × 电池更换费 + 持有年数 × 年均故障维修费。数据来源: constants.json v3.5</p>
+</div>
+
+<h2>市场数据来源</h2>
+<div class="card">
+<table>
+<tr><th>机型</th><th>买入价</th><th>数据来源</th><th>采集日期</th></tr>
+<tr><td>MacBook Air M1 16G</td><td>3,500元</td><td>SMZDM二手Mac选购指南 / 头条终极指南</td><td>2026-07-24</td></tr>
+<tr><td>MacBook Air M2 16G</td><td>5,100元(估)</td><td>基于8G版(4000-4500元)上浮20-25%估算</td><td>2026-07-24</td></tr>
+<tr><td>Mac mini M1 16G</td><td>1,850元</td><td>头条二手Mac mini购买指南(闲鱼成交参考)</td><td>2026-07-24</td></tr>
+<tr><td>Mac mini M2 16G</td><td>2,350元</td><td>头条指南 / 搜狐闲搞机 交叉验证</td><td>2026-07-24</td></tr>
+<tr><td>Mac mini M4 16G 256G</td><td>3,824元</td><td>中关村在线(国补到手价, 256G库存机)</td><td>2026-07-24</td></tr>
+<tr><td>MacBook Pro M1 Pro 16G 512G</td><td>4,400元</td><td>头条回收报价 / SMZDM选购指南 多源</td><td>2026-07-24</td></tr>
+<tr><td>MacBook Air M5(残值基准)</td><td>9,999元</td><td>苹果中国官网(涨价后, 16G/512G)</td><td>2026-07-24</td></tr>
+<tr><td>Mac mini M4(残值基准)</td><td>5,999元</td><td>苹果中国官网(512G版, 256G已下架)</td><td>2026-07-24</td></tr>
+<tr><td>MacBook Pro M5 Pro(残值基准)</td><td>17,999元</td><td>苹果中国官网(24G/1TB)</td><td>2026-07-24</td></tr>
+</table>
+</div>
+
+<!-- 第三部分: 图表说明 -->
+<h2>图表说明</h2>
+<div class="card">
+<h3>帕累托前沿图阅读方法</h3>
+<ul style="margin-left:16px;">
+<li><strong>蓝色实心点(前沿):</strong> 帕累托最优方案，不存在"成本更低同时性能更高"的其他方案。前沿上的点都是合理选择。</li>
+<li><strong>灰色空心点(被支配):</strong> 存在至少一个方案在成本和性能上都不劣于它，因此不推荐。</li>
+<li><strong>气泡大小:</strong> 表示持有期净支出(买入价-残值+维修)，反映资金占用规模。</li>
+<li><strong>选择逻辑:</strong> 前沿最左端=最省钱但性能最低；最右端=性能最高但最贵。根据您的偏好在前沿上选择。</li>
+</ul>
+<h3>保值率曲线图阅读方法</h3>
+<ul style="margin-left:16px;">
+<li>横轴为机龄(发布后月数)，纵轴为相对发布价的保值率%。</li>
+<li>曲线越陡表示贬值越快。0-3个月为最陡区间(约-4%/月)。</li>
+<li>72个月(macOS支持期)后曲线不再延伸，标注为"系统支持截止"。</li>
+</ul>
+<h3>不确定性标注</h3>
+<ul style="margin-left:16px;">
+<li><strong>高置信度(12-36月):</strong> 保值率有实测数据支撑，性能衰减模型可靠。</li>
+<li><strong>中置信度(＜12月):</strong> 数据点较少，但趋势明确。</li>
+<li><strong>低置信度(＞36月):</strong> 保值率为外推，性能衰减为CAGR假设(M系列r=0.17)。近期M4→M5仅9.2%/年，衰减可能放缓，但趋势尚不明确。</li>
+</ul>
+</div>
+
+<!-- 第四部分: 更新提示 -->
+<h2>更新提示</h2>
+<div class="card">
+<h3>触发重新分析的条件</h3>
+<ul style="margin-left:16px;">
+<li>Mac mini M5正式发布(预计2026年Q3) — 将影响M4及前代的保值率</li>
+<li>苹果再次调价或国补政策变化</li>
+<li>用户预算或需求发生变化</li>
+<li>距离本次分析超过30天</li>
+</ul>
+<h3>下次建议分析时间</h3>
+<p>建议在 Mac mini M5 发布后(预计2026年8-9月)重新分析，以纳入新品发布对保值率的冲击。</p>
+</div>
+
+<hr style="margin:24px 0; border:none; border-top:1px solid var(--border);">
+<p class="meta">本报告由 apple-product-value-analysis SOP v3.5 自动生成 | 常量数据: constants.json v3.5 (2026-07-21) | 市场数据采集: 2026-07-24</p>
+
+</div>
+
+<script>
+// ========== 图表1: 帕累托前沿散点图 ==========
+var chartPareto = echarts.init(document.getElementById('chart-pareto'));
+var frontierData = [{"name": "Mac mini M1(\u630160\u6708)", "value": [28.2, 32.3, 1690], "itemStyle": {"color": "#0071e3"}, "symbolSize": 21.125}, {"name": "Mac mini M1(\u630148\u6708)", "value": [33.1, 34.0, 1590], "itemStyle": {"color": "#0071e3"}, "symbolSize": 19.875}, {"name": "Mac mini M2(\u630160\u6708)", "value": [36.5, 42.4, 2190], "itemStyle": {"color": "#0071e3"}, "symbolSize": 27.375}, {"name": "Mac mini M2(\u630148\u6708)", "value": [43.5, 44.6, 2090], "itemStyle": {"color": "#0071e3"}, "symbolSize": 26.125}, {"name": "Mac mini M2(\u630136\u6708)", "value": [55.3, 47.3, 1990], "itemStyle": {"color": "#0071e3"}, "symbolSize": 24.875}, {"name": "Mac mini M4(\u630160\u6708)", "value": [61.1, 65.5, 3664], "itemStyle": {"color": "#0071e3"}, "symbolSize": 40}, {"name": "Mac mini M4(\u630148\u6708)", "value": [72.1, 69.0, 3459], "itemStyle": {"color": "#0071e3"}, "symbolSize": 40}, {"name": "Mac mini M4(\u630136\u6708)", "value": [81.6, 73.1, 2939], "itemStyle": {"color": "#0071e3"}, "symbolSize": 36.7375}, {"name": "Mac mini M4(\u630124\u6708)", "value": [100.2, 77.9, 2404], "itemStyle": {"color": "#0071e3"}, "symbolSize": 30.05}, {"name": "Mac mini M4(\u630118\u6708)", "value": [117.5, 80.6, 2114], "itemStyle": {"color": "#0071e3"}, "symbolSize": 26.425}, {"name": "Mac mini M4(\u630112\u6708)", "value": [143.3, 83.5, 1719], "itemStyle": {"color": "#0071e3"}, "symbolSize": 21.4875}];
+
+var dominatedData = [{"name": "MacBook Air M1(\u630112\u6708)", "value": [250.0, 41.2, 3000], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M1(\u630118\u6708)", "value": [175.0, 39.7, 3150], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M1(\u630124\u6708)", "value": [137.5, 38.4, 3300], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M1(\u630136\u6708)", "value": [136.1, 36.1, 4899], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M1(\u630148\u6708)", "value": [108.3, 34.0, 5199], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M1(\u630160\u6708)", "value": [91.7, 32.3, 5499], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M2(\u630112\u6708)", "value": [325.0, 54.0, 3900], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M2(\u630118\u6708)", "value": [244.5, 52.1, 4400], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M2(\u630124\u6708)", "value": [204.2, 50.4, 4900], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M2(\u630136\u6708)", "value": [180.5, 47.3, 6499], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M2(\u630148\u6708)", "value": [141.6, 44.6, 6799], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Air M2(\u630160\u6708)", "value": [118.3, 42.4, 7099], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "Mac mini M1(\u630112\u6708)", "value": [107.5, 41.2, 1290], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 12.9}, {"name": "Mac mini M1(\u630118\u6708)", "value": [74.5, 39.7, 1340], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 13.4}, {"name": "Mac mini M1(\u630124\u6708)", "value": [57.9, 38.4, 1390], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 13.9}, {"name": "Mac mini M1(\u630136\u6708)", "value": [41.4, 36.1, 1490], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 14.9}, {"name": "Mac mini M2(\u630112\u6708)", "value": [96.7, 54.0, 1160], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 11.6}, {"name": "Mac mini M2(\u630118\u6708)", "value": [78.9, 52.1, 1420], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 14.2}, {"name": "Mac mini M2(\u630124\u6708)", "value": [70.0, 50.4, 1680], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 16.8}, {"name": "MacBook Pro 14 M1 Pro(\u630112\u6708)", "value": [190.0, 29.5, 2280], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 22.8}, {"name": "MacBook Pro 14 M1 Pro(\u630118\u6708)", "value": [157.8, 28.5, 2840], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 28.4}, {"name": "MacBook Pro 14 M1 Pro(\u630124\u6708)", "value": [126.7, 27.5, 3040], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Pro 14 M1 Pro(\u630136\u6708)", "value": [131.6, 25.8, 4739], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Pro 14 M1 Pro(\u630148\u6708)", "value": [107.1, 24.4, 5139], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}, {"name": "MacBook Pro 14 M1 Pro(\u630160\u6708)", "value": [92.3, 23.2, 5539], "itemStyle": {"color": "#cbd5e1"}, "symbolSize": 30}];
+
+// 前沿连线数据
+var frontierLine = frontierData.map(function(d) {
+  return d.value.slice(0, 2);
+}).sort(function(a, b) { return a[0] - b[0]; });
+
+chartPareto.setOption({
+  tooltip: {
+    trigger: 'item',
+    formatter: function(params) {
+      return params.data.name + '<br/>月均成本: ' + params.data.value[0] + '元<br/>性能满足度: ' + params.data.value[1] + '%<br/>净支出: ' + params.data.value[2] + '元';
+    }
+  },
+  legend: { data: ['帕累托前沿', '被支配方案'], top: 5 },
+  grid: { left: 60, right: 30, bottom: 60, top: 50 },
+  xAxis: { name: '月均成本(元/月)', nameLocation: 'middle', nameGap: 30,
+    scale: true, axisLabel: { fontSize: 11 } },
+  yAxis: { name: '性能满足度(%)', nameLocation: 'middle', nameGap: 40,
+    scale: true, axisLabel: { fontSize: 11 }, max: 100 },
+  series: [
+    {
+      name: '帕累托前沿', type: 'scatter', data: frontierData,
+      symbol: 'circle', symbolKeepAspect: false,
+      label: { show: true, position: 'top', fontSize: 9, formatter: function(p) {
+        return p.data.name.length > 10 ? p.data.name.substring(0, 10) : p.data.name;
+      }},
+      z: 10
+    },
+    {
+      name: '被支配方案', type: 'scatter', data: dominatedData,
+      symbol: 'circle', itemStyle: { opacity: 0.5 },
+      z: 5
+    },
+    {
+      name: '前沿连线', type: 'line', data: frontierLine,
+      symbol: 'none', lineStyle: { type: 'dashed', color: '#0071e3', width: 2 },
+      z: 1
+    }
+  ]
+});
+
+// ========== 图表2: 保值率曲线 ==========
+var chartDep = echarts.init(document.getElementById('chart-depreciation'));
+var depSeries = [];
+var depColors = {'MacBook_Air': '#0071e3', 'Mac_mini': '#34c759', 'MacBook_Pro': '#ff9500'};
+var depNames = {'MacBook_Air': 'MacBook Air', 'Mac_mini': 'Mac mini', 'MacBook_Pro': 'MacBook Pro'};
+var depData = {"MacBook_Air": [[0, 100], [3, 88], [6, 80], [12, 65], [18, 55], [24, 45], [36, 30], [48, 22], [60, 15]], "Mac_mini": [[0, 100], [3, 90], [6, 82], [12, 65], [18, 56], [24, 48], [36, 33], [48, 25], [60, 18]], "MacBook_Pro": [[0, 100], [3, 90], [6, 82], [12, 68], [18, 58], [24, 48], [36, 35], [48, 28], [60, 20]]};
+for (var cat in depData) {
+  depSeries.push({
+    name: depNames[cat], type: 'line', smooth: true,
+    data: depData[cat], symbol: 'circle', symbolSize: 6,
+    lineStyle: { width: 2, color: depColors[cat] },
+    itemStyle: { color: depColors[cat] }
+  });
+}
+chartDep.setOption({
+  tooltip: { trigger: 'axis', formatter: function(params) {
+    var m = params[0].axisValue;
+    return '机龄: ' + m + '月<br/>' + params.map(function(p) {
+      return p.marker + p.seriesName + ': ' + p.data[1] + '%';
+    }).join('<br/>');
+  }},
+  legend: { top: 5 },
+  grid: { left: 60, right: 30, bottom: 60, top: 50 },
+  xAxis: { name: '机龄(月)', nameLocation: 'middle', nameGap: 30,
+    type: 'value', axisLabel: { fontSize: 11 } },
+  yAxis: { name: '保值率(%)', nameLocation: 'middle', nameGap: 40,
+    type: 'value', axisLabel: { fontSize: 11 } },
+  series: depSeries,
+  markLine: { silent: true, data: [{ xAxis: 72, lineStyle: { type: 'dashed', color: '#ff3b30' },
+    label: { formatter: 'macOS支持截止(72月)', color: '#ff3b30', fontSize: 10 } }] }
+});
+
+// ========== 图表3: 多持有期成本曲线 ==========
+var chartCost = echarts.init(document.getElementById('chart-cost'));
+var costSeries = [];
+var costData = {"MacBook Air M1 16G 256G": [[12, 250.0], [18, 175.0], [24, 137.5], [36, 136.1], [48, 108.3], [60, 91.7]], "MacBook Air M2 16G 256G": [[12, 325.0], [18, 244.5], [24, 204.2], [36, 180.5], [48, 141.6], [60, 118.3]], "Mac mini M1 16G 256G": [[12, 107.5], [18, 74.5], [24, 57.9], [36, 41.4], [48, 33.1], [60, 28.2]], "Mac mini M2 16G 256G": [[12, 96.7], [18, 78.9], [24, 70.0], [36, 55.3], [48, 43.5], [60, 36.5]], "Mac mini M4 16G 256G": [[12, 143.3], [18, 117.5], [24, 100.2], [36, 81.6], [48, 72.1], [60, 61.1]], "MacBook Pro 14 M1 Pro 16G 512G": [[12, 190.0], [18, 157.8], [24, 126.7], [36, 131.6], [48, 107.1], [60, 92.3]]};
+var costColors = ['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30', '#5ac8fa'];
+var ci = 0;
+for (var name in costData) {
+  costSeries.push({
+    name: name, type: 'line', smooth: true,
+    data: costData[name].sort(function(a,b){return a[0]-b[0];}),
+    symbol: 'circle', symbolSize: 6,
+    lineStyle: { width: 2, color: costColors[ci % costColors.length] },
+    itemStyle: { color: costColors[ci % costColors.length] }
+  });
+  ci++;
+}
+chartCost.setOption({
+  tooltip: { trigger: 'axis', formatter: function(params) {
+    return '持有: ' + params[0].axisValue + '月<br/>' + params.map(function(p) {
+      return p.marker + p.seriesName + ': ' + p.data[1] + '元/月';
+    }).join('<br/>');
+  }},
+  legend: { top: 5, type: 'scroll' },
+  grid: { left: 60, right: 30, bottom: 60, top: 50 },
+  xAxis: { name: '持有月数', nameLocation: 'middle', nameGap: 30,
+    type: 'value', axisLabel: { fontSize: 11 } },
+  yAxis: { name: '月均成本(元/月)', nameLocation: 'middle', nameGap: 40,
+    type: 'value', axisLabel: { fontSize: 11 } },
+  series: costSeries
+});
+
+// 响应式
+window.addEventListener('resize', function() {
+  chartPareto.resize();
+  chartDep.resize();
+  chartCost.resize();
+});
+</script>
+</body>
+</html>
