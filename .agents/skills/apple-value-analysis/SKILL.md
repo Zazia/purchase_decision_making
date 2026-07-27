@@ -1,5 +1,5 @@
 ---
-name: apple-product-value-analysis
+name: apple-value-analysis
 description: 量化分析苹果产品保值率与持有成本,用帕累托前沿筛选最优(机型×持有期)购买方案。当用户想买苹果设备、对比各代/二手/新品性价比、决定持有多久划算、或做苹果产品购买决策时调用。
 ---
 
