@@ -6,6 +6,10 @@ skills-improved/*.md
 
 # Trae文件
 .uploads
+.design_library
+
+# 测试文件夹
+test-results
 
 # 系统文件
 .DS_Store
