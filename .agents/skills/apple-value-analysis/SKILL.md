@@ -46,11 +46,14 @@ description: 量化分析苹果产品保值率与持有成本,用帕累托前沿
 
 本技能支持**单独分发 SKILL.md**:constants.json 无需随 SKILL.md 一起分发,技能在执行时自动从远程仓库获取最新版本。此设计实现数据维护集中化、分发轻量化。
 
-**远程仓库**:`https://github.com/Zazia/purchase_decision_making`
+**远程仓库**(双源,Gitee 优先):
+- **主源(Gitee,国内推荐)**:`https://gitee.com/zezia/purchase_decision_making`
+- **备份源(GitHub)**:`https://github.com/Zazia/purchase_decision_making`
 
 **constants.json 远程地址**:
 ```
-https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/skills/apple-value-analysis/constants.json
+主源: https://gitee.com/zezia/purchase_decision_making/raw/main/.agents/skills/apple-value-analysis/constants.json
+备份: https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/skills/apple-value-analysis/constants.json
 ```
 
 **获取规则**(每次技能被调用时,在步骤1之前执行):
@@ -59,15 +62,17 @@ https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/sk
 3. **本地存在**:读取 `metadata.last_updated` 日期(而非版本号),判断数据是否过期:
    - **未过期**(距今 ≤ 7 天):直接使用本地文件,跳过网络获取
    - **已过期**(距今 > 7 天):从远程获取最新版,覆盖本地文件。覆盖前提示用户"constants.json 数据已过期(上次更新: YYYY-MM-DD),正在从远程获取最新版"
-4. **远程获取失败**(网络不可用等):
-   - 若本地有旧版文件 → 使用旧版,在报告中标注"⚠️ 常量数据可能过期(上次更新: YYYY-MM-DD,远程获取失败),市场价快照等时效性数据可能不准确,建议稍后重试或手动更新"
-   - 若本地无文件 → 提示用户手动从上述远程地址下载 constants.json 并放置于 SKILL.md 同目录,终止执行
+4. **远程获取失败时的双源容错**:
+   - 先尝试 Gitee 主源;若失败(超时/不可达),自动回退到 GitHub 备份源
+   - **两个源均不可达**:
+     - 若本地有旧版文件 → 使用旧版,在报告中标注"⚠️ 常量数据可能过期(上次更新: YYYY-MM-DD,远程获取失败),市场价快照等时效性数据可能不准确,建议稍后重试或手动更新"
+     - 若本地无文件 → 提示用户手动从上述任一远程地址下载 constants.json 并放置于 SKILL.md 同目录,终止执行
 
 **关键原则**:获取最新版**不依赖版本号比对**。远程 constants.json 可能每周更新(市场价快照回写、跑分更新等),其版本号会高于用户本地 SKILL.md 的 SOP 版本,这是正常现象——SOP(方法论)与 constants.json(数据)独立演进。判断是否需要更新的唯一依据是 `metadata.last_updated` 日期,而非版本号。
 
-**获取方法**:使用 WebFetch 获取上述远程地址的 JSON 内容,解析后保存为同目录下的 `constants.json`。
+**获取方法**:使用 WebFetch 获取上述远程地址的 JSON 内容,解析后保存为同目录下的 `constants.json`。优先请求 Gitee 地址,失败时回退 GitHub 地址。
 
-**数据维护**:constants.json 的更新(保值率曲线年度更新、芯片跑分更新、市场价快照回写等)统一在远程仓库进行,**更新节奏约为每周一次**(主要为市场价快照回写,大版本含保值率/跑分更新频率更低)。分析过程中本地回写的市场价快照仅用于本次分析,不自动推送至远程——远程仓库的 constants.json 由维护者定期合并各分析节点的快照更新。用户本地 SKILL.md 的 SOP 版本不需要跟随 constants.json 版本升级,只要 SOP 定义的字段结构在 constants.json 中存在即可正常工作。
+**数据维护**:constants.json 的更新(保值率曲线年度更新、芯片跑分更新、市场价快照回写等)统一在远程仓库进行,**更新节奏约为每周一次**(主要为市场价快照回写,大版本含保值率/跑分更新频率更低)。分析过程中本地回写的市场价快照仅用于本次分析,不自动推送至远程——远程仓库的 constants.json 由维护者定期合并各分析节点的快照更新。用户本地 SKILL.md 的 SOP 版本不需要跟随 constants.json 版本升级,只要 SOP 定义的字段结构在 constants.json 中存在即可正常工作。**Gitee 与 GitHub 两个仓库内容保持同步**(同步策略见仓库 README.md "双仓库同步"章节)。
 
 **许可证**:SKILL.md 与 constants.json 均采用 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) 许可证(署名-非商业性使用 4.0 国际),详见仓库根目录 LICENSE 文件。任何人可自由复制、分发、修改本技能,但不得用于商业目的,且必须保留原作者署名。
 
@@ -557,7 +562,10 @@ r 取值(按芯片系列):
 
 - 当前SOP版本:v3.7(2026-07-29)
 - constants.json 版本:独立演进,可能高于 SOP 版本(数据每周更新,SOP 不一定跟随升级)
-- **远程仓库**:`https://github.com/Zazia/purchase_decision_making`(constants.json 的权威源,获取与更新机制见"依赖文件"章节)
+- **远程仓库**(双源,Gitee 优先):
+  - 主源(Gitee,国内推荐):`https://gitee.com/zezia/purchase_decision_making`
+  - 备份源(GitHub):`https://github.com/Zazia/purchase_decision_making`
+  - constants.json 的权威源,获取与更新机制见"依赖文件"章节
 - **许可证**:CC BY-NC 4.0(署名-非商业性使用 4.0 国际),详见仓库根目录 LICENSE 文件
 
 **版本演进规则**:SOP(方法论)与 constants.json(数据)版本号**独立演进**。SOP 版本仅在流程/公式/规则变更时升级;constants.json 版本随数据更新(约每周一次)递增,版本号可能高于 SOP 版本。SKILL.md 可独立分发,执行时自动从远程仓库获取最新 constants.json(依据 `last_updated` 日期判断过期,不依赖版本号比对)。只要 SOP 定义的字段结构在 constants.json 中存在,两者即可正常协同工作。

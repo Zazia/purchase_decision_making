@@ -88,13 +88,42 @@ iPhone 15 和 16 哪个值得买？用两年哪个省
 
 ## constants.json 远程获取
 
-SKILL.md 可**独立分发**，无需附带 constants.json。技能执行时自动从远程仓库获取最新数据：
+SKILL.md 可**独立分发**，无需附带 constants.json。技能执行时自动从远程仓库获取最新数据，**双源容错，Gitee 优先**：
 
 ```
-https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/skills/apple-value-analysis/constants.json
+主源(Gitee,国内推荐): https://gitee.com/zezia/purchase_decision_making/raw/main/.agents/skills/apple-value-analysis/constants.json
+备份(GitHub):          https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/skills/apple-value-analysis/constants.json
 ```
 
-获取逻辑：检查本地 constants.json 的 `last_updated` 日期 → 距今 ≤ 7 天直接使用 / 超过 7 天从远程获取最新版覆盖 / 本地不存在则远程下载并缓存。**不依赖版本号比对**——远程 constants.json 约每周更新一次，版本号会高于本地 SKILL.md 的 SOP 版本，这是正常现象（SOP 追踪方法论，constants.json 追踪数据，两者独立演进）。网络不可用时回退本地旧版并提示数据可能过期。数据维护集中在远程仓库进行，各分析节点的快照更新由维护者定期合并。
+获取逻辑：检查本地 constants.json 的 `last_updated` 日期 → 距今 ≤ 7 天直接使用 / 超过 7 天从远程获取最新版覆盖 / 本地不存在则远程下载并缓存。**不依赖版本号比对**——远程 constants.json 约每周更新一次，版本号会高于本地 SKILL.md 的 SOP 版本，这是正常现象（SOP 追踪方法论，constants.json 追踪数据，两者独立演进）。远程获取时先请求 Gitee，失败自动回退 GitHub；两个源均不可达时回退本地旧版并提示数据可能过期。数据维护集中在远程仓库进行，各分析节点的快照更新由维护者定期合并。
+
+## 双仓库同步
+
+本项目同时托管在 Gitee 和 GitHub，内容保持同步。维护策略如下：
+
+**当前方案：本地双 remote 手动推送**
+
+```bash
+# 查看远程配置
+git remote -v
+# origin  → GitHub (https://github.com/Zazia/purchase_decision_making.git)
+# gitee   → Gitee  (https://gitee.com/zezia/purchase_decision_making.git)
+
+# 每次提交后同时推送两个远程
+git push origin main && git push gitee main
+```
+
+也可用一条命令同时推送（配置 `push.default` 后）：
+```bash
+git push all main
+# 需先配置: git remote add all https://github.com/Zazia/purchase_decision_making.git
+#           git remote set-url --add --push all https://github.com/Zazia/purchase_decision_making.git
+#           git remote set-url --add --push all https://gitee.com/zezia/purchase_decision_making.git
+```
+
+**备选方案：Gitee 自动镜像 GitHub**
+
+Gitee 内置「强制同步」功能，可在仓库设置中绑定 GitHub 仓库，一键或定时从 GitHub 拉取。此方式下只需维护 GitHub，Gitee 自动跟进，但同步有延迟（通常几分钟内）。
 
 ## 版本
 
