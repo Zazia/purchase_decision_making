@@ -88,17 +88,17 @@ iPhone 15 和 16 哪个值得买？用两年哪个省
 
 ## constants.json 远程获取
 
-SKILL.md 可**独立分发**，无需附带 constants.json。技能执行时自动从远程仓库获取匹配版本：
+SKILL.md 可**独立分发**，无需附带 constants.json。技能执行时自动从远程仓库获取最新数据：
 
 ```
 https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/skills/apple-value-analysis/constants.json
 ```
 
-获取逻辑：检查本地 constants.json 版本 → 与 SOP 版本比对 → 版本一致直接使用 / 不一致从远程更新 / 本地不存在则远程下载并缓存。网络不可用时回退到本地旧版并标注版本差异。数据维护集中在远程仓库进行，各分析节点的快照更新由维护者定期合并。
+获取逻辑：检查本地 constants.json 的 `last_updated` 日期 → 距今 ≤ 7 天直接使用 / 超过 7 天从远程获取最新版覆盖 / 本地不存在则远程下载并缓存。**不依赖版本号比对**——远程 constants.json 约每周更新一次，版本号会高于本地 SKILL.md 的 SOP 版本，这是正常现象（SOP 追踪方法论，constants.json 追踪数据，两者独立演进）。网络不可用时回退本地旧版并提示数据可能过期。数据维护集中在远程仓库进行，各分析节点的快照更新由维护者定期合并。
 
 ## 版本
 
-当前 SOP 与 constants.json 均为 **v3.7**（2026-07-29）。版本号严格同步，每次 SOP 更新 constants.json 同步递增。
+当前 SOP 为 **v3.7**（2026-07-29）。SOP（方法论）与 constants.json（数据）版本号**独立演进**：SOP 仅在流程/公式/规则变更时升级，constants.json 随数据更新（约每周一次）递增，版本号可能高于 SOP 版本。只要 SOP 定义的字段结构在 constants.json 中存在，两者即可正常协同。
 
 - 保值率曲线：每年 1 月更新
 - 芯片跑分：新芯片发布后更新
