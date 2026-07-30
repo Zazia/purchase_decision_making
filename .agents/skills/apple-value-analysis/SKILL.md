@@ -34,13 +34,39 @@ description: 量化分析苹果产品保值率与持有成本,用帕累托前沿
 
 ## 本技能做什么 (What This Skill Does)
 
-基于同目录下的 `constants.json` 常量数据库(保值率曲线、芯片跑分、维修成本、实时市场价快照等)与按需校验更新的市场价快照,执行 **7 步标准流程**:确定候选方案 → 宏观因素扫描与常量分级校验 → 校验市场价快照并按需更新 → 计算持有期平均性能满足度 → 计算月均成本(含预期维修成本) → 帕累托前沿分析 → 结论先行的 HTML 报告。核心输出为(月均成本, 持有期平均性能)平面上的**帕累托前沿**,前沿上的非劣解即为合理购买方案。
+基于 `constants.json` 常量数据库(保值率曲线、芯片跑分、维修成本、实时市场价快照等,获取方式见下方"依赖文件"章节)与按需校验更新的市场价快照,执行 **7 步标准流程**:确定候选方案 → 宏观因素扫描与常量分级校验 → 校验市场价快照并按需更新 → 计算持有期平均性能满足度 → 计算月均成本(含预期维修成本) → 帕累托前沿分析 → 结论先行的 HTML 报告。核心输出为(月均成本, 持有期平均性能)平面上的**帕累托前沿**,前沿上的非劣解即为合理购买方案。
 
 ## 依赖文件
 
-- **`constants.json`**(同目录):本技能的唯一常量数据源,含保值率曲线、芯片性能跑分、内存/存储权重、发布节奏、维修成本、实时市场价快照、等待新品发布候选方案、报告视觉与图表实现(`design_tokens` 字段)等。SOP 版本须与 `constants.json` 版本**严格一致**(当前均为 v3.7)。
-- 文中所有"查 constants.json / 见 constants.json"均指同目录下的该文件。**SKILL.md 不依赖 constants.json 之外的任何外部文件**。
+- **`constants.json`**:本技能的唯一常量数据源,含保值率曲线、芯片性能跑分、内存/存储权重、发布节奏、维修成本、实时市场价快照、等待新品发布候选方案、报告视觉与图表实现(`design_tokens` 字段)等。SOP 版本须与 `constants.json` 版本**严格一致**(当前均为 v3.7)。
+- 文中所有"查 constants.json / 见 constants.json"均指本文件(可能位于 SKILL.md 同目录,也可能由远程获取后缓存至同目录)。**SKILL.md 不依赖 constants.json 之外的任何外部文件**。
 - **实时市场价快照**:存储已搜索的真实交易渠道价格(苹果官网/京东自营/闲鱼/爱回收/京东拍拍)及符合5项标准的可信二手资料价格。下次分析时优先校验本快照是否需要更新,避免每次全量搜索。快照分级使用规则见 constants.json "实时市场价快照._快照分级使用规则"
+
+### constants.json 的获取与更新机制(支持 SKILL.md 独立分发)
+
+本技能支持**单独分发 SKILL.md**:constants.json 无需随 SKILL.md 一起分发,技能在执行时自动从远程仓库获取最新版本。此设计实现数据维护集中化、分发轻量化。
+
+**远程仓库**:`https://github.com/Zazia/purchase_decision_making`
+
+**constants.json 远程地址**:
+```
+https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/skills/apple-value-analysis/constants.json
+```
+
+**获取规则**(每次技能被调用时,在步骤1之前执行):
+1. **检查本地文件**:检查 SKILL.md 同目录下是否存在 `constants.json`
+2. **本地存在且版本一致**:读取 `metadata.version` 字段,与 SOP 版本(当前 v3.7)比对。版本一致 → 直接使用本地文件,跳过网络获取
+3. **本地存在但版本不一致**:从远程获取最新版,覆盖本地文件(远程仓库为权威源)。覆盖前提示用户"检测到 constants.json 有新版本(vX.X → vY.Y),正在更新"
+4. **本地不存在**:从远程获取 constants.json,保存到 SKILL.md 同目录下,供本次及后续分析使用
+5. **远程获取失败**(网络不可用等):
+   - 若本地有旧版文件 → 使用旧版,在报告中标注"⚠️ 常量版本(vX.X)与 SOP 版本(v3.7)不一致,远程获取失败,部分分析可能不准确"
+   - 若本地无文件 → 提示用户手动从上述远程地址下载 constants.json 并放置于 SKILL.md 同目录,终止执行
+
+**获取方法**:使用 WebFetch 获取上述远程地址的 JSON 内容,解析后保存为同目录下的 `constants.json`。
+
+**数据维护**:constants.json 的更新(保值率曲线年度更新、芯片跑分更新、市场价快照回写等)统一在远程仓库进行。分析过程中本地回写的市场价快照仅用于本次分析,不自动推送至远程——远程仓库的 constants.json 由维护者定期合并各分析节点的快照更新。
+
+**许可证**:SKILL.md 与 constants.json 均采用 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) 许可证(署名-非商业性使用 4.0 国际),详见仓库根目录 LICENSE 文件。任何人可自由复制、分发、修改本技能,但不得用于商业目的,且必须保留原作者署名。
 
 ---
 
@@ -528,5 +554,7 @@ r 取值(按芯片系列):
 
 - 当前SOP版本:v3.7(2026-07-29)
 - 配套constants.json版本:v3.7(2026-07-29)
+- **远程仓库**:`https://github.com/Zazia/purchase_decision_making`(constants.json 的权威源,获取与更新机制见"依赖文件"章节)
+- **许可证**:CC BY-NC 4.0(署名-非商业性使用 4.0 国际),详见仓库根目录 LICENSE 文件
 
-**版本同步规则**:SOP与constants.json版本号严格一致,每次SOP更新constants.json同步更新。
+**版本同步规则**:SOP与constants.json版本号严格一致,每次SOP更新constants.json同步更新。SKILL.md 可独立分发,执行时自动从远程仓库获取匹配版本的 constants.json。

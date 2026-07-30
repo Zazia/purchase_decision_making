@@ -34,9 +34,11 @@ S(t) = S(0) / (1 + r)^(t/12)     # r: 芯片代际性能 CAGR
 
 ```
 purchase_decision_making/
+├── LICENSE                        # CC BY-NC 4.0 许可证
+├── README.md
 ├── .agents/skills/apple-value-analysis/
-│   ├── SKILL.md          # 标准操作流程 (SOP v3.7)
-│   └── constants.json    # 常量数据库 (133KB, v3.7)
+│   ├── SKILL.md                   # 标准操作流程 (SOP v3.7, 可独立分发)
+│   └── constants.json             # 常量数据库 (133KB, v3.7, 可远程获取)
 └── .gitignore
 ```
 
@@ -84,6 +86,16 @@ iPhone 15 和 16 哪个值得买？用两年哪个省
 
 报告输出为自包含 HTML 文件（ECharts CDN），含帕累托前沿散点图、保值率曲线图、各机型多持有期成本曲线。
 
+## constants.json 远程获取
+
+SKILL.md 可**独立分发**，无需附带 constants.json。技能执行时自动从远程仓库获取匹配版本：
+
+```
+https://raw.githubusercontent.com/Zazia/purchase_decision_making/main/.agents/skills/apple-value-analysis/constants.json
+```
+
+获取逻辑：检查本地 constants.json 版本 → 与 SOP 版本比对 → 版本一致直接使用 / 不一致从远程更新 / 本地不存在则远程下载并缓存。网络不可用时回退到本地旧版并标注版本差异。数据维护集中在远程仓库进行，各分析节点的快照更新由维护者定期合并。
+
 ## 版本
 
 当前 SOP 与 constants.json 均为 **v3.7**（2026-07-29）。版本号严格同步，每次 SOP 更新 constants.json 同步递增。
@@ -95,4 +107,4 @@ iPhone 15 和 16 哪个值得买？用两年哪个省
 
 ## License
 
-MIT
+[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)（署名-非商业性使用 4.0 国际）。任何人可自由复制、分发、修改本项目，但不得用于商业目的，且必须保留原作者署名。详见 [LICENSE](LICENSE) 文件。
