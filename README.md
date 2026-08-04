@@ -4,9 +4,9 @@
 
 A quantitative Apple-product analysis skill based on the **Pareto frontier**. It filters non-inferior purchase options on the *monthly cost × average holding-period performance* plane, helping you answer: which model, new vs. used, and how many years to hold.
 
-> **方法论见 [METHOD.md](METHOD.md)。** 那是一篇独立文章，讲清楚为什么耐用品购买应该用帕累托框架，而不是「最佳推荐清单」。本 README 只描述技能的工程实现。
+> **方法论见 [METHOD.md](METHOD.md)（中文）/ [METHOD_EN.md](METHOD_EN.md)（English）。** 这是一篇独立文章，讲清楚为什么耐用品购买应该用帕累托框架，而不是「最佳推荐清单」。两个文件内容相同、语言不同，顶部互相链接可在 GitHub 页面点击切换。本 README 只描述技能的工程实现。
 >
-> **The methodology lives in [METHOD.md](METHOD.md).** That is a standalone essay explaining why durable-goods purchases should use the Pareto framework rather than a "best-buy list." This README describes only the engineering implementation of the skill.
+> **The methodology lives in [METHOD.md](METHOD.md) (中文) / [METHOD_EN.md](METHOD_EN.md) (English).** It is a standalone essay explaining why durable-goods purchases should use the Pareto framework rather than a "best-buy list." The two files contain the same content in different languages, with cross-links at the top for switching on the GitHub page. This README describes only the engineering implementation of the skill.
 
 ---
 
@@ -78,7 +78,8 @@ v3.8 introduces a *Macro-Factor Extended Model* that links macro-scan results th
 purchase_decision_making/
 ├── LICENSE                        # CC BY-NC 4.0
 ├── README.md                      # 本文件 / this file
-├── METHOD.md                      # 方法论文章（中英双语）/ Methodology essay (bilingual)
+├── METHOD.md                      # 方法论文章（中文）/ Methodology essay (Chinese)
+├── METHOD_EN.md                   # 方法论文章（英文）/ Methodology essay (English)
 ├── .agents/skills/apple-value-analysis/
 │   ├── SKILL.md                   # 标准操作流程 SOP v3.8（可独立分发）/ SOP v3.8 (independently distributable)
 │   └── constants.json             # 常量数据库 ~155KB v3.8（可远程获取）/ Constants DB ~155KB v3.8 (remote-fetchable)
