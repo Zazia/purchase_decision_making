@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>2026-08-04 MacBook vs Mac mini 性价比与便携溢价分析</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+  --bg:      #F5F5F7;  --surface: #FFFFFF;  --rule: #D2D2D8;
+  --muted:   #86868F;  --fg:      #1D1D1F;
+  --accent:  #007AFF;  --accent-hover: #0063D4;  --accent-soft: #E6F2FF;
+  --success: #2A8A61;  --success-soft: #D9F0E3;
+  --warning: #E09500;  --warning-soft: #FFF0C2;
+  --error:   #F24B4B;  --error-soft:   #FFD9D9;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font-family:'Inter',-apple-system,'SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+.container { max-width:960px; margin:0 auto; padding:24px 16px; }
+h1 { font-family:'DM Sans',-apple-system,'SF Pro Display','PingFang SC',sans-serif; font-size:32px; font-weight:600; margin-bottom:4px; }
+h2 { font-family:'DM Sans',-apple-system,'SF Pro Display','PingFang SC',sans-serif; font-size:24px; font-weight:600; margin:32px 0 16px; }
+h3 { font-size:20px; font-weight:600; margin:20px 0 12px; }
+p { margin:8px 0; color:var(--fg); }
+.muted { color:var(--muted); font-size:14px; }
+.big-number { font-size:32px; font-weight:600; font-family:'DM Sans',-apple-system,'SF Pro Display','PingFang SC',sans-serif; color:var(--accent); line-height:1.2; }
+.card {
+  background:var(--surface); border-radius:20px;
+  box-shadow:0 1px 2px rgba(29,29,31,0.06),0 1px 1px rgba(29,29,31,0.04);
+  padding:24px; display:flex; flex-direction:column; gap:12px;
+}
+.card-title { font-family:'DM Sans',-apple-system,'SF Pro Display','PingFang SC',sans-serif; font-size:20px; font-weight:600; }
+.report-table {
+  width:100%; border-collapse:separate; border-spacing:0;
+  background:var(--surface); border:1px solid var(--rule);
+  border-radius:16px; overflow:hidden;
+}
+.report-table th, .report-table td {
+  padding:12px 16px; text-align:left;
+  border-bottom:1px solid var(--rule); font-size:14px;
+}
+.report-table thead th { color:var(--muted); font-size:12px; font-weight:600; white-space:nowrap; }
+.report-table tbody tr:last-child td { border-bottom:none; }
+.report-table tbody tr:hover { filter:brightness(0.97); }
+.badge { display:inline-flex; align-items:center; height:24px; padding:0 8px;
+  border-radius:9999px; font-size:12px; font-weight:400; line-height:1; white-space:nowrap; }
+.badge-default { background:var(--bg); color:var(--muted); }
+.badge-success { background:var(--success-soft); color:var(--success); }
+.badge-warning { background:var(--warning-soft); color:var(--warning); }
+.badge-error { background:var(--error-soft); color:var(--error); }
+.highlight-row { background:var(--accent-soft); }
+.highlight-row td { font-weight:500; }
+.chart { width:100%; height:430px; }
+.chart-sm { width:100%; height:360px; }
+.flex-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:640px) { .flex-grid { grid-template-columns:1fr; } }
+.insight-box { background:var(--accent-soft); border-radius:12px; padding:16px; margin:16px 0; }
+.insight-box p { margin:4px 0; font-size:15px; }
+.warning-box { background:var(--warning-soft); border-radius:12px; padding:16px; margin:16px 0; }
+.warning-box p { margin:4px 0; font-size:14px; }
+.legend { display:flex; gap:16px; flex-wrap:wrap; margin:8px 0; font-size:13px; }
+.legend-item { display:flex; align-items:center; gap:6px; }
+.legend-dot { width:12px; height:12px; border-radius:50%; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>MacBook vs Mac mini — 性价比与便携溢价分析</h1>
+<p class="muted">分析日期：2026-08-04 | 数据来源：constants.json v3.8 (快照 2026-07-27) | 常量校验级别：<span class="badge badge-success">绿色免检</span></p>
+
+<!-- ===== 结论 ===== -->
+<h2>核心结论</h2>
+
+<div class="insight-box">
+<p><strong>便携溢价随设备年龄锐减：</strong>新品 MacBook 比同芯片 Mac mini 贵 <span class="big-number">40-50%</span>，但二手仅贵 <span class="big-number">8-12%</span>。二手 MacBook Air 是性价比最高的便携方案。</p>
+</div>
+
+<div class="flex-grid">
+  <div class="card">
+    <div class="card-title">最高性价比</div>
+    <div style="font-size:15px;line-height:1.8;">
+      <strong>Mac mini M2 16G 二手</strong><br>
+      买入 <span class="badge badge-default">~3,390元</span><br>
+      月均 <span class="big-number">115</span> 元/月<br>
+      性能满足度 42%<br>
+      <span class="muted">持有24个月</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">最佳便携性价比</div>
+    <div style="font-size:15px;line-height:1.8;">
+      <strong>MacBook Air M2 16G 二手</strong><br>
+      买入 <span class="badge badge-default">3,668元</span><br>
+      月均 <span class="big-number">147</span> 元/月<br>
+      性能满足度 42%<br>
+      <span class="muted">便携溢价仅 +8% vs 同款 mini</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">最佳新品</div>
+    <div style="font-size:15px;line-height:1.8;">
+      <strong>Mac mini M4 16G 国补</strong><br>
+      买入 <span class="badge badge-default">~5,074元</span><br>
+      月均 <span class="big-number">154</span> 元/月<br>
+      性能满足度 65%<br>
+      <span class="muted">日本国补+国补15%</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">最佳便携新品</div>
+    <div style="font-size:15px;line-height:1.8;">
+      <strong>MacBook Air M5 13寸 国补</strong><br>
+      买入 <span class="badge badge-default">~8,457元</span><br>
+      月均 <span class="big-number">216</span> 元/月<br>
+      性能满足度 87%<br>
+      <span class="muted">便携溢价 +40% vs 同芯 mini</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 便携溢价分析 ===== -->
+<h2>便携溢价量化</h2>
+
+<div class="card">
+  <div class="card-title">同芯片 MacBook vs Mac mini 价格差</div>
+  <table class="report-table">
+    <thead>
+      <tr><th>芯片</th><th>Mac mini 价格</th><th>MacBook Air 价格</th><th>差价</th><th>便携溢价</th><th>状态</th></tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row">
+        <td><strong>M4 新品</strong></td>
+        <td>5,999 元</td>
+        <td>8,999 元*</td>
+        <td>+3,000 元</td>
+        <td><span class="badge badge-warning">+50%</span></td>
+        <td><span class="muted">M4 Air已停产</span></td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>M5 新品</strong></td>
+        <td>—</td>
+        <td>9,999 元</td>
+        <td>—</td>
+        <td><span class="badge badge-warning">~+40%**</span></td>
+        <td><span class="muted">M5 mini未发布</span></td>
+      </tr>
+      <tr>
+        <td><strong>M2 二手</strong></td>
+        <td>~3,390 元</td>
+        <td>3,668 元</td>
+        <td>+278 元</td>
+        <td><span class="badge badge-success">+8.2%</span></td>
+        <td><span class="muted">实付价格</span></td>
+      </tr>
+      <tr>
+        <td><strong>M1 二手</strong></td>
+        <td>~2,520 元</td>
+        <td>~2,831 元</td>
+        <td>+311 元</td>
+        <td><span class="badge badge-success">+12.3%</span></td>
+        <td><span class="muted">实付价格</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="muted">* M4 MacBook Air 发布时官方价 8,999 元（已停产）。** M5 Mac mini 若发布，预计售价约 6,999-7,999 元，则 M5 Air 便携溢价约 40%。</p>
+</div>
+
+<div class="insight-box" style="margin-top:16px;">
+  <p><strong>为什么二手便携溢价几乎消失？</strong></p>
+  <p>MacBook Air 保值率曲线比 Mac mini 更陡（24月: 45% vs 48%；48月: 22% vs 25%），这意味着 MacBook 贬值更快。当两台设备都进入二手市场 3-4 年后，MacBook 的"便携光环"已基本被折旧消化，残值趋同。</p>
+</div>
+
+<!-- ===== 帕累托前沿 ===== -->
+<h2>帕累托前沿：月均成本 vs 性能</h2>
+
+<div class="card">
+  <div class="card-title">所有候选方案决策图（24/36/48月持有期）</div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#007AFF"></span>台式前沿</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#007AFF;border-radius:2px"></span>便携前沿</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#C7C7CC;opacity:0.5"></span>已排除</div>
+    <div class="legend-item"><span style="color:var(--warning)">---</span> 性能地板</div>
+  </div>
+  <div id="pareto" class="chart"></div>
+  <p class="muted">⚫ 圆点 = 台式（Mac mini） | ◆ 菱形 = 便携（MacBook Air/Pro） | 实心 = 前沿非劣解 | 空心 = 被支配 | 气泡大小 = 净支出</p>
+</div>
+
+<!-- ===== 月均成本曲线 ===== -->
+<h2>月均成本随持有期变化</h2>
+
+<div class="card">
+  <div class="card-title">各机型持有期 — 月均成本曲线</div>
+  <div id="costCurve" class="chart-sm"></div>
+  <p class="muted">持有越久，月均成本越低，但边际递减。36个月以上部分机型超出系统支持期（虚线标记）。</p>
+</div>
+
+<!-- ===== 详细数据 ===== -->
+<h2>详细计算数据</h2>
+
+<div class="card">
+  <div class="card-title">24个月持有期 — 推荐方案</div>
+  <table class="report-table">
+    <thead>
+      <tr><th>机型</th><th>买入价</th><th>月均成本</th><th>性能 S̄</th><th>方案类型</th><th>备注</th></tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row">
+        <td><strong>Mac mini M2 16G 二手</strong></td>
+        <td>3,390 元</td>
+        <td>115 元/月</td>
+        <td>42%</td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td>性价比最高</td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>MacBook Air M2 16G 二手</strong></td>
+        <td>3,668 元</td>
+        <td>147 元/月</td>
+        <td>42%</td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td>便携溢价+8%</td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>Mac mini M4 16G 国补</strong></td>
+        <td>5,074 元</td>
+        <td>154 元/月</td>
+        <td>65%</td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td>新品最优</td>
+      </tr>
+      <tr>
+        <td>MacBook Air M4 16G 二手</td>
+        <td>5,320 元</td>
+        <td>136 元/月</td>
+        <td>65%</td>
+        <td><span class="badge badge-default">支配</span></td>
+        <td>被M4 mini支配</td>
+      </tr>
+      <tr>
+        <td>MacBook Air M5 13寸 国补</td>
+        <td>8,457 元</td>
+        <td>216 元/月</td>
+        <td>87%</td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td>性能最强便携</td>
+      </tr>
+      <tr>
+        <td>Mac mini M1 16G 二手</td>
+        <td>2,520 元</td>
+        <td>106 元/月</td>
+        <td>32%</td>
+        <td><span class="badge badge-default">支配</span></td>
+        <td>⚠ 已超支持期</td>
+      </tr>
+      <tr>
+        <td>MacBook Air M1 16G 二手</td>
+        <td>2,831 元</td>
+        <td>131 元/月</td>
+        <td>32%</td>
+        <td><span class="badge badge-default">支配</span></td>
+        <td>⚠ 已超支持期</td>
+      </tr>
+      <tr>
+        <td>MacBook Pro M5 14寸 新品</td>
+        <td>15,999 元</td>
+        <td>318 元/月</td>
+        <td>29%</td>
+        <td><span class="badge badge-default">支配</span></td>
+        <td>Pro溢价高</td>
+      </tr>
+      <tr>
+        <td>MacBook Pro M2Pro 14寸 二手</td>
+        <td>6,365 元</td>
+        <td>171 元/月</td>
+        <td>25%</td>
+        <td><span class="badge badge-default">支配</span></td>
+        <td>Pro芯片</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-title">36个月持有期</div>
+  <table class="report-table">
+    <thead>
+      <tr><th>机型</th><th>买入价</th><th>月均成本</th><th>性能 S̄</th><th>备注</th></tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row">
+        <td><strong>Mac mini M2 16G 二手</strong></td>
+        <td>3,390 元</td>
+        <td>91 元/月</td>
+        <td>40%</td>
+        <td>⚠ 卖出时机龄79月超支持期</td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>Mac mini M4 16G 国补</strong></td>
+        <td>5,074 元</td>
+        <td>117 元/月</td>
+        <td>61%</td>
+        <td>新品推荐</td>
+      </tr>
+      <tr>
+        <td>MacBook Air M5 13寸 国补</td>
+        <td>8,457 元</td>
+        <td>222 元/月</td>
+        <td>82%</td>
+        <td>含电池更换</td>
+      </tr>
+      <tr>
+        <td>MacBook Air M2 16G 二手</td>
+        <td>3,668 元</td>
+        <td>155 元/月</td>
+        <td>40%</td>
+        <td>⚠ 超支持期</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-title">48个月持有期</div>
+  <table class="report-table">
+    <thead>
+      <tr><th>机型</th><th>买入价</th><th>月均成本</th><th>性能 S̄</th><th>备注</th></tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row">
+        <td><strong>Mac mini M2 16G 二手</strong></td>
+        <td>3,390 元</td>
+        <td>75 元/月</td>
+        <td>37%</td>
+        <td>⚠ 超支持期</td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>Mac mini M4 16G 国补</strong></td>
+        <td>5,074 元</td>
+        <td>99 元/月</td>
+        <td>58%</td>
+        <td>最佳长持</td>
+      </tr>
+      <tr>
+        <td>MacBook Air M5 13寸 国补</td>
+        <td>8,457 元</td>
+        <td>189 元/月</td>
+        <td>78%</td>
+        <td>含电池更换</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 关键洞察 ===== -->
+<h2>关键洞察</h2>
+
+<div class="flex-grid">
+  <div class="card">
+    <div class="card-title">便携溢价消失曲线</div>
+    <div id="premiumChart" class="chart-sm"></div>
+    <p class="muted">新品便携溢价 ~40-50%，随设备老化快速收敛至 ~8-12%</p>
+  </div>
+  <div class="card">
+    <div class="card-title">保值率对比</div>
+    <div id="valueChart" class="chart-sm"></div>
+    <p class="muted">MacBook Air 贬值速度略快于 Mac mini，36个月后差异缩小</p>
+  </div>
+</div>
+
+<div class="warning-box">
+  <p><strong>⚠️ 当前宏观环境提示</strong></p>
+  <p>• 存储超级周期进行中（TrendForce 2026-07），内存/闪存成本高位</p>
+  <p>• 2026-06-25 苹果全线涨价生效（Mac mini +33%，MacBook Air +18%）</p>
+  <p>• 本报告价格均为涨价后最新数据，快照日期 2026-07-27</p>
+  <p>• 建议关注京东国补/教育优惠，可降低实际购入成本 15-20%</p>
+</div>
+
+<!-- ===== 更新提示 ===== -->
+<h2>更新提示</h2>
+<div class="card">
+  <p>• 下次建议分析时间：<strong>2026-09 中旬</strong>（iPhone 18 发布后，存储市场可能转向）</p>
+  <p>• Mac mini M5 若发布，触发快照红色全更新，便携溢价需重新计算</p>
+  <p>• 常量数据来源：constants.json v3.8 (2026-08-02)，快照日期 2026-07-27</p>
+  <p class="muted">数据来源：苹果官网、闲鱼、转转、什么值得买实付晒单、Geekbench 6、TrendForce</p>
+</div>
+
+</div><!-- /container -->
+
+<script>
+var C_PRIMARY = '#007AFF', C_ACCENT_SOFT = '#E6F2FF';
+var C_MUTED = '#86868F', C_BORDER = '#D2D2D8', C_GRAY = '#C7C7CC';
+var C_SUCCESS = '#2A8A61', C_WARNING = '#E09500', C_ERROR = '#F24B4B';
+var PALETTE = ['#007AFF', '#8E8E93', '#2A8A61', '#E09500', '#AF52DE', '#5856D6'];
+
+var baseOption = {
+  backgroundColor: 'transparent',
+  color: PALETTE,
+  textStyle: { fontFamily: 'Inter, -apple-system, "PingFang SC", sans-serif', color: '#1D1D1F' },
+  grid: { left: 60, right: 24, top: 50, bottom: 60, containLabel: true },
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#D2D2D8', borderWidth: 1,
+    textStyle: { color: '#1D1D1F', fontSize: 13 },
+    extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;'
+  },
+  legend: { top: 8, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },
+  xAxis: {
+    type: 'value', nameLocation: 'middle', nameGap: 32,
+    nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } },
+    axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }
+  },
+  yAxis: {
+    type: 'value', nameLocation: 'middle', nameGap: 40,
+    nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } },
+    axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }
+  }
+};
+
+// === 帕累托前沿图 ===
+(function() {
+  // 数据格式: [月均成本, 平均性能S̄%, 净支出, 名称]
+  // 台式 (Mac mini)
+  var deskAll = [
+    [154, 65.0, 3697, 'Mac mini M4 新品 24m'],
+    [117, 61.2, 4224, 'Mac mini M4 新品 36m'],
+    [99,  57.9, 4742, 'Mac mini M4 新品 48m'],
+    [115, 42.0, 2756, 'Mac mini M2 二手 24m'],
+    [91,  39.5, 3510, 'Mac mini M2 二手 36m'],
+    [75,  37.4, 3610, 'Mac mini M2 二手 48m'],
+    [106, 32.1, 2500, 'Mac mini M1 二手 24m'],
+    [73,  30.0, 2640, 'Mac mini M1 二手 36m']
+  ];
+  // 便携 (MacBook Air + Pro)
+  var portAll = [
+    [216, 87.2, 5182, 'MBA M5 新品 24m'],
+    [222, 82.0, 7989, 'MBA M5 新品 36m'],
+    [189, 77.6, 7957, 'MBA M5 新品 48m'],
+    [136, 65.0, 3253, 'MBA M4 二手 24m'],
+    [156, 61.2, 4611, 'MBA M4 二手 36m'],
+    [138, 57.9, 5509, 'MBA M4 二手 48m'],
+    [143, 52.0, 3442, 'MBA M3 二手 24m'],
+    [160, 48.8, 5239, 'MBA M3 二手 36m'],
+    [147, 42.0, 3526, 'MBA M2 二手 24m'],
+    [155, 39.5, 5267, 'MBA M2 二手 36m'],
+    [131, 32.1, 2731, 'MBA M1 二手 24m'],
+    [131, 30.0, 4730, 'MBA M1 二手 36m'],
+    [318, 29.0, 7633, 'MBP M5 新品 24m'],
+    [326, 25.9, 10532, 'MBP M5 新品 36m'],
+    [230, 27.0, 5520, 'MBP M3Pro 二手 24m'],
+    [245, 23.5, 8819, 'MBP M3Pro 二手 36m'],
+    [171, 25.0, 4098, 'MBP M2Pro 二手 24m'],
+    [206, 21.5, 7398, 'MBP M2Pro 二手 36m'],
+    [203, 20.0, 4864, 'MBP M1Pro 二手 24m'],
+    [195, 17.5, 7029, 'MBP M1Pro 二手 36m']
+  ];
+
+  // 合并所有点计算帕累托前沿
+  var all = deskAll.concat(portAll);
+  // 帕累托前沿: 月均成本越低越好, 性能越高越好
+  var front = [];
+  var dom = [];
+  all.forEach(function(a) {
+    var dominated = false;
+    all.forEach(function(b) {
+      if (b[0] <= a[0] && b[1] >= a[1] && (b[0] < a[0] || b[1] > a[1])) {
+        dominated = true;
+      }
+    });
+    if (dominated) dom.push(a); else front.push(a);
+  });
+
+  // 分离台式/便携
+  var frontDesk = front.filter(function(d) { return deskAll.indexOf(d) !== -1; });
+  var frontPort = front.filter(function(d) { return portAll.indexOf(d) !== -1; });
+  var domDesk = dom.filter(function(d) { return deskAll.indexOf(d) !== -1; });
+  var domPort = dom.filter(function(d) { return portAll.indexOf(d) !== -1; });
+
+  // 前沿线
+  var frontSorted = front.slice().sort(function(a, b) { return a[0] - b[0]; });
+  var frontLine = frontSorted.map(function(d) { return [d[0], d[1]]; });
+
+  var paretoOption = Object.assign({}, baseOption, {
+    xAxis: { name: '月均成本(元/月) → 越低越省', min: 50, max: 360 },
+    yAxis: { name: '平均性能满足度% → 越高越好', min: 10, max: 95 },
+    tooltip: { trigger: 'item', formatter: function(p) {
+      if (!p.value || p.value.length < 3) return '';
+      return '<strong>' + p.value[3] + '</strong><br>月均: ' + p.value[0].toFixed(0) + ' 元/月<br>性能: ' + p.value[1].toFixed(1) + '%<br>净支出: ' + p.value[2] + ' 元';
+    }},
+    legend: { data: ['台式前沿', '便携前沿', '台式已排除', '便携已排除'] },
+    series: [
+      { name: '台式前沿', type: 'scatter', symbol: 'circle', symbolSize: function(d) { return Math.sqrt(d[2]) / 4 + 8; },
+        itemStyle: { color: C_PRIMARY }, data: frontDesk },
+      { name: '便携前沿', type: 'scatter', symbol: 'diamond', symbolSize: function(d) { return Math.sqrt(d[2]) / 4 + 8; },
+        itemStyle: { color: C_PRIMARY }, data: frontPort },
+      { name: '台式已排除', type: 'scatter', symbol: 'circle', symbolSize: 8,
+        itemStyle: { color: C_GRAY, opacity: 0.5 }, data: domDesk },
+      { name: '便携已排除', type: 'scatter', symbol: 'diamond', symbolSize: 8,
+        itemStyle: { color: C_GRAY, opacity: 0.5 }, data: domPort },
+      { type: 'line', data: frontLine, symbol: 'none',
+        lineStyle: { color: C_PRIMARY, type: 'dashed', width: 1.5 }, tooltip: { show: false } }
+    ]
+  });
+  var chart = echarts.init(document.getElementById('pareto'));
+  chart.setOption(paretoOption);
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// === 月均成本曲线 ===
+(function() {
+  var machineData = [
+    { name: 'Mac mini M4 新品', data: [[24,154],[36,117],[48,99]] },
+    { name: 'Mac mini M2 二手', data: [[24,115],[36,91],[48,75]] },
+    { name: 'Mac mini M1 二手', data: [[24,106],[36,73]] },
+    { name: 'MBA M5 新品',      data: [[24,216],[36,222],[48,189]] },
+    { name: 'MBA M4 二手',      data: [[24,136],[36,156],[48,138]] },
+    { name: 'MBA M3 二手',      data: [[24,143],[36,160]] },
+    { name: 'MBA M2 二手',      data: [[24,147],[36,155]] },
+    { name: 'MBA M1 二手',      data: [[24,131],[36,131]] },
+    { name: 'MBP M5 新品',      data: [[24,318],[36,326]] },
+    { name: 'MBP M2Pro 二手',   data: [[24,171],[36,206]] }
+  ];
+  var costCurveOption = Object.assign({}, baseOption, {
+    xAxis: { name: '持有月数', min: 12, max: 54 },
+    yAxis: { name: '月均成本(元)', min: 50, max: 400 },
+    tooltip: { trigger: 'axis', formatter: function(pts) {
+      var s = ''; pts.forEach(function(i) { s += i.seriesName + ': ' + i.data[1] + '元/月<br>'; }); return s;
+    }},
+    legend: { type: 'scroll', top: 0, textStyle: { color: C_MUTED, fontSize: 10 }, height: 50 },
+    series: machineData.map(function(s, i) {
+      return { name: s.name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, data: s.data,
+        lineStyle: { width: 2, color: PALETTE[i % PALETTE.length] },
+        itemStyle: { color: PALETTE[i % PALETTE.length] } };
+    })
+  });
+  var chart = echarts.init(document.getElementById('costCurve'));
+  chart.setOption(costCurveOption);
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// === 便携溢价收敛曲线 ===
+(function() {
+  var premiumOption = Object.assign({}, baseOption, {
+    xAxis: { name: '新→旧', data: ['新品 M4', '二手 M2', '二手 M1'], axisLabel: { fontSize: 13 } },
+    yAxis: { name: '便携溢价%', min: 0, max: 60 },
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['便携溢价率'] },
+    series: [{
+      name: '便携溢价率', type: 'bar',
+      data: [
+        { value: 50, itemStyle: { color: C_WARNING } },
+        { value: 8.2, itemStyle: { color: C_SUCCESS } },
+        { value: 12.3, itemStyle: { color: C_SUCCESS } }
+      ],
+      label: { show: true, position: 'top', formatter: '{c}%', fontSize: 14, fontWeight: 600 }
+    }]
+  });
+  var chart = echarts.init(document.getElementById('premiumChart'));
+  chart.setOption(premiumOption);
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// === 保值率曲线对比 ===
+(function() {
+  var curves = [
+    { name: 'Mac mini', data: [[0,100],[3,90],[6,82],[12,65],[18,56],[24,48],[36,33],[48,25],[60,18]] },
+    { name: 'MacBook Air', data: [[0,100],[3,88],[6,80],[12,65],[18,55],[24,45],[36,30],[48,22],[60,15]] },
+    { name: 'MacBook Pro', data: [[0,100],[3,90],[6,82],[12,68],[18,58],[24,48],[36,35],[48,28],[60,20]] }
+  ];
+  var valueCurveSeries = curves.map(function(c, i) {
+    return { name: c.name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, data: c.data,
+      lineStyle: { color: PALETTE[i], width: 2.5 }, itemStyle: { color: PALETTE[i] } };
+  });
+  var valueCurveOption = Object.assign({}, baseOption, {
+    xAxis: { name: '机龄(发布后月数)', min: 0, max: 60 },
+    yAxis: { name: '保值率%', min: 0, max: 100 },
+    tooltip: { trigger: 'axis' },
+    series: valueCurveSeries
+  });
+  var chart = echarts.init(document.getElementById('valueChart'));
+  chart.setOption(valueCurveOption);
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+</script>
+</body>
+</html>
