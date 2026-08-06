@@ -1,0 +1,6 @@
+<!-- components/pareto-chart/pareto-chart.wxml -->
+<ec-canvas
+  id="ec-canvas"
+  canvas-id="pareto-chart-canvas"
+  ec="{{ ec }}"
+></ec-canvas>

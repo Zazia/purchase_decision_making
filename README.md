@@ -78,11 +78,23 @@ v3.8 introduces a *Macro-Factor Extended Model* that links macro-scan results th
 purchase_decision_making/
 ├── LICENSE                        # CC BY-NC 4.0
 ├── README.md                      # 本文件 / this file
+├── STANCE.md                      # 独立性声明 / Independence stance
 ├── METHOD.md                      # 方法论文章（中文）/ Methodology essay (Chinese)
 ├── METHOD_EN.md                   # 方法论文章（英文）/ Methodology essay (English)
 ├── .agents/skills/apple-value-analysis/
 │   ├── SKILL.md                   # 标准操作流程 SOP v3.8（可独立分发）/ SOP v3.8 (independently distributable)
 │   └── constants.json             # 常量数据库 ~155KB v3.8（可远程获取）/ Constants DB ~155KB v3.8 (remote-fetchable)
+├── packages/
+│   └── apple-value-engine/        # TS 引擎包（帕累托前沿计算）/ TS engine (Pareto computation)
+│       ├── src/                   # 源码（保值率/性能/成本/帕累托）/ source
+│       └── tests/                 # 一致性单测 / consistency tests
+├── miniapp/
+│   └── wx/                        # 微信原生小程序工程 / WeChat native mini-program
+│       ├── pages/                 # 决策树/结果/详情/分享卡 / decision-tree/result/detail/share-card
+│       ├── components/            # 帕累托图/分享卡canvas / pareto-chart/share-card-canvas
+│       ├── engine-bridge/         # 引擎适配层 / engine adapter
+│       ├── snapshot/              # constants.json 月更快照 / monthly snapshot
+│       └── project.config.json    # AppID: wx2f00740110e78738
 └── .gitignore
 ```
 
@@ -144,6 +156,40 @@ iPhone 15 和 16 哪个值得买？用两年哪个省
 报告输出为自包含 HTML 文件（ECharts CDN），含帕累托前沿散点图、保值率曲线图、各机型多持有期成本曲线。
 
 The report is a self-contained HTML file (ECharts CDN), with a Pareto scatter plot, retention curves, and per-model multi-holding-period cost curves.
+
+---
+
+## 微信小程序入口 / WeChat Mini-Program
+
+本项目已上线微信小程序，AppID: `wx2f00740110e78738`，类目「工具-效率」，个人主体。
+
+A WeChat mini-program is available, AppID: `wx2f00740110e78738`, category "Tools - Productivity", personal subject.
+
+### 使用流程 / Usage Flow
+
+1. **决策树表单 / Decision tree**: 5 步引导（品类 → 预算 → 持有期 → 新品/二手 → 性能地板），每步可选「不确定」
+2. **结果页 / Result page**: 调用 `apple-value-engine` 计算帕累托前沿，结论先行展示非劣方案列表 + 散点图
+3. **方案详情 / Plan detail**: 点击方案卡片查看完整成本分解（买入价/残值/维修/性能满足度）
+4. **分享卡 / Share card**: 生成 1080×1440 分享图，支持保存到相册与转发
+
+### 技术架构 / Tech Architecture
+
+- **引擎复用 / Engine reuse**: 小程序通过 `workspace:*` 协议引用 `apple-value-engine`，与 skill 共用同一份帕累托算法
+- **数据快照 / Data snapshot**: `constants.json` 月更快照打包进小程序版本，结果页底部显示数据更新日期与时效分级
+- **ec-canvas 图表 / Chart**: 静态帕累托散点图，关闭 tooltip/缩放，点击点位跳详情页
+- **个人主体合规 / Compliance**: 无支付、无外链、无导购字样，详见 [STANCE.md](STANCE.md)
+
+### 本地开发 / Local Development
+
+```bash
+# 1. 安装依赖 / Install dependencies
+cd miniapp/wx
+npm install
+
+# 2. 微信开发者工具打开 miniapp/wx/ 目录 / Open in WeChat DevTools
+# 3. 工具 → 构建 npm / Tools → Build npm
+# 4. 预览/真机调试 / Preview / Real device debug
+```
 
 ---
 

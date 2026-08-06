@@ -1,0 +1,46 @@
+<!-- pages/decision-tree/decision-tree.wxml -->
+<view class="container">
+  <!-- 进度条 -->
+  <view class="progress-bar">
+    <view class="progress-track">
+      <view class="progress-fill" style="width: {{progress}}%;"></view>
+    </view>
+    <text class="progress-text">第 {{currentStep + 1}} / {{steps.length}} 步</text>
+  </view>
+
+  <!-- 步骤内容 -->
+  <view class="step-container {{fadeClass}}" wx:for="{{steps}}" wx:key="key" wx:if="{{index === currentStep}}">
+    <view class="step-title">{{item.title}}</view>
+
+    <!-- 选项列表 -->
+    <view class="options">
+      <view
+        class="option-card"
+        wx:for="{{item.options}}"
+        wx:for-item="opt"
+        wx:key="value"
+        data-step="{{item.key}}"
+        data-value="{{opt.value}}"
+        bindtap="onSelectOption"
+      >
+        <view class="option-label">{{opt.label}}</view>
+        <view class="option-desc" wx:if="{{opt.desc}}">{{opt.desc}}</view>
+      </view>
+    </view>
+
+    <!-- 不确定/帮我选 -->
+    <view class="unsure-card" bindtap="onSelectUnsure">
+      <text class="unsure-text">不确定 / 帮我选</text>
+    </view>
+  </view>
+
+  <!-- 上一步按钮 -->
+  <view class="nav-bar">
+    <view class="nav-btn back" wx:if="{{currentStep > 0}}" bindtap="prevStep">上一步</view>
+  </view>
+
+  <!-- AI 顾问提示 -->
+  <view class="ai-hint {{showAiHint ? 'show' : ''}}">
+    AI 顾问功能开发中, 已为您使用默认参数
+  </view>
+</view>

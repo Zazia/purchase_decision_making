@@ -1,0 +1,29 @@
+{
+  "name": "apple-value-engine",
+  "version": "0.1.0",
+  "description": "Apple product value analysis & Pareto frontier engine. Pure functions, zero runtime deps, runs on Node/Browser/WeChat MiniProgram.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "license": "CC-BY-NC-4.0",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

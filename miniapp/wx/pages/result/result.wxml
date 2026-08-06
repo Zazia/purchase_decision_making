@@ -1,0 +1,136 @@
+<!-- pages/result/result.wxml -->
+<view class="container">
+  <!-- Loading -->
+  <view class="state-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="state-text">正在计算帕累托前沿...</text>
+  </view>
+
+  <!-- Error -->
+  <view class="state-wrap" wx:elif="{{error}}">
+    <text class="state-text error-text">{{error}}</text>
+    <view class="retry-btn" bindtap="onRetry">重试</view>
+  </view>
+
+  <!-- Result -->
+  <block wx:else>
+    <!-- Empty with fallback -->
+    <view class="empty-card" wx:if="{{isEmpty}}">
+      <view class="empty-icon">⚠️</view>
+      <view class="empty-title">当前约束下无非劣方案</view>
+      <view class="empty-desc">{{relaxedHint}}</view>
+      <view class="empty-suggestion">以下为放宽约束后的最近可行方案</view>
+    </view>
+
+    <!-- Conclusion section -->
+    <view class="conclusion-card" wx:if="{{!isEmpty && plans.length > 0}}">
+      <view class="section-title">推荐方案（按月均成本升序）</view>
+      <view class="plan-list">
+        <view
+          class="plan-card {{item.inRange ? 'in-range' : ''}}"
+          wx:for="{{plans}}"
+          wx:key="key"
+          data-index="{{index}}"
+          bindtap="onPlanTap"
+        >
+          <view class="plan-header">
+            <text class="plan-model">{{item.modelLabel}}</text>
+            <view class="plan-badges">
+              <text class="badge badge-{{item.buyTiming}}">{{item.buyTimingLabel}}</text>
+              <text class="badge badge-hold">{{item.holdingYears}}年</text>
+            </view>
+          </view>
+          <view class="plan-metrics">
+            <view class="metric">
+              <text class="metric-value">{{item.monthlyCost}}</text>
+              <text class="metric-unit">元/月</text>
+            </view>
+            <view class="metric">
+              <text class="metric-label">性能满足度</text>
+              <text class="metric-value-sm">{{item.avgPerformancePct}}%</text>
+            </view>
+            <view class="metric">
+              <text class="metric-label">买入价</text>
+              <text class="metric-value-sm">{{item.buyPrice}}元</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Empty fallback plan list -->
+    <view class="conclusion-card" wx:if="{{isEmpty && plans.length > 0}}">
+      <view class="section-title">最近可行方案</view>
+      <view class="plan-list">
+        <view
+          class="plan-card"
+          wx:for="{{plans}}"
+          wx:key="key"
+          data-index="{{index}}"
+          bindtap="onPlanTap"
+        >
+          <view class="plan-header">
+            <text class="plan-model">{{item.modelLabel}}</text>
+            <view class="plan-badges">
+              <text class="badge badge-{{item.buyTiming}}">{{item.buyTimingLabel}}</text>
+              <text class="badge badge-hold">{{item.holdingYears}}年</text>
+            </view>
+          </view>
+          <view class="plan-metrics">
+            <view class="metric">
+              <text class="metric-value">{{item.monthlyCost}}</text>
+              <text class="metric-unit">元/月</text>
+            </view>
+            <view class="metric">
+              <text class="metric-label">性能满足度</text>
+              <text class="metric-value-sm">{{item.avgPerformancePct}}%</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Pareto chart -->
+    <view class="chart-card" wx:if="{{frontier.length > 0 || dominated.length > 0}}">
+      <view class="section-title">帕累托前沿图</view>
+      <view class="chart-desc">横轴: 月均成本(越低越省) | 纵轴: 性能满足度(越高越好)</view>
+      <view class="chart-legend">
+        <view class="legend-item">
+          <view class="legend-dot legend-frontier"></view>
+          <text>前沿方案</text>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot legend-dominated"></view>
+          <text>已排除方案</text>
+        </view>
+        <view class="legend-item" wx:if="{{performanceFloor > 0}}">
+          <view class="legend-line legend-floor"></view>
+          <text>性能地板</text>
+        </view>
+      </view>
+      <pareto-chart
+        id="chart"
+        frontier="{{frontier}}"
+        dominated="{{dominated}}"
+        recommendation-range="{{recommendationRange}}"
+        performance-floor="{{performanceFloor}}"
+        bind:pointtap="onChartPointTap"
+      />
+    </view>
+
+    <!-- Generate share card button -->
+    <view class="share-btn-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
+      <view class="share-btn" bindtap="onGenerateShareCard">生成分享卡</view>
+    </view>
+
+    <!-- Data freshness footer -->
+    <view class="footer footer-{{freshnessLevel}}">
+      <text class="footer-text">数据更新于 {{lastUpdated}}</text>
+      <text class="footer-hint" wx:if="{{freshnessLevel === 'stale'}}">数据已 {{days}} 天未更新，下次发版将刷新</text>
+      <block wx:if="{{freshnessLevel === 'expired'}}">
+        <text class="footer-hint">数据较旧({{days}}天)，建议查看 GitHub 最新版</text>
+        <text class="footer-link" bindtap="onOpenGitHub">复制 GitHub 链接</text>
+      </block>
+    </view>
+  </block>
+</view>

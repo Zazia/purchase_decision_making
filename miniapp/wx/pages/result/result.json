@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "分析结果",
+  "usingComponents": {
+    "pareto-chart": "../../components/pareto-chart/pareto-chart"
+  }
+}
+

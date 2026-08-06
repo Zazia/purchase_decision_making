@@ -1,0 +1,168 @@
+/* pages/decision-tree/decision-tree.wxss */
+/* 设计 token 对齐 constants.json design_tokens */
+
+.container {
+  min-height: 100vh;
+  background: #F5F5F7;
+  padding: 0 24rpx 120rpx;
+  box-sizing: border-box;
+}
+
+/* 进度条 */
+.progress-bar {
+  padding: 40rpx 0 32rpx;
+}
+
+.progress-track {
+  height: 8rpx;
+  background: #D2D2D8;
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #007AFF;
+  border-radius: 999rpx;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #86868F;
+  text-align: center;
+}
+
+/* 步骤容器 */
+.step-container {
+  padding: 24rpx 0;
+}
+
+.step-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin-bottom: 32rpx;
+  line-height: 1.4;
+}
+
+/* 选项卡片 */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.option-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 32rpx 28rpx;
+  border: 2rpx solid transparent;
+  box-shadow: 0 1rpx 4rpx rgba(29, 29, 31, 0.06);
+  transition: all 0.15s ease;
+}
+
+.option-card:active {
+  background: #E6F2FF;
+  border-color: #007AFF;
+  transform: scale(0.98);
+}
+
+.option-label {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #1D1D1F;
+}
+
+.option-desc {
+  font-size: 26rpx;
+  color: #86868F;
+  margin-top: 8rpx;
+}
+
+/* 不确定选项 */
+.unsure-card {
+  margin-top: 24rpx;
+  padding: 28rpx;
+  text-align: center;
+  border-radius: 20rpx;
+  border: 2rpx dashed #D2D2D8;
+  background: transparent;
+}
+
+.unsure-card:active {
+  border-color: #007AFF;
+  background: #E6F2FF;
+}
+
+.unsure-text {
+  font-size: 30rpx;
+  color: #86868F;
+}
+
+/* 导航栏 */
+.nav-bar {
+  margin-top: 40rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-btn {
+  padding: 20rpx 64rpx;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  text-align: center;
+}
+
+.nav-btn.back {
+  background: #FFFFFF;
+  color: #86868F;
+  border: 2rpx solid #D2D2D8;
+}
+
+.nav-btn.back:active {
+  background: #F5F5F7;
+}
+
+/* AI 提示 */
+.ai-hint {
+  position: fixed;
+  bottom: 60rpx;
+  left: 50%;
+  transform: translateX(-50%) translateY(120rpx);
+  background: rgba(29, 29, 31, 0.88);
+  color: #FFFFFF;
+  font-size: 28rpx;
+  padding: 24rpx 40rpx;
+  border-radius: 16rpx;
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 80%;
+  text-align: center;
+}
+
+.ai-hint.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 步骤切换动画 */
+.fade-in {
+  animation: fadeIn 0.25s ease;
+}
+
+.fade-out {
+  animation: fadeOut 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(40rpx); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-40rpx); }
+}

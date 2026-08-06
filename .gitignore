@@ -8,10 +8,22 @@ skills-improved/*.md
 .uploads
 .design_library
 .playwright-browsers
+.trae/
+
+# 依赖
+node_modules/
+
+# 构建产物(各 workspace 自行决定是否保留 dist)
+packages/*/dist/
 
 # 测试文件夹
 test-results
+apple-decision-video
 
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# 敏感密钥(小程序主体私钥等,严禁入库)
+*.key
+private.*

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "分享卡",
+  "usingComponents": {
+    "share-card-canvas": "../../components/share-card-canvas/share-card-canvas"
+  }
+}

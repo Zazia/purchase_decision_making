@@ -1,0 +1,91 @@
+#!/usr/bin/env node
+/**
+ * sync-snapshot.mjs — constants.json 快照同步脚本
+ *
+ * 将源文件 .agents/skills/apple-value-analysis/constants.json 拷贝到
+ * 小程序快照目录 miniapp/wx/snapshot/constants.json。
+ *
+ * 校验:
+ * 1. 源文件存在
+ * 2. hash 比对(若一致则跳过)
+ * 3. 拷贝后 hash 一致性校验
+ * 4. last_updated 字段非空校验
+ *
+ * 失败退出非零码并指明失败步骤。
+ *
+ * 用法: node scripts/sync-snapshot.mjs
+ */
+import { createHash } from 'node:crypto';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '..');
+const SOURCE = join(ROOT, '.agents/skills/apple-value-analysis/constants.json');
+const TARGET_DIR = join(ROOT, 'miniapp/wx/snapshot');
+const TARGET = join(TARGET_DIR, 'constants.json');
+
+function sha256(content) {
+  return createHash('sha256').update(content).digest('hex');
+}
+
+function fail(step, message) {
+  console.error(`[sync-snapshot] FAIL @ ${step}: ${message}`);
+  process.exit(1);
+}
+
+// Step 1: 源文件存在校验
+if (!existsSync(SOURCE)) {
+  fail('source-check', `Source constants.json not found at ${SOURCE}`);
+}
+console.log('[sync-snapshot] Source file found.');
+
+const sourceContent = readFileSync(SOURCE, 'utf-8');
+const sourceHash = sha256(sourceContent);
+
+// Step 2: hash 比对(一致则跳过)
+if (existsSync(TARGET)) {
+  const targetContent = readFileSync(TARGET, 'utf-8');
+  const targetHash = sha256(targetContent);
+  if (sourceHash === targetHash) {
+    console.log(`[sync-snapshot] Snapshot already in sync (hash: ${sourceHash.slice(0, 12)}...). Skip.`);
+    process.exit(0);
+  }
+  console.log('[sync-snapshot] Hash differs, will update.');
+} else {
+  console.log('[sync-snapshot] Target not found, will create.');
+}
+
+// Step 3: 确保目标目录存在
+if (!existsSync(TARGET_DIR)) {
+  mkdirSync(TARGET_DIR, { recursive: true });
+  console.log(`[sync-snapshot] Created target dir: ${TARGET_DIR}`);
+}
+
+// Step 4: 拷贝
+writeFileSync(TARGET, sourceContent, 'utf-8');
+console.log('[sync-snapshot] File copied.');
+
+// Step 5: 拷贝后 hash 一致性校验
+const copiedContent = readFileSync(TARGET, 'utf-8');
+const copiedHash = sha256(copiedContent);
+if (copiedHash !== sourceHash) {
+  fail('hash-verify', `Hash mismatch after copy: source=${sourceHash.slice(0, 12)} target=${copiedHash.slice(0, 12)}`);
+}
+console.log(`[sync-snapshot] Hash verified: ${copiedHash.slice(0, 12)}...`);
+
+// Step 6: last_updated 非空校验
+try {
+  const parsed = JSON.parse(copiedContent);
+  const lastUpdated = parsed?.metadata?.last_updated;
+  if (typeof lastUpdated !== 'string' || lastUpdated.length === 0) {
+    fail('last-updated-check', 'metadata.last_updated is missing or empty in copied snapshot');
+  }
+  console.log(`[sync-snapshot] last_updated verified: ${lastUpdated}`);
+} catch (err) {
+  fail('json-parse', `Failed to parse copied snapshot as JSON: ${err.message}`);
+}
+
+console.log(`[sync-snapshot] Snapshot synced: ${copiedHash}`);
+process.exit(0);

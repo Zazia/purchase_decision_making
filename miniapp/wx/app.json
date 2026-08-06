@@ -1,0 +1,23 @@
+{
+  "pages": [
+    "pages/decision-tree/decision-tree",
+    "pages/result/result",
+    "pages/detail/detail",
+    "pages/share-card/share-card"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTitleText": "苹果购买决策分析",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F5F7"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.writePhotosAlbum": {
+      "desc": "用于将分享卡保存到相册"
+    }
+  }
+}

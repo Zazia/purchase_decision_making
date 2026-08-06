@@ -1,0 +1,96 @@
+/* pages/share-card/share-card.wxss */
+/* 设计 token 对齐 constants.json design_tokens */
+
+.container {
+  min-height: 100vh;
+  background: #F5F5F7;
+  padding: 24rpx 24rpx 80rpx;
+  box-sizing: border-box;
+}
+
+/* ============ Canvas 预览 ============ */
+.canvas-wrap {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 1rpx 4rpx rgba(29, 29, 31, 0.06);
+}
+
+/* ============ 降级提示 ============ */
+.fallback-tip {
+  background: #FFF0C2;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.fallback-text {
+  font-size: 26rpx;
+  color: #E09500;
+  text-align: center;
+}
+
+/* ============ 操作按钮 ============ */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+}
+
+.action-btn {
+  text-align: center;
+  padding: 28rpx;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.action-btn.primary {
+  background: #1D1D1F;
+  color: #FFFFFF;
+}
+
+.action-btn.primary:active {
+  opacity: 0.85;
+}
+
+.action-btn.secondary {
+  background: #FFFFFF;
+  color: #1D1D1F;
+  border: 2rpx solid #D2D2D8;
+}
+
+.action-btn.secondary:active {
+  background: #F5F5F7;
+}
+
+/* button 重置 */
+.share-btn {
+  line-height: normal;
+}
+
+.share-btn::after {
+  border: none;
+}
+
+/* ============ 预览图 ============ */
+.preview-wrap {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 1rpx 4rpx rgba(29, 29, 31, 0.06);
+}
+
+.preview-label {
+  font-size: 28rpx;
+  color: #86868F;
+  margin-bottom: 16rpx;
+}
+
+.preview-img {
+  width: 100%;
+  height: 960rpx;
+  border-radius: 12rpx;
+}

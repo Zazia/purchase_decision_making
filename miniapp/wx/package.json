@@ -1,0 +1,10 @@
+{
+  "name": "apple-value-miniapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "苹果产品价值分析微信小程序",
+  "dependencies": {
+    "apple-value-engine": "file:../../packages/apple-value-engine"
+  },
+  "license": "CC-BY-NC-4.0"
+}

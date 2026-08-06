@@ -1,0 +1,6 @@
+/* components/pareto-chart/pareto-chart.wxss */
+ec-canvas {
+  display: block;
+  width: 100%;
+  height: 500rpx;
+}

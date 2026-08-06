@@ -1,0 +1,15 @@
+{
+  "name": "purchase_decision_making",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "miniapp/wx"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "build": "npm run build --workspaces",
+    "sync:snapshot": "node scripts/sync-snapshot.mjs"
+  },
+  "license": "CC-BY-NC-4.0"
+}

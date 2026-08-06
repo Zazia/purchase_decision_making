@@ -1,0 +1,39 @@
+<!-- pages/share-card/share-card.wxml -->
+<view class="container">
+  <!-- Canvas 预览 -->
+  <view class="canvas-wrap">
+    <share-card-canvas
+      id="card"
+      budget="{{budget}}"
+      category="{{category}}"
+      category-label="{{categoryLabel}}"
+      top-plan="{{topPlan}}"
+      frontier="{{frontier}}"
+      last-updated="{{lastUpdated}}"
+    />
+  </view>
+
+  <!-- 降级提示(canvas 渲染失败时) -->
+  <view class="fallback-tip" wx:if="{{renderFailed}}">
+    <view class="fallback-text">分享卡渲染失败，请截取上方画面分享</view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="actions">
+    <view class="action-btn primary" bindtap="onGenerate">
+      {{generated ? '重新生成' : '生成分享卡'}}
+    </view>
+    <view class="action-btn secondary" wx:if="{{generated}}" bindtap="onSaveToAlbum">
+      保存到相册
+    </view>
+    <button class="action-btn secondary share-btn" open-type="share" wx:if="{{generated}}">
+      转发给朋友
+    </button>
+  </view>
+
+  <!-- 预览图 -->
+  <view class="preview-wrap" wx:if="{{tempFilePath}}">
+    <view class="preview-label">分享卡预览</view>
+    <image class="preview-img" src="{{tempFilePath}}" mode="aspectFit" />
+  </view>
+</view>

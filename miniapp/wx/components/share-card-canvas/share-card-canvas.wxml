@@ -1,0 +1,6 @@
+<!-- components/share-card-canvas/share-card-canvas.wxml -->
+<canvas
+  type="2d"
+  id="share-canvas"
+  class="share-canvas"
+></canvas>

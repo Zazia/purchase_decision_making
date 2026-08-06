@@ -78,6 +78,48 @@ description: 量化分析苹果产品保值率与持有成本,用帕累托前沿
 
 ---
 
+## 引擎调用(优先路径)
+
+本技能的帕累托前沿算法已抽离为独立 TypeScript 引擎包 `apple-value-engine`(位于仓库 `packages/apple-value-engine/`)。**当 Agent 运行环境支持 npm/Node.js 时,优先调用引擎执行计算,跳过下文 SOP 步骤 4-6 的手动计算**。
+
+### 调用方式
+
+```typescript
+import { loadConstants, computeParetoFrontier } from 'apple-value-engine';
+
+// 1. 获取 constants.json(远程获取逻辑不变,见上方"获取与更新机制")
+const jsonText = await fetchConstantsJson(); // 现有远程获取逻辑
+
+// 2. 加载并校验常量
+const constants = loadConstants(jsonText);
+
+// 3. 调用引擎计算帕累托前沿(替代 SOP 步骤 4-6 的手动计算)
+const result = computeParetoFrontier(constants, {
+  category: 'mac-mini',      // 品类
+  budget: 5000,              // 预算上限
+  holdingYears: [2, 3, 4],   // 候选持有年数
+  buyTiming: 'used',         // 'new' 或 'used'
+  performanceFloor: 0.7,     // 性能地板(0-1)
+});
+
+// 4. result.frontier = 前沿非劣方案(按月均成本升序)
+//    result.dominated = 被支配方案
+//    result.recommendationRange = 用户偏好截取的推荐区间
+```
+
+### 引擎路径与 SOP 文字路径的关系
+
+- **引擎路径(优先)**:Agent 环境支持 npm → `loadConstants` + `computeParetoFrontier` → 直接获取前沿结果 → 跳至 SOP 步骤 7 生成报告
+- **文字路径(回退)**:Agent 环境不支持 npm → 按下文 SOP 步骤 1-7 逐执行,Agent 自行执行保值率插值、性能满足度、月均成本、帕累托筛选的计算
+
+两条路径使用同一份 constants.json,输出结果一致(引擎单测 fixtures 来自 SOP 路径产出的历史报告)。SOP 步骤 1-3(候选方案确定、宏观扫描、市场价校验)和步骤 7(报告生成)在两条路径下均需执行,仅步骤 4-6 可由引擎替代。
+
+### constants.json 兼容性
+
+引擎的 `loadConstants()` 接收原始 JSON 文本,内部完成中文键名 → 英文字段名的映射。远程获取的 constants.json 无需任何预处理,直接传入即可。现有远程获取逻辑(双源容错、7 天过期判断)完全不变。
+
+---
+
 ## 0. 设计原则
 
 1. **以事实为依据**:所有判断从数据出发。宏观因素通过实时扫描发现不预设;规律从 constants.json 统计得出不预设结论;常量按分级校验原则验证,不做无效重复校验

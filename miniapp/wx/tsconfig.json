@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "lib": ["ES2018"],
+    "typeRoots": ["./typings"]
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "miniprogram_npm", "dist", "vendor"]
+}

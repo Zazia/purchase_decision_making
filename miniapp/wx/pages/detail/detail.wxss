@@ -1,0 +1,205 @@
+/* pages/detail/detail.wxss */
+/* 设计 token 对齐 constants.json design_tokens */
+
+.container {
+  min-height: 100vh;
+  background: #F5F5F7;
+  padding: 24rpx 24rpx 80rpx;
+  box-sizing: border-box;
+}
+
+.state-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 40rpx;
+}
+
+.state-text {
+  font-size: 30rpx;
+  color: #86868F;
+}
+
+/* ============ 标题卡片 ============ */
+.header-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 36rpx 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 1rpx 4rpx rgba(29, 29, 31, 0.06);
+}
+
+.header-model {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin-bottom: 16rpx;
+  line-height: 1.4;
+}
+
+.header-badges {
+  display: flex;
+  gap: 8rpx;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  line-height: 1.4;
+}
+
+.badge-new {
+  background: #D9F0E3;
+  color: #2A8A61;
+}
+
+.badge-used {
+  background: #FFD9D9;
+  color: #9F1239;
+}
+
+.badge-hold {
+  background: #F5F5F7;
+  color: #86868F;
+}
+
+/* ============ 核心指标 ============ */
+.metrics-card {
+  background: linear-gradient(135deg, #007AFF, #0063D4);
+  border-radius: 20rpx;
+  padding: 36rpx 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.metric-cell:last-child {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4rpx;
+}
+
+.metric-value {
+  font-size: 56rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+  font-family: 'DM Sans', -apple-system, sans-serif;
+}
+
+.metric-unit {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.metric-label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.metric-value-sm {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+/* ============ 分解卡片 ============ */
+.section-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 1rpx 4rpx rgba(29, 29, 31, 0.06);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin-bottom: 24rpx;
+}
+
+.breakdown-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+.breakdown-label {
+  font-size: 28rpx;
+  color: #86868F;
+}
+
+.breakdown-value {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1D1D1F;
+}
+
+.breakdown-value.highlight {
+  color: #007AFF;
+  font-size: 32rpx;
+}
+
+.breakdown-divider {
+  height: 2rpx;
+  background: #D2D2D8;
+  margin: 8rpx 0;
+}
+
+.breakdown-row.total .breakdown-label {
+  color: #1D1D1F;
+  font-weight: 500;
+}
+
+.perf-note {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: #E6F2FF;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  color: #86868F;
+  line-height: 1.5;
+}
+
+/* ============ 公式卡片 ============ */
+.formula-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 1rpx 4rpx rgba(29, 29, 31, 0.06);
+}
+
+.formula-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin-bottom: 20rpx;
+}
+
+.formula-text {
+  font-size: 26rpx;
+  color: #1D1D1F;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  line-height: 1.8;
+  padding: 8rpx 0;
+}

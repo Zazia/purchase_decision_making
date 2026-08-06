@@ -1,0 +1,100 @@
+<!-- pages/detail/detail.wxml -->
+<view class="container">
+  <view class="state-wrap" wx:if="{{!plan}}">
+    <text class="state-text">方案数据加载中...</text>
+  </view>
+
+  <block wx:else>
+    <!-- 方案标题 -->
+    <view class="header-card">
+      <view class="header-model">{{modelLabel}}</view>
+      <view class="header-badges">
+        <text class="badge badge-{{plan.buyTiming}}">{{buyTimingLabel}}</text>
+        <text class="badge badge-hold">持有 {{plan.holdingYears}} 年</text>
+      </view>
+    </view>
+
+    <!-- 核心指标 -->
+    <view class="metrics-card">
+      <view class="metric-row">
+        <view class="metric-cell">
+          <text class="metric-value primary">{{plan.monthlyCost}}</text>
+          <text class="metric-unit">元/月</text>
+        </view>
+        <view class="metric-cell">
+          <text class="metric-label">性能满足度</text>
+          <text class="metric-value-sm">{{avgPerformancePct}}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 成本分解 -->
+    <view class="section-card">
+      <view class="section-title">成本分解</view>
+      <view class="breakdown-list">
+        <view class="breakdown-row">
+          <text class="breakdown-label">买入价</text>
+          <text class="breakdown-value">{{plan.buyPrice}} 元</text>
+        </view>
+        <view class="breakdown-row">
+          <text class="breakdown-label">预期卖出残值</text>
+          <text class="breakdown-value">{{plan.residual}} 元</text>
+        </view>
+        <view class="breakdown-row">
+          <text class="breakdown-label">持有期维修成本</text>
+          <text class="breakdown-value">{{plan.maintenanceCost}} 元</text>
+        </view>
+        <view class="breakdown-row">
+          <text class="breakdown-label">持有月数</text>
+          <text class="breakdown-value">{{plan.holdingMonths}} 月</text>
+        </view>
+        <view class="breakdown-divider"></view>
+        <view class="breakdown-row total">
+          <text class="breakdown-label">净支出</text>
+          <text class="breakdown-value">{{netCost}} 元</text>
+        </view>
+        <view class="breakdown-row total">
+          <text class="breakdown-label">月均成本</text>
+          <text class="breakdown-value highlight">{{plan.monthlyCost}} 元/月</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 性能满足度分解 -->
+    <view class="section-card">
+      <view class="section-title">性能满足度分解</view>
+      <view class="breakdown-list">
+        <view class="breakdown-row">
+          <text class="breakdown-label">初始性能 S(0)</text>
+          <text class="breakdown-value">{{s0Pct}}%</text>
+        </view>
+        <view class="breakdown-row">
+          <text class="breakdown-label">持有期末性能 S(N)</text>
+          <text class="breakdown-value">{{snPct}}%</text>
+        </view>
+        <view class="breakdown-divider"></view>
+        <view class="breakdown-row total">
+          <text class="breakdown-label">持有期平均性能</text>
+          <text class="breakdown-value highlight">{{avgPerformancePct}}%</text>
+        </view>
+      </view>
+      <view class="perf-note">
+        性能满足度 = 芯片性能系数 × 内存权重 × 存储权重，持有期内基准芯片更新导致相对性能衰减。
+      </view>
+    </view>
+
+    <!-- 计算公式说明 -->
+    <view class="formula-card">
+      <view class="formula-title">计算公式</view>
+      <view class="formula-text">
+        月均成本 = (买入价 − 预期残值 + 维修成本) ÷ 持有月数
+      </view>
+      <view class="formula-text">
+        性能满足度 S(t) = S(0) ÷ (1 + r)^(t/12)
+      </view>
+      <view class="formula-text">
+        持有期平均 = [S(0) + S(N)] ÷ 2
+      </view>
+    </view>
+  </block>
+</view>
