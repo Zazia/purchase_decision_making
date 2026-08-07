@@ -11,5 +11,8 @@
     "build": "npm run build --workspaces",
     "sync:snapshot": "node scripts/sync-snapshot.mjs"
   },
-  "license": "CC-BY-NC-4.0"
+  "license": "CC-BY-NC-4.0",
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
 }

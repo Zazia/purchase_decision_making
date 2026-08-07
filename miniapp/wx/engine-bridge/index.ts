@@ -16,7 +16,9 @@ import { loadConstants, computeParetoFrontier } from '../vendor/apple-value-engi
 import type { Constants, DecisionParams, ParetoFrontierResult } from '../vendor/apple-value-engine/index';
 
 // 本地快照(require 方式, 由小程序打包时注入)
-const snapshotRaw = require('../snapshot/constants.json') as Record<string, unknown>;
+// 注意: 微信小程序运行时 require('xxx.json') 会被解析为 xxx.json.js 导致找不到模块,
+// 所以 scripts/sync-snapshot.mjs 会生成 constants.js 包装文件, 这里 require .js 版本。
+const snapshotRaw = require('../snapshot/constants.js') as Record<string, unknown>;
 
 let cachedConstants: Constants | null = null;
 

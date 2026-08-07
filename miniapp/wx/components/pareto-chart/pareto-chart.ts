@@ -42,13 +42,16 @@ Component({
 
   data: {
     ec: { lazyLoad: true } as { lazyLoad: boolean },
-    chartInstance: null as echarts.ECharts | null,
     initialized: false,
   },
 
+  // chartInstance 存为组件实例属性 (非 data), 因为 ECharts 对象不可序列化,
+  // 放入 data 会导致 setData 部分失败 (initialized 字段不会更新)
+  chartInstance: null as echarts.ECharts | null,
+
   observers: {
     'frontier, dominated, recommendationRange, performanceFloor': function () {
-      if (this.data.initialized && this.data.chartInstance) {
+      if (this.data.initialized && this.chartInstance) {
         this.updateChart();
       }
     },
@@ -60,8 +63,8 @@ Component({
       setTimeout(() => this.initChart(), 200);
     },
     detached() {
-      if (this.data.chartInstance) {
-        this.data.chartInstance.dispose();
+      if (this.chartInstance) {
+        this.chartInstance.dispose();
       }
     },
   },
@@ -92,7 +95,9 @@ Component({
           height,
           dpr,
         });
-        this.setData({ chartInstance: chart, initialized: true });
+        // chart 实例不可序列化, 存为实例属性而非 data
+        this.chartInstance = chart;
+        this.setData({ initialized: true });
         this.updateChart();
         return chart;
       });
@@ -100,7 +105,7 @@ Component({
 
     /** 更新图表 option */
     updateChart() {
-      const chart = this.data.chartInstance;
+      const chart = this.chartInstance;
       if (!chart) return;
 
       const frontier = this.properties.frontier as PlanPoint[];

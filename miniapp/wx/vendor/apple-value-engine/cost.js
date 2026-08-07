@@ -125,6 +125,10 @@ function getBuyPrice(entry, buyTiming) {
     if (typeof entry.闲鱼中位价_二手同款_参考 === 'number' && entry.闲鱼中位价_二手同款_参考 > 0) {
         return entry.闲鱼中位价_二手同款_参考;
     }
+    // 兜底: iPhone/iPad 快照使用 "闲鱼中位价" (无 _二手同款 后缀)
+    if (typeof entry.闲鱼中位价 === 'number' && entry.闲鱼中位价 > 0) {
+        return entry.闲鱼中位价;
+    }
     return null;
 }
 //# sourceMappingURL=cost.js.map

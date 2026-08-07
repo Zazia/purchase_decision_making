@@ -28,7 +28,7 @@ export function computeParetoFrontier(
   const points: PlanPoint[] = [];
   for (const cand of candidates) {
     for (const years of params.holdingYears) {
-      const point = buildPlanPoint(constants, cand, years, categoryKey, params);
+      const point = buildPlanPoint(constants, cand, years, params);
       if (point) points.push(point);
     }
   }
@@ -54,51 +54,92 @@ interface Candidate {
   buyTiming: BuyTiming;
   buyPrice: number;
   releaseDateKey: string;
+  /** 该候选所属的快照品类键(子品类, 如 iPhone_Pro), 用于保值率/维修/性能查表 */
+  categoryKey: string;
 }
 
-/** 从市场快照提取候选机型 */
+/**
+ * 从市场快照提取候选机型
+ * 支持「父品类」聚合: 当 categoryKey 本身不存在时, 搜索所有子品类
+ * (如 "iphone" → iPhone_Pro + iPhone_proMax + iPhone_标准)
+ */
 function extractCandidates(
   constants: Constants,
   categoryKey: string,
   buyTiming: BuyTiming,
 ): Candidate[] {
-  const snapshots = constants.marketSnapshots[categoryKey];
-  if (!snapshots) return [];
+  // 确定要搜索的快照键列表
+  let snapshotKeys: string[];
+  if (constants.marketSnapshots[categoryKey]) {
+    snapshotKeys = [categoryKey];
+  } else {
+    // 父品类: 搜索所有以 categoryKey + '_' 开头的子品类
+    const prefix = categoryKey.toLowerCase() + '_';
+    snapshotKeys = Object.keys(constants.marketSnapshots).filter(
+      (k) => !k.startsWith('_') && k.toLowerCase().startsWith(prefix),
+    );
+  }
 
   const candidates: Candidate[] = [];
-  for (const [modelKey, entry] of Object.entries(snapshots)) {
-    const condition = buyTiming === 'new' ? '新品' : '二手';
-    if (!modelKey.includes(condition)) continue;
+  for (const snapKey of snapshotKeys) {
+    const snapshots = constants.marketSnapshots[snapKey];
+    if (!snapshots) continue;
 
-    const parsed = parseModelKey(modelKey, categoryKey);
-    if (!parsed) continue;
+    for (const [modelKey, entry] of Object.entries(snapshots)) {
+      const condition = buyTiming === 'new' ? '新品' : '二手';
+      if (!modelKey.includes(condition)) continue;
 
-    const buyPrice = getBuyPrice(entry, buyTiming);
-    if (buyPrice === null || buyPrice <= 0) continue;
+      const parsed = parseModelKey(modelKey, snapKey);
+      if (!parsed) continue;
 
-    candidates.push({
-      modelKey,
-      chip: parsed.chip,
-      memoryGb: parsed.memoryGb,
-      storageGb: parsed.storageGb,
-      buyTiming,
-      buyPrice,
-      releaseDateKey: parsed.releaseDateKey,
-    });
+      const buyPrice = getBuyPrice(entry, buyTiming);
+      if (buyPrice === null || buyPrice <= 0) continue;
+
+      candidates.push({
+        modelKey,
+        chip: parsed.chip,
+        memoryGb: parsed.memoryGb,
+        storageGb: parsed.storageGb,
+        buyTiming,
+        buyPrice,
+        releaseDateKey: parsed.releaseDateKey,
+        categoryKey: snapKey,
+      });
+    }
   }
   return candidates;
 }
 
 /**
+ * 规范化芯片名: 将快照 modelKey 中的紧凑写法转为 benchmark 表的键名
+ * M1Pro → M1_Pro, M5Max → M5_Max, M5Pro_Max → M5_Pro_Max
+ */
+function normalizeChipName(chip: string): string {
+  return chip.replace(/(?<!_)(Pro|Max|Ultra)/g, '_$1');
+}
+
+/** iPhone 产品名 → 芯片名映射 (productReleaseDates 用 iPhone_N, benchmarks 用 A_N) */
+const IPHONE_CHIP_MAP: Record<string, string> = {
+  'iPhone_12': 'A14', 'iPhone_13': 'A15',
+  'iPhone_14': 'A15', 'iPhone_14_Pro': 'A16',
+  'iPhone_15': 'A16', 'iPhone_15_Pro': 'A17_Pro',
+  'iPhone_16': 'A18', 'iPhone_16_Pro': 'A18_Pro',
+  'iPhone_17': 'A19', 'iPhone_17_Pro': 'A19_Pro',
+  'iPhone_18': 'A20', 'iPhone_18_Pro': 'A20_Pro',
+};
+
+/**
  * 解析机型 key, 如 "M4_16G_256G_新品" → { chip: "M4", memoryGb: 16, storageGb: 256, releaseDateKey: "Mac_mini_M4" }
  * 支持带屏幕尺寸的格式, 如 "M5_Pro_14寸_16G_512G_新品"
+ * 支持无内存/存储段的格式, 如 "M3_24寸_二手" (iMac), 此时使用默认值
+ * 支持 iPhone 产品名格式, 如 "iPhone_16_Pro_256G_二手"
  */
 function parseModelKey(
   modelKey: string,
   categoryKey: string,
 ): { chip: string; memoryGb: number; storageGb: number; releaseDateKey: string } | null {
-  // 去掉条件后缀
-  const withoutCondition = modelKey.replace(/_(新品|二手)$/, '');
+  // 去掉条件后缀及附加修饰(如 _基础款, _升级款)
+  const withoutCondition = modelKey.replace(/_(新品|二手)(_.*)?$/, '');
   const segments = withoutCondition.split('_');
 
   // 找内存和存储段(匹配 \d+G)
@@ -108,21 +149,50 @@ function parseModelKey(
     if (m) gbSegments.push({ index: i, value: Number(m[1]) });
   });
 
-  if (gbSegments.length < 2) return null;
+  // 找屏幕尺寸段(如 "14寸")
+  const screenSizeMatch = segments.find((s) => /^\d+寸$/.test(s));
+  const screenSize = screenSizeMatch ? screenSizeMatch.replace('寸', '') : '';
 
-  const memoryGb = gbSegments[0].value;
-  const storageGb = gbSegments[1].value;
+  // iPhone 特殊处理: modelKey 以 iPhone_ 开头, 需映射到芯片名
+  if (segments[0] === 'iPhone') {
+    // 提取产品代际名: iPhone_16_Pro 或 iPhone_16 (到第一个 GB 段之前)
+    const productEnd = gbSegments[0]?.index ?? segments.length;
+    const productSegments = segments.slice(0, productEnd).filter((s) => !/^\d+寸$/.test(s));
+    const productName = productSegments.join('_'); // 如 "iPhone_16_Pro"
 
-  // 芯片 = 内存段之前的所有段, 去掉屏幕尺寸段(如 "13寸")
+    // 只取前两段作为发布日期 key (iPhone_16), 不含 Pro/ProMax 后缀
+    const releaseDateKey = productSegments.slice(0, 2).join('_'); // 如 "iPhone_16"
+
+    // 映射到芯片名
+    const chip = IPHONE_CHIP_MAP[productName] ?? IPHONE_CHIP_MAP[productSegments.slice(0, 2).join('_')] ?? 'A14';
+
+    // iPhone 内存默认 6GB, 存储从 key 提取
+    const storageGb = gbSegments[0]?.value ?? 128;
+    return { chip, memoryGb: 6, storageGb, releaseDateKey };
+  }
+
+  // 内存/存储可能缺失(如 iMac 的 "M3_24寸_二手"), 使用默认值
+  // 仅 1 个 GB 段时视为存储(Mac/iPad 通常不标内存)
+  const memoryGb = gbSegments.length >= 2 ? gbSegments[0].value : 8;
+  const storageGb = gbSegments.length >= 2 ? gbSegments[1].value : (gbSegments[0]?.value ?? 256);
+
+  // 芯片 = 内存段之前的所有段(或全部段如果无 GB), 去掉屏幕尺寸段
+  const chipEndIndex = gbSegments.length >= 2 ? gbSegments[0].index : (gbSegments[0]?.index ?? segments.length);
   const chipSegments = segments
-    .slice(0, gbSegments[0].index)
+    .slice(0, chipEndIndex)
     .filter((s) => !/^\d+寸$/.test(s));
-  const chip = chipSegments.join('_');
+  const rawChip = chipSegments.join('_');
 
-  if (!chip) return null;
+  if (!rawChip) return null;
 
-  // 发布日期 key: 如 "Mac_mini_M4", "Mac_mini_M2_Pro"
-  const releaseDateKey = `${categoryKey}_${chip}`;
+  // 规范化芯片名: M1Pro → M1_Pro (匹配 benchmark 表)
+  const chip = normalizeChipName(rawChip);
+
+  // 发布日期 key: 优先带屏幕尺寸 (如 "MacBook_Pro_14_M3Pro"), 其次不带 (如 "Mac_mini_M4")
+  // 注意: releaseDateKey 用原始芯片名(非规范化), 因为 productReleaseDates 用 M1Pro 不用 M1_Pro
+  const releaseDateKey = screenSize
+    ? `${categoryKey}_${screenSize}_${rawChip}`
+    : `${categoryKey}_${rawChip}`;
 
   return { chip, memoryGb, storageGb, releaseDateKey };
 }
@@ -135,35 +205,34 @@ function buildPlanPoint(
   constants: Constants,
   cand: Candidate,
   holdingYears: number,
-  categoryKey: string,
   params: DecisionParams,
 ): PlanPoint | null {
   const holdingMonths = holdingYears * 12;
 
-  // 当前机龄(月)
+  // 当前机龄(月) — 用候选自身的子品类键查发布日期
   const currentAgeMonths = computeAgeMonths(constants, cand.releaseDateKey);
   if (currentAgeMonths < 0) return null;
 
-  // 当前同品类新品价(残值分母)
-  const currentNewPrice = getCurrentNewPrice(constants, categoryKey);
+  // 当前同品类新品价(残值分母) — 用候选自身的子品类键
+  const currentNewPrice = getCurrentNewPrice(constants, cand.categoryKey);
 
-  // 月均成本
+  // 月均成本 — 用候选自身的子品类键查保值率/维修费
   const cost = computeMonthlyCost(
     constants,
-    categoryKey,
+    cand.categoryKey,
     cand.buyPrice,
     currentAgeMonths,
     holdingMonths,
     currentNewPrice,
   );
 
-  // 性能满足度
+  // 性能满足度 — 用候选自身的子品类键查基准芯片
   const perf = computePerformance(
     constants,
     cand.chip,
     cand.memoryGb,
     cand.storageGb,
-    categoryKey,
+    cand.categoryKey,
     holdingMonths,
     params.mSeriesCAGR,
     params.aSeriesCAGR,
@@ -187,7 +256,31 @@ function buildPlanPoint(
 
 /** 计算机龄(月) = (分析日期 - 发布日期) × 12 */
 function computeAgeMonths(constants: Constants, releaseDateKey: string): number {
-  const releaseDate = constants.productReleaseDates[releaseDateKey];
+  let releaseDate = constants.productReleaseDates[releaseDateKey];
+
+  // 模糊兜底 1: 去掉屏幕尺寸段再试 (MacBook_Pro_14_M3Pro → MacBook_Pro_M3Pro)
+  if (!releaseDate) {
+    const withoutScreen = releaseDateKey.replace(/_\d+_(?=[^_]+$)/, '_');
+    if (withoutScreen !== releaseDateKey) {
+      releaseDate = constants.productReleaseDates[withoutScreen];
+    }
+  }
+
+  // 模糊兜底 2: 按芯片名(最后一段)搜索其他尺寸/子品类的发布日期
+  // (如 "MacBook_Pro_14_M3Pro" 不存在, 但 "MacBook_Pro_16_M3Pro" 存在)
+  if (!releaseDate) {
+    const chip = releaseDateKey.split('_').pop();
+    if (chip) {
+      // 优先匹配同品类前缀 + 同芯片后缀
+      const categoryPrefix = releaseDateKey.split('_').slice(0, -2).join('_'); // 如 "MacBook_Pro"
+      for (const [key, val] of Object.entries(constants.productReleaseDates)) {
+        if (key.startsWith(categoryPrefix + '_') && key.endsWith('_' + chip) && typeof val === 'string') {
+          releaseDate = val;
+          break;
+        }
+      }
+    }
+  }
   if (!releaseDate) return -1;
 
   // 解析 "YYYY-MM" 或 "YYYY-MM(预计)"

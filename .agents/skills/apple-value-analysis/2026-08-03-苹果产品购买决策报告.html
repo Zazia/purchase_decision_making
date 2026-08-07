@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mac mini 购买决策分析报告 - 2026-08-03</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+  --brand-blue: #007AFF;
+  --accent-soft: #E8F0FE;
+  --success: #34C759;
+  --warning: #FF9500;
+  --error: #FF3B30;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-600: #6B7280;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--gray-50);
+  color: var(--gray-900);
+  line-height: 1.6;
+  padding: 24px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* 报告头部 */
+.report-header {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.report-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 8px;
+}
+
+.report-header .meta {
+  color: var(--gray-600);
+  font-size: 14px;
+}
+
+/* 结论卡片 */
+.conclusion-card {
+  background: linear-gradient(135deg, var(--brand-blue), #0056CC);
+  color: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.conclusion-card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.conclusion-card .verdict {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.conclusion-card .detail {
+  font-size: 15px;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+/* 推荐方案表 */
+.recommend-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.recommend-section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--gray-900);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  background: var(--gray-100);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-600);
+  font-size: 13px;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+tr:last-child td { border-bottom: none; }
+
+.highlight-row {
+  background: var(--accent-soft);
+}
+
+.highlight-row td {
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-success { background: #D1FAE5; color: #065F46; }
+.badge-warning { background: #FEF3C7; color: #92400E; }
+.badge-error { background: #FEE2E2; color: #991B1B; }
+.badge-info { background: var(--accent-soft); color: var(--brand-blue); }
+
+/* 关键数字 */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.kpi-card .label {
+  font-size: 12px;
+  color: var(--gray-600);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.kpi-card .value {
+  font-size: 32px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  color: var(--brand-blue);
+}
+
+.kpi-card .unit {
+  font-size: 14px;
+  color: var(--gray-600);
+  margin-top: 4px;
+}
+
+/* 图表容器 */
+.chart-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.chart-container h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.chart-box {
+  width: 100%;
+  height: 430px;
+}
+
+.chart-note {
+  font-size: 13px;
+  color: var(--gray-600);
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  line-height: 1.5;
+}
+
+/* 警告框 */
+.alert {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.alert-warning {
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+}
+
+.alert-info {
+  background: var(--accent-soft);
+  border: 1px solid #BBDEFB;
+  color: #1A56DB;
+}
+
+.alert-error {
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+}
+
+.alert h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* 宏观因素 */
+.macro-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.macro-section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.macro-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.macro-item:last-child { border-bottom: none; }
+
+.macro-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.macro-item .dot-warning { background: var(--warning); }
+.macro-item .dot-info { background: var(--brand-blue); }
+.macro-item .dot-error { background: var(--error); }
+
+.macro-item .content { flex: 1; }
+.macro-item .content .title { font-weight: 600; font-size: 14px; }
+.macro-item .content .desc { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
+
+/* 图表说明 */
+.chart-guide {
+  background: var(--gray-50);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.chart-guide h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.chart-guide ul {
+  padding-left: 20px;
+  color: var(--gray-600);
+  line-height: 1.8;
+}
+
+/* 移动端 */
+@media (max-width: 640px) {
+  body { padding: 12px; }
+  .report-header { padding: 20px; }
+  .report-header h1 { font-size: 22px; }
+  .conclusion-card { padding: 24px; }
+  .conclusion-card .verdict { font-size: 20px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .kpi-card .value { font-size: 24px; }
+  .chart-box { height: 360px; }
+  table { font-size: 12px; }
+  th, td { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- 报告头部 -->
+<div class="report-header">
+  <h1>Mac mini 购买决策分析报告</h1>
+  <div class="meta">分析日期: 2026-08-03 | 预算: 4000元 | 品类: Mac mini | SOP v3.8</div>
+</div>
+
+<!-- 结论卡片 -->
+<div class="conclusion-card">
+  <h2>结论与推荐方案</h2>
+  <div class="verdict">
+    4000元预算内，推荐购买 Mac mini M2 16G+256G 二手，持有 24-36 个月
+  </div>
+  <div class="detail">
+    M2 在性能满足度（42%）、月均成本（¥123/月持24月 / ¥96/月持36月）和系统支持期之间取得最佳平衡。<br>
+    若预算紧张可考虑 M1，但需注意系统支持期已超（M1 机龄69月，超出 macOS 72月支持期）。
+  </div>
+</div>
+
+<!-- 关键数字 KPI -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="label">最佳月均成本 (M2持24月)</div>
+    <div class="value">¥123</div>
+    <div class="unit">/月</div>
+  </div>
+  <div class="kpi-card">
+    <div class="label">最佳性能满足度 (M2持12月)</div>
+    <div class="value">44.9%</div>
+    <div class="unit">相对M5旗舰</div>
+  </div>
+  <div class="kpi-card">
+    <div class="label">预算内买入价 (M2二手)</div>
+    <div class="value">¥3,566</div>
+    <div class="unit">闲鱼中位价</div>
+  </div>
+  <div class="kpi-card">
+    <div class="label">M4新品官方价 (超出预算)</div>
+    <div class="value">¥5,999</div>
+    <div class="unit">涨价33.3%后</div>
+  </div>
+</div>
+
+<!-- 预警信息 -->
+<div class="alert alert-warning">
+  <h4>⚠️ 存储超级周期进行中</h4>
+  2026年Q3 PC DRAM仍涨15-20%，新品价格预测/冲击调整已启用宏观修正。Mac mini 已于2026-06-25涨价33.3%（4499→5999元）。
+</div>
+
+<div class="alert alert-info">
+  <h4>⚠️ Mac mini M5 发布时间不确定</h4>
+  原预测2026-Q3，但M5仅发布于MacBook，Mac mini M5至今无发布迹象，偏差已超1季度。等待新品方案（类型B/C）置信度降级，不建议等。
+</div>
+
+<!-- 推荐方案表 -->
+<div class="recommend-section">
+  <h2>推荐方案</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>方案</th>
+        <th>配置</th>
+        <th>买入价</th>
+        <th>持有期</th>
+        <th>月均成本</th>
+        <th>性能满足度</th>
+        <th>推荐理由</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row">
+        <td><strong>🥇 首选</strong></td>
+        <td>M2 16G+256G</td>
+        <td>¥3,566</td>
+        <td>24个月</td>
+        <td><strong>¥123/月</strong></td>
+        <td>42.0%</td>
+        <td>均衡之选，持有期内仍在系统支持期</td>
+      </tr>
+      <tr class="highlight-row">
+        <td><strong>🥇 首选</strong></td>
+        <td>M2 16G+256G</td>
+        <td>¥3,566</td>
+        <td>36个月</td>
+        <td><strong>¥96/月</strong></td>
+        <td>39.6%</td>
+        <td>成本更低，但期末超出支持期7月</td>
+      </tr>
+      <tr>
+        <td>经济档</td>
+        <td>M1 16G+256G</td>
+        <td>¥2,650</td>
+        <td>48个月</td>
+        <td>¥60/月</td>
+        <td>28.5%</td>
+        <td>最低成本，性能偏低，已超支持期45月</td>
+      </tr>
+      <tr>
+        <td>性能档</td>
+        <td>M2 16G+256G</td>
+        <td>¥3,566</td>
+        <td>12个月</td>
+        <td>¥210/月</td>
+        <td>44.9%</td>
+        <td>最高性能，月均成本高</td>
+      </tr>
+      <tr>
+        <td>长持档</td>
+        <td>M2 16G+256G</td>
+        <td>¥3,566</td>
+        <td>48个月</td>
+        <td>¥79/月</td>
+        <td>37.4%</td>
+        <td>长期持有成本低，但已超支持期19月</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 全候选方案表 -->
+<div class="recommend-section">
+  <h2>全部候选方案（预算内）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>型号</th>
+        <th>持有期</th>
+        <th>买入价</th>
+        <th>S₀(%)</th>
+        <th>S̄(%)</th>
+        <th>期末残值</th>
+        <th>月均成本</th>
+        <th>帕累托</th>
+        <th>系统支持</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>M1 16G+256G</td>
+        <td>12月</td>
+        <td>¥2,650</td>
+        <td>36.8</td>
+        <td>34.2</td>
+        <td>¥315</td>
+        <td>¥203/月</td>
+        <td><span class="badge badge-error">被支配</span></td>
+        <td><span class="badge badge-error">超9月</span></td>
+      </tr>
+      <tr>
+        <td>M1 16G+256G</td>
+        <td>18月</td>
+        <td>¥2,650</td>
+        <td>36.8</td>
+        <td>33.1</td>
+        <td>¥175</td>
+        <td>¥146/月</td>
+        <td><span class="badge badge-error">被支配</span></td>
+        <td><span class="badge badge-error">超15月</span></td>
+      </tr>
+      <tr>
+        <td>M1 16G+256G</td>
+        <td>24月</td>
+        <td>¥2,650</td>
+        <td>36.8</td>
+        <td>32.1</td>
+        <td>¥175</td>
+        <td>¥111/月</td>
+        <td><span class="badge badge-error">被支配</span></td>
+        <td><span class="badge badge-error">超21月</span></td>
+      </tr>
+      <tr>
+        <td>M1 16G+256G</td>
+        <td>36月</td>
+        <td>¥2,650</td>
+        <td>36.8</td>
+        <td>30.2</td>
+        <td>¥175</td>
+        <td>¥77/月</td>
+        <td><span class="badge badge-error">被支配</span></td>
+        <td><span class="badge badge-error">超33月</span></td>
+      </tr>
+      <tr>
+        <td><strong>M1 16G+256G</strong></td>
+        <td><strong>48月</strong></td>
+        <td><strong>¥2,650</strong></td>
+        <td>36.8</td>
+        <td><strong>28.5</strong></td>
+        <td><strong>¥175</strong></td>
+        <td><strong>¥60/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-error">超45月</span></td>
+      </tr>
+      <tr>
+        <td><strong>M1 16G+256G</strong></td>
+        <td><strong>60月</strong></td>
+        <td><strong>¥2,650</strong></td>
+        <td>36.8</td>
+        <td><strong>27.1</strong></td>
+        <td><strong>¥175</strong></td>
+        <td><strong>¥50/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-error">超57月</span></td>
+      </tr>
+      <tr>
+        <td><strong>M2 16G+256G</strong></td>
+        <td><strong>12月</strong></td>
+        <td><strong>¥3,566</strong></td>
+        <td>48.2</td>
+        <td><strong>44.9</strong></td>
+        <td><strong>¥1,148</strong></td>
+        <td><strong>¥210/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-info">正常</span></td>
+      </tr>
+      <tr>
+        <td><strong>M2 16G+256G</strong></td>
+        <td><strong>18月</strong></td>
+        <td><strong>¥3,566</strong></td>
+        <td>48.2</td>
+        <td><strong>43.4</strong></td>
+        <td><strong>¥1,015</strong></td>
+        <td><strong>¥150/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-warning">接近尾声</span></td>
+      </tr>
+      <tr>
+        <td><strong>M2 16G+256G</strong></td>
+        <td><strong>24月</strong></td>
+        <td><strong>¥3,566</strong></td>
+        <td>48.2</td>
+        <td><strong>42.0</strong></td>
+        <td><strong>¥811</strong></td>
+        <td><strong>¥123/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-warning">接近尾声</span></td>
+      </tr>
+      <tr>
+        <td><strong>M2 16G+256G</strong></td>
+        <td><strong>36月</strong></td>
+        <td><strong>¥3,566</strong></td>
+        <td>48.2</td>
+        <td><strong>39.6</strong></td>
+        <td><strong>¥403</strong></td>
+        <td><strong>¥96/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-error">超7月</span></td>
+      </tr>
+      <tr>
+        <td><strong>M2 16G+256G</strong></td>
+        <td><strong>48月</strong></td>
+        <td><strong>¥3,566</strong></td>
+        <td>48.2</td>
+        <td><strong>37.4</strong></td>
+        <td><strong>¥175</strong></td>
+        <td><strong>¥79/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-error">超19月</span></td>
+      </tr>
+      <tr>
+        <td><strong>M2 16G+256G</strong></td>
+        <td><strong>60月</strong></td>
+        <td><strong>¥3,566</strong></td>
+        <td>48.2</td>
+        <td><strong>35.6</strong></td>
+        <td><strong>¥175</strong></td>
+        <td><strong>¥65/月</strong></td>
+        <td><span class="badge badge-success">前沿</span></td>
+        <td><span class="badge badge-error">超31月</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="margin-top: 12px; font-size: 13px; color: var(--gray-600);">
+    <span class="badge badge-success">前沿</span> = 帕累托前沿非劣解，<span class="badge badge-error">被支配</span> = 存在更优方案替代，<span class="badge badge-error">超N月</span> = 超出macOS系统支持期
+  </div>
+</div>
+
+<!-- 帕累托前沿图 -->
+<div class="chart-container">
+  <h2>帕累托前沿分析</h2>
+  <div id="paretoChart" class="chart-box"></div>
+  <div class="chart-note">
+    <strong>阅读方法</strong>：横轴为月均成本（越低越好），纵轴为持有期平均性能满足度（越高越好）。
+    蓝色实心点为帕累托前沿非劣解（推荐方案），灰色空心点为被支配方案。
+    前沿上的方案不存在"成本更低同时性能更高"的替代方案。
+  </div>
+</div>
+
+<!-- 月均成本曲线 -->
+<div class="chart-container">
+  <h2>各机型多持有期成本对比</h2>
+  <div id="costChart" class="chart-box"></div>
+  <div class="chart-note">
+    持有期越长，月均成本越低，但边际递减。M2 在24-36月区间性价比最优。
+  </div>
+</div>
+
+<!-- 宏观因素分析 -->
+<div class="macro-section">
+  <h2>宏观因素与常量校验</h2>
+  
+  <div class="macro-item">
+    <div class="dot dot-warning"></div>
+    <div class="content">
+      <div class="title">存储超级周期 — 进行中</div>
+      <div class="desc">TrendForce 预测2026-Q3 PC DRAM 续涨15-20%，AI HBM 挤压消费级产能。已启用：新品价格预测模型、冲击幅度向下修正（Mac_mini 38%→≈29%）、缺货等待期因子×2.0</div>
+    </div>
+  </div>
+  
+  <div class="macro-item">
+    <div class="dot dot-warning"></div>
+    <div class="content">
+      <div class="title">苹果全线涨价（2026-06-25）</div>
+      <div class="desc">Mac mini 从4499元涨至5999元（涨幅33.3%），已反映在 constants.json 快照中。目前 M4 新品官方价5999元，超出预算。</div>
+    </div>
+  </div>
+  
+  <div class="macro-item">
+    <div class="dot dot-warning"></div>
+    <div class="content">
+      <div class="title">Mac mini M5 发布延迟</div>
+      <div class="desc">原预测2026-Q3，但M5仅在MacBook发布，Mac mini M5至今无迹象。偏差已超1季度，建议不等待新品。</div>
+    </div>
+  </div>
+  
+  <div class="macro-item">
+    <div class="dot dot-info"></div>
+    <div class="content">
+      <div class="title">常量校验级别：绿色（免检）</div>
+      <div class="desc">constants.json 最后更新于2026-08-02（距分析日1天），无需更新。</div>
+    </div>
+  </div>
+  
+  <div class="macro-item">
+    <div class="dot dot-info"></div>
+    <div class="content">
+      <div class="title">市场价快照级别：绿色（免更新）</div>
+      <div class="desc">snapshot_date 2026-07-27（距分析日7天，≤14天），直接使用快照价格。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 数据置信度说明 -->
+<div class="macro-section">
+  <h2>数据置信度与不确定性</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>数据项</th>
+        <th>置信度</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>M4 官方价 ¥5,999</td>
+        <td><span class="badge badge-success">高</span></td>
+        <td>WebFetch 直接搜索苹果官网</td>
+      </tr>
+      <tr>
+        <td>M2 二手价 ¥3,566</td>
+        <td><span class="badge badge-warning">中</span></td>
+        <td>闲鱼挂单价（非实付），实际成交价低5-10%</td>
+      </tr>
+      <tr>
+        <td>M1 二手价 ¥2,650</td>
+        <td><span class="badge badge-warning">中</span></td>
+        <td>闲鱼挂单价（非实付），实际成交价低5-10%</td>
+      </tr>
+      <tr>
+        <td>保值率曲线</td>
+        <td><span class="badge badge-warning">中</span></td>
+        <td>历史统计均值，±5-10%波动；超60月为外推，置信度降低</td>
+      </tr>
+      <tr>
+        <td>长持有期(>36月)性能预测</td>
+        <td><span class="badge badge-warning">中-低</span></td>
+        <td>基于CAGR 16%假设，近期M4→M5仅10%显示放缓迹象</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 更新提示 -->
+<div class="macro-section">
+  <h2>更新提示</h2>
+  <div style="font-size: 14px; color: var(--gray-600); line-height: 1.8;">
+    <p>• 当 Mac mini M5 实际发布后，应重新分析（快照触发红色全更新）</p>
+    <p>• 当二手市场价出现显著变化（幅度>15%）时，建议重新分析</p>
+    <p>• 下次建议分析时间：2026-09-03（快照过期前）或 M5 发布后（立即）</p>
+    <p>• 数据来源：constants.json v3.8（2026-08-02更新）+ 实时市场价快照（2026-07-27）</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+// 帕累托前沿图
+(function() {
+  var chart = echarts.init(document.getElementById('paretoChart'));
+  
+  // 数据点
+  var allPoints = [
+    // M1 系列
+    { model: 'M1', hold: 12, cost: 203, perf: 34.2, front: false, buy: 2650 },
+    { model: 'M1', hold: 18, cost: 146, perf: 33.1, front: false, buy: 2650 },
+    { model: 'M1', hold: 24, cost: 111, perf: 32.1, front: false, buy: 2650 },
+    { model: 'M1', hold: 36, cost: 77, perf: 30.2, front: false, buy: 2650 },
+    { model: 'M1', hold: 48, cost: 60, perf: 28.5, front: true, buy: 2650 },
+    { model: 'M1', hold: 60, cost: 50, perf: 27.1, front: true, buy: 2650 },
+    // M2 系列
+    { model: 'M2', hold: 12, cost: 210, perf: 44.9, front: true, buy: 3566 },
+    { model: 'M2', hold: 18, cost: 150, perf: 43.4, front: true, buy: 3566 },
+    { model: 'M2', hold: 24, cost: 123, perf: 42.0, front: true, buy: 3566 },
+    { model: 'M2', hold: 36, cost: 96, perf: 39.6, front: true, buy: 3566 },
+    { model: 'M2', hold: 48, cost: 79, perf: 37.4, front: true, buy: 3566 },
+    { model: 'M2', hold: 60, cost: 65, perf: 35.6, front: true, buy: 3566 },
+  ];
+  
+  var frontPoints = allPoints.filter(function(p) { return p.front; });
+  frontPoints.sort(function(a, b) { return a.cost - b.cost; });
+  
+  var dominatedPoints = allPoints.filter(function(p) { return !p.front; });
+  
+  var option = {
+    tooltip: {
+      formatter: function(params) {
+        var d = params.data;
+        return '<strong>' + d.model + ' 持' + d.hold + '月</strong><br/>' +
+          '月均成本: ¥' + d.cost + '/月<br/>' +
+          '性能满足度: ' + d.perf + '%<br/>' +
+          (d.front ? '✅ 帕累托前沿' : '❌ 被支配');
+      }
+    },
+    grid: { left: 65, right: 30, top: 30, bottom: 50 },
+    xAxis: {
+      name: '月均成本 (元/月) → 越低越好',
+      nameLocation: 'center',
+      nameGap: 35,
+      type: 'value',
+      min: 30,
+      max: 230,
+      axisLabel: { formatter: '¥{value}' }
+    },
+    yAxis: {
+      name: '持有期平均性能满足度 % → 越高越好',
+      nameLocation: 'center',
+      nameGap: 45,
+      type: 'value',
+      min: 20,
+      max: 50,
+      axisLabel: { formatter: '{value}%' }
+    },
+    series: [
+      {
+        name: '帕累托前沿',
+        type: 'scatter',
+        data: frontPoints.map(function(p) { return { value: [p.cost, p.perf], model: p.model, hold: p.hold, cost: p.cost, perf: p.perf, front: true, buy: p.buy }; }),
+        symbolSize: 14,
+        itemStyle: { color: '#007AFF' },
+        label: {
+          show: true,
+          formatter: function(p) { return p.data.model + ' ' + p.data.hold + '月'; },
+          position: 'right',
+          fontSize: 11,
+          color: '#1F2937'
+        }
+      },
+      {
+        name: '被支配方案',
+        type: 'scatter',
+        data: dominatedPoints.map(function(p) { return { value: [p.cost, p.perf], model: p.model, hold: p.hold, cost: p.cost, perf: p.perf, front: false }; }),
+        symbolSize: 10,
+        itemStyle: { color: 'rgba(107, 114, 128, 0.5)' },
+        label: { show: false }
+      },
+      {
+        name: '前沿连接线',
+        type: 'line',
+        data: frontPoints.map(function(p) { return [p.cost, p.perf]; }),
+        lineStyle: { color: '#007AFF', type: 'dashed', width: 2, opacity: 0.5 },
+        symbol: 'none',
+        smooth: false
+      }
+    ]
+  };
+  
+  chart.setOption(option);
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+
+// 月均成本曲线图
+(function() {
+  var chart = echarts.init(document.getElementById('costChart'));
+  
+  var option = {
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params) {
+        var s = '<strong>' + params[0].axisValue + '月</strong><br/>';
+        params.forEach(function(p) {
+          s += p.marker + ' ' + p.seriesName + ': ¥' + p.value + '/月<br/>';
+        });
+        return s;
+      }
+    },
+    legend: {
+      data: ['M1 16G+256G (二手)', 'M2 16G+256G (二手)'],
+      bottom: 0
+    },
+    grid: { left: 55, right: 30, top: 20, bottom: 40 },
+    xAxis: {
+      type: 'category',
+      data: ['12月', '18月', '24月', '36月', '48月', '60月'],
+      name: '持有期'
+    },
+    yAxis: {
+      type: 'value',
+      name: '月均成本 (元/月)',
+      axisLabel: { formatter: '¥{value}' }
+    },
+    series: [
+      {
+        name: 'M1 16G+256G (二手)',
+        type: 'line',
+        data: [203, 146, 111, 77, 60, 50],
+        smooth: true,
+        lineStyle: { color: '#FF9500', width: 2 },
+        itemStyle: { color: '#FF9500' },
+        symbol: 'circle',
+        symbolSize: 8
+      },
+      {
+        name: 'M2 16G+256G (二手)',
+        type: 'line',
+        data: [210, 150, 123, 96, 79, 65],
+        smooth: true,
+        lineStyle: { color: '#007AFF', width: 2 },
+        itemStyle: { color: '#007AFF' },
+        symbol: 'circle',
+        symbolSize: 8
+      }
+    ]
+  };
+  
+  chart.setOption(option);
+  window.addEventListener('resize', function() { chart.resize(); });
+})();
+</script>
+</body>
+</html>

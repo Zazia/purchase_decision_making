@@ -18,7 +18,7 @@
         class="option-card"
         wx:for="{{item.options}}"
         wx:for-item="opt"
-        wx:key="value"
+        wx:key="label"
         data-step="{{item.key}}"
         data-value="{{opt.value}}"
         bindtap="onSelectOption"

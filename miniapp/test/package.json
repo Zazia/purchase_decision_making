@@ -1,0 +1,20 @@
+{
+  "name": "apple-value-miniapp-autotest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "微信小程序自动化调试脚本 (miniprogram-automator)",
+  "scripts": {
+    "smoke": "node smoke.js",
+    "smoke:decision": "node smoke-decision-tree.js",
+    "smoke:result": "node smoke-result.js",
+    "smoke:detail": "node smoke-detail.js",
+    "smoke:share": "node smoke-share-card.js",
+    "smoke:all": "node run-all.js"
+  },
+  "dependencies": {
+    "miniprogram-api-typings": "^3.12.3",
+    "miniprogram-automator": "0.12.1",
+    "typescript": "^5.4.5"
+  },
+  "license": "CC-BY-NC-4.0"
+}

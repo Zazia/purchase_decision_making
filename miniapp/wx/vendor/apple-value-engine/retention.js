@@ -9,7 +9,17 @@ exports.getRetentionRate = getRetentionRate;
  * @returns 保值率(%), 范围 [3, 100]
  */
 function getRetentionRate(curves, category, months) {
-    const curve = curves[category];
+    let curve = curves[category];
+    if (!curve) {
+        // 大小写兜底: 快照键 iPhone_proMax vs 保值率曲线键 iPhone_ProMax
+        const lower = category.toLowerCase();
+        for (const [k, v] of Object.entries(curves)) {
+            if (k.toLowerCase() === lower) {
+                curve = v;
+                break;
+            }
+        }
+    }
     if (!curve) {
         throw new Error(`Retention curve not found for category: ${category}`);
     }

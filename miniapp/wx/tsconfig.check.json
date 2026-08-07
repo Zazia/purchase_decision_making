@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "lib": ["ES2018", "DOM"],
+    "typeRoots": ["../test/node_modules/@types", "../test/node_modules/miniprogram-api-typings"]
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "miniprogram_npm", "dist", "vendor", "../test"]
+}

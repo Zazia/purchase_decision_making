@@ -23,6 +23,10 @@ apple-decision-video
 # 系统文件
 .DS_Store
 Thumbs.db
+debug.log
+
+# 一次性调试产物(脚本本身保留,运行产物不入库)
+scripts/debug/
 
 # 敏感密钥(小程序主体私钥等,严禁入库)
 *.key
