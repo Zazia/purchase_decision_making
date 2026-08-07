@@ -1,0 +1,314 @@
+[
+  {
+    "model": "MacBook Pro M2Pro 32G 512G 二手",
+    "category": "MacBook_Pro",
+    "query": "MacBook Pro M2Pro 32G 512G",
+    "xianyu_median_price": 8200,
+    "xianyu_price_range": [
+      6400,
+      10000
+    ],
+    "xianyu_sample_count": 2,
+    "xianyu_prices": [
+      6400,
+      10000
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "低",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'MacBook Pro M2Pro 32G 512G'拦截5个API响应,提取2个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "MacBook Pro M3Pro 36G 512G 二手",
+    "category": "MacBook_Pro",
+    "query": "MacBook Pro M3Pro 36G 512G",
+    "xianyu_median_price": 9888,
+    "xianyu_price_range": [
+      9888,
+      9888
+    ],
+    "xianyu_sample_count": 1,
+    "xianyu_prices": [
+      9888
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "低",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'MacBook Pro M3Pro 36G 512G'拦截5个API响应,提取1个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iMac M3 24寸 16G 512G 二手",
+    "category": "iMac",
+    "query": "iMac M3 24寸 16G 512G",
+    "xianyu_median_price": 8000,
+    "xianyu_price_range": [
+      7580,
+      8500
+    ],
+    "xianyu_sample_count": 4,
+    "xianyu_prices": [
+      7580,
+      7999,
+      8000,
+      8500
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iMac M3 24寸 16G 512G'拦截5个API响应,提取4个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iMac M1 24寸 16G 512G 二手",
+    "category": "iMac",
+    "query": "iMac M1 24寸 16G 512G",
+    "xianyu_median_price": 5266,
+    "xianyu_price_range": [
+      3800,
+      6000
+    ],
+    "xianyu_sample_count": 9,
+    "xianyu_prices": [
+      3800,
+      3950,
+      4999,
+      5100,
+      5266,
+      5600,
+      5850,
+      5880,
+      6000
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iMac M1 24寸 16G 512G'拦截5个API响应,提取9个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iPhone 16 ProMax 512G 二手",
+    "category": "iPhone_proMax",
+    "query": "iPhone 16 ProMax 512G",
+    "xianyu_median_price": null,
+    "xianyu_price_range": null,
+    "xianyu_sample_count": 0,
+    "xianyu_prices": [],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "无",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "未采集到有效价格(API响应5个)"
+  },
+  {
+    "model": "iPhone 16 Pro 128G 二手",
+    "category": "iPhone_Pro",
+    "query": "iPhone 16 Pro 128G",
+    "xianyu_median_price": 4819,
+    "xianyu_price_range": [
+      4500,
+      5600
+    ],
+    "xianyu_sample_count": 14,
+    "xianyu_prices": [
+      4500,
+      4580,
+      4599,
+      4639,
+      4650,
+      4780,
+      4799,
+      4839,
+      4859,
+      5229,
+      5279,
+      5459,
+      5529,
+      5600
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iPhone 16 Pro 128G'拦截5个API响应,提取14个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iPhone 16 Pro 512G 二手",
+    "category": "iPhone_Pro",
+    "query": "iPhone 16 Pro 512G",
+    "xianyu_median_price": 7184,
+    "xianyu_price_range": [
+      6829,
+      7939
+    ],
+    "xianyu_sample_count": 6,
+    "xianyu_prices": [
+      6829,
+      6969,
+      6979,
+      7389,
+      7919,
+      7939
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iPhone 16 Pro 512G'拦截5个API响应,提取6个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iPhone 16 128G 二手",
+    "category": "iPhone_标准",
+    "query": "iPhone 16 128G",
+    "xianyu_median_price": 3787,
+    "xianyu_price_range": [
+      3199,
+      4489
+    ],
+    "xianyu_sample_count": 14,
+    "xianyu_prices": [
+      3199,
+      3200,
+      3550,
+      3599,
+      3652,
+      3688,
+      3786,
+      3788,
+      3799,
+      3800,
+      3899,
+      3949,
+      4319,
+      4489
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iPhone 16 128G'拦截5个API响应,提取14个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "Mac mini M2 16G 512G 二手",
+    "category": "Mac_mini",
+    "query": "Mac mini M2 16G 512G",
+    "xianyu_median_price": 4799,
+    "xianyu_price_range": [
+      3180,
+      4880
+    ],
+    "xianyu_sample_count": 7,
+    "xianyu_prices": [
+      3180,
+      3888,
+      4350,
+      4799,
+      4800,
+      4850,
+      4880
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'Mac mini M2 16G 512G'拦截5个API响应,提取7个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "MacBook Air M2 16G 512G 二手",
+    "category": "MacBook_Air",
+    "query": "MacBook Air M2 16G 512G",
+    "xianyu_median_price": 4399,
+    "xianyu_price_range": [
+      4200,
+      5250
+    ],
+    "xianyu_sample_count": 3,
+    "xianyu_prices": [
+      4200,
+      4399,
+      5250
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'MacBook Air M2 16G 512G'拦截5个API响应,提取3个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iPad Pro M2 11寸 512G 二手",
+    "category": "iPad_Pro",
+    "query": "iPad Pro M2 11寸 512G",
+    "xianyu_median_price": 4940,
+    "xianyu_price_range": [
+      4150,
+      5500
+    ],
+    "xianyu_sample_count": 3,
+    "xianyu_prices": [
+      4150,
+      4940,
+      5500
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iPad Pro M2 11寸 512G'拦截5个API响应,提取3个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iPad Pro M2 13寸 512G 二手",
+    "category": "iPad_Pro",
+    "query": "iPad Pro M2 13寸 512G",
+    "xianyu_median_price": 6449,
+    "xianyu_price_range": [
+      6199,
+      6699
+    ],
+    "xianyu_sample_count": 2,
+    "xianyu_prices": [
+      6199,
+      6699
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "低",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iPad Pro M2 13寸 512G'拦截5个API响应,提取2个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "iPad Air M2 11寸 256G 二手",
+    "category": "iPad_Air",
+    "query": "iPad Air M2 11寸 256G",
+    "xianyu_median_price": null,
+    "xianyu_price_range": null,
+    "xianyu_sample_count": 0,
+    "xianyu_prices": [],
+    "api_response_count": 6,
+    "search_date": "2026-08-07",
+    "confidence": "无",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "未采集到有效价格(API响应6个)"
+  },
+  {
+    "model": "iPad Air M2 13寸 256G 二手",
+    "category": "iPad_Air",
+    "query": "iPad Air M2 13寸 256G",
+    "xianyu_median_price": 4100,
+    "xianyu_price_range": [
+      3799,
+      4150
+    ],
+    "xianyu_sample_count": 3,
+    "xianyu_prices": [
+      3799,
+      4100,
+      4150
+    ],
+    "api_response_count": 5,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'iPad Air M2 13寸 256G'拦截5个API响应,提取3个有效价格。挂单价非实付,实际成交低5-10%"
+  }
+]

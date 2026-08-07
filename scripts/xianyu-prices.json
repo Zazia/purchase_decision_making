@@ -1,0 +1,131 @@
+[
+  {
+    "model": "Mac mini M2 8G 256G 二手",
+    "category": "Mac_mini",
+    "query": "Mac mini M2 8G 256G",
+    "xianyu_median_price": 2675,
+    "xianyu_price_range": [
+      2600,
+      2750
+    ],
+    "xianyu_sample_count": 2,
+    "xianyu_prices": [
+      2600,
+      2750
+    ],
+    "api_response_count": 6,
+    "search_date": "2026-08-07",
+    "confidence": "低",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'Mac mini M2 8G 256G'拦截6个API响应,提取2个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "Mac mini M1 8G 256G 二手",
+    "category": "Mac_mini",
+    "query": "Mac mini M1 8G 256G",
+    "xianyu_median_price": 2244,
+    "xianyu_price_range": [
+      1999,
+      2488
+    ],
+    "xianyu_sample_count": 2,
+    "xianyu_prices": [
+      1999,
+      2488
+    ],
+    "api_response_count": 6,
+    "search_date": "2026-08-07",
+    "confidence": "低",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'Mac mini M1 8G 256G'拦截6个API响应,提取2个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "MacBook Air M2 8G 256G 二手",
+    "category": "MacBook_Air",
+    "query": "MacBook Air M2 8G 256G",
+    "xianyu_median_price": 3775,
+    "xianyu_price_range": [
+      2990,
+      4279
+    ],
+    "xianyu_sample_count": 12,
+    "xianyu_prices": [
+      2990,
+      3425,
+      3499,
+      3526,
+      3599,
+      3759,
+      3790,
+      4009,
+      4100,
+      4179,
+      4199,
+      4279
+    ],
+    "api_response_count": 6,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'MacBook Air M2 8G 256G'拦截6个API响应,提取12个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "MacBook Air M1 8G 256G 二手",
+    "category": "MacBook_Air",
+    "query": "MacBook Air M1 8G 256G",
+    "xianyu_median_price": 2789,
+    "xianyu_price_range": [
+      1699,
+      3359
+    ],
+    "xianyu_sample_count": 14,
+    "xianyu_prices": [
+      1699,
+      1850,
+      2588,
+      2619,
+      2749,
+      2750,
+      2778,
+      2799,
+      2949,
+      2979,
+      3100,
+      3129,
+      3199,
+      3359
+    ],
+    "api_response_count": 6,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'MacBook Air M1 8G 256G'拦截6个API响应,提取14个有效价格。挂单价非实付,实际成交低5-10%"
+  },
+  {
+    "model": "MacBook Air M3 8G 256G 二手",
+    "category": "MacBook_Air",
+    "query": "MacBook Air M3 8G 256G",
+    "xianyu_median_price": 4799,
+    "xianyu_price_range": [
+      4019,
+      5459
+    ],
+    "xianyu_sample_count": 9,
+    "xianyu_prices": [
+      4019,
+      4289,
+      4369,
+      4569,
+      4799,
+      4879,
+      4889,
+      4969,
+      5459
+    ],
+    "api_response_count": 6,
+    "search_date": "2026-08-07",
+    "confidence": "中",
+    "source": "闲鱼(goofish.com)真实浏览器 CDP 连接 + API 拦截",
+    "note": "闲鱼搜索'MacBook Air M3 8G 256G'拦截6个API响应,提取9个有效价格。挂单价非实付,实际成交低5-10%"
+  }
+]
