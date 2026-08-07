@@ -1,0 +1,8 @@
+schema: spec-driven
+created: 2026-08-05
+archived: 2026-08-07
+status: archived
+archive_note: |
+  代码层变更（任务 1-9）全部完成并落地。
+  第 10 节「提审与上线」为运营动作，超出本 change 范围，转交后续 change 跟踪。
+  specs 已提升至 openspec/specs/。
