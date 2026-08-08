@@ -1,0 +1,186 @@
+<!-- pages/report/report.wxml -->
+<!-- 端内完整报告页: 按 design.md D9 结构 (HTML 报告端内简化版) -->
+<view class="container">
+  <!-- Loading -->
+  <view class="state-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="state-text">正在组装报告...</text>
+  </view>
+
+  <!-- Error -->
+  <view class="state-wrap" wx:elif="{{error}}">
+    <text class="state-text error-text">{{error}}</text>
+  </view>
+
+  <!-- Report -->
+  <block wx:else>
+    <!-- 报告头部 -->
+    <view class="report-header">
+      <view class="header-title">{{headerTitle}}</view>
+      <view class="header-meta">{{headerMeta}}</view>
+    </view>
+
+    <!-- 结论卡 -->
+    <view class="conclusion-card">
+      <view class="conclusion-label">结论与推荐方案</view>
+      <view class="conclusion-verdict">{{conclusionVerdict}}</view>
+      <view class="conclusion-detail">{{conclusionDetail}}</view>
+    </view>
+
+    <!-- KPI 行 (4 卡) -->
+    <view class="kpi-row" wx:if="{{kpiCards.length > 0}}">
+      <view class="kpi-card" wx:for="{{kpiCards}}" wx:key="label">
+        <view class="kpi-label">{{item.label}}</view>
+        <view class="kpi-value">{{item.value}}</view>
+        <view class="kpi-unit">{{item.unit}}</view>
+      </view>
+    </view>
+
+    <!-- 预警 alert -->
+    <view class="alert alert-{{item.level}}" wx:for="{{alerts}}" wx:key="title" wx:for-item="item">
+      <view class="alert-title">{{item.title}}</view>
+      <view class="alert-desc">{{item.desc}}</view>
+    </view>
+
+    <!-- 推荐方案表 -->
+    <view class="section-card" wx:if="{{recommendRows.length > 0}}">
+      <view class="section-title">推荐方案</view>
+      <view class="table-wrap">
+        <view class="table-row table-head">
+          <view class="cell cell-plan">方案</view>
+          <view class="cell cell-config">配置</view>
+          <view class="cell cell-price">买入价</view>
+          <view class="cell cell-hold">持有期</view>
+          <view class="cell cell-cost">月均</view>
+          <view class="cell cell-perf">性能</view>
+          <view class="cell cell-reason">推荐理由</view>
+        </view>
+        <view class="table-row {{index === 0 ? 'row-highlight' : ''}}" wx:for="{{recommendRows}}" wx:key="planLabel">
+          <view class="cell cell-plan">{{item.planLabel}}</view>
+          <view class="cell cell-config">{{item.config}}
+            <text class="badge badge-wait" wx:if="{{item.candidateBadge}}">{{item.candidateBadge}}</text>
+          </view>
+          <view class="cell cell-price">¥{{item.buyPrice}}<text class="predict-tag" wx:if="{{item.predictedPrice}}">预测</text></view>
+          <view class="cell cell-hold">{{item.holdingMonths}}月</view>
+          <view class="cell cell-cost">¥{{item.monthlyCost}}</view>
+          <view class="cell cell-perf">{{item.performancePct}}%</view>
+          <view class="cell cell-reason">{{item.reason}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 全候选方案表 (默认折叠, 仅渲染前 20 行) -->
+    <view class="section-card" wx:if="{{allCandidateRows.length > 0}}">
+      <view class="section-title">全部候选方案 ({{allCandidateTotal}})</view>
+      <view class="table-wrap candidate-table">
+        <view class="table-row table-head">
+          <view class="cell c-model">型号</view>
+          <view class="cell c-hold">持有</view>
+          <view class="cell c-price">买入价</view>
+          <view class="cell c-s0">S₀</view>
+          <view class="cell c-avg">S̄</view>
+          <view class="cell c-residual">残值</view>
+          <view class="cell c-cost">月均</view>
+          <view class="cell c-pareto">帕累托</view>
+          <view class="cell c-support">支持</view>
+        </view>
+        <block wx:for="{{allCandidateRows}}" wx:key="*this">
+          <view class="table-row {{item.paretoLevel === 'dominated' ? 'row-muted' : ''}}" wx:if="{{allCandidatesExpanded || index < 20}}">
+            <view class="cell c-model">{{item.model}}
+              <text class="badge badge-wait" wx:if="{{item.candidateBadge}}">{{item.candidateBadge}}</text>
+            </view>
+            <view class="cell c-hold">{{item.holdingMonths}}月</view>
+            <view class="cell c-price">¥{{item.buyPrice}}<text class="predict-tag" wx:if="{{item.predictedPrice}}">预测</text></view>
+            <view class="cell c-s0">{{item.s0Pct}}</view>
+            <view class="cell c-avg">{{item.avgSPct}}</view>
+            <view class="cell c-residual">¥{{item.residual}}</view>
+            <view class="cell c-cost">¥{{item.monthlyCost}}</view>
+            <view class="cell c-pareto">
+              <text class="badge badge-{{item.paretoLevel === 'frontier' ? 'success' : 'error'}}">{{item.paretoStatus}}</text>
+            </view>
+            <view class="cell c-support">
+              <text class="badge badge-{{item.supportLevel === 'exceeded' ? 'error' : item.supportLevel === 'near-end' ? 'warning' : 'success'}}" wx:if="{{item.supportLabel}}">{{item.supportLabel}}</text>
+              <text class="badge badge-success" wx:else>正常</text>
+            </view>
+          </view>
+        </block>
+      </view>
+      <view class="expand-btn" wx:if="{{allCandidateTotal > 20}}" bindtap="onToggleAllCandidates">
+        {{allCandidatesExpanded ? '收起' : '查看全部 ' + allCandidateTotal + ' 个方案'}}
+      </view>
+    </view>
+
+    <!-- 帕累托前沿图 -->
+    <view class="section-card chart-card" wx:if="{{frontier.length > 0 || dominated.length > 0}}">
+      <view class="section-title">帕累托前沿图</view>
+      <view class="chart-desc">横轴: 月均成本(越低越省) | 纵轴: 性能满足度(越高越好)</view>
+      <pareto-chart
+        id="chart"
+        frontier="{{frontier}}"
+        dominated="{{dominated}}"
+        recommendation-range="{{recommendationRange}}"
+        performance-floor="{{performanceFloor}}"
+        budget="{{budget}}"
+        bind:pointtap="onChartPointTap"
+      />
+      <view class="chart-note">
+        前沿上的方案不存在"成本更低同时性能更高"的替代方案。点击图中点位可查看方案详情。
+      </view>
+    </view>
+
+    <!-- 宏观因素摘要 (展开/收起) -->
+    <view class="section-card" wx:if="{{macroFactors.length > 0}}">
+      <view class="section-title-row">
+        <view class="section-title">宏观因素与常量校验</view>
+        <view class="toggle-btn" bindtap="onToggleMacro">{{macroExpanded ? '收起' : '展开'}}</view>
+      </view>
+      <block wx:if="{{macroExpanded}}">
+        <view class="macro-item" wx:for="{{macroFactors}}" wx:key="title">
+          <view class="macro-dot macro-dot-{{item.level}}"></view>
+          <view class="macro-content">
+            <view class="macro-title">{{item.title}}</view>
+            <view class="macro-desc">{{item.desc}}</view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 数据置信度表 -->
+    <view class="section-card" wx:if="{{confidenceRows.length > 0}}">
+      <view class="section-title">数据置信度与不确定性</view>
+      <view class="table-wrap">
+        <view class="table-row table-head">
+          <view class="cell conf-item">数据项</view>
+          <view class="cell conf-level">置信度</view>
+          <view class="cell conf-desc">说明</view>
+        </view>
+        <view class="table-row" wx:for="{{confidenceRows}}" wx:key="item">
+          <view class="cell conf-item">{{item.item}}</view>
+          <view class="cell conf-level">
+            <text class="badge badge-{{item.levelClass}}">{{item.level}}</text>
+          </view>
+          <view class="cell conf-desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 更新提示 -->
+    <view class="section-card">
+      <view class="section-title">更新提示</view>
+      <view class="hint-list">
+        <view class="hint-item" wx:for="{{updateHints}}" wx:key="*this">• {{item}}</view>
+      </view>
+    </view>
+
+    <!-- 导出与转发按钮 -->
+    <view class="export-wrap">
+      <view class="export-btn" bindtap="onExportHtml">导出为 HTML 文件</view>
+      <view class="share-btn {{hasExportedFile ? '' : 'btn-disabled'}}" bindtap="onShareFile">转发文件</view>
+    </view>
+
+    <!-- 数据时效页脚 -->
+    <view class="footer">
+      <text class="footer-text">数据更新于 {{lastUpdated}} · SOP v{{sopVersion}}</text>
+    </view>
+  </block>
+</view>

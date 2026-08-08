@@ -1,0 +1,17 @@
+#!/bin/sh
+# pre-commit: 源 constants.json 被 staged 时自动同步到小程序快照
+# 配置: git config core.hooksPath scripts/hooks
+# 手动跳过: git commit --no-verify
+
+CONSTANTS_SRC=".agents/skills/apple-value-analysis/constants.json"
+
+# 仅当源 constants.json 在本次 staged 改动中时触发
+if git diff --cached --name-only | grep -Fxq "$CONSTANTS_SRC"; then
+  echo "[pre-commit] $CONSTANTS_SRC changed, syncing snapshot..."
+  node scripts/sync-snapshot.mjs || {
+    echo "[pre-commit] sync-snapshot failed, aborting commit." >&2
+    exit 1
+  }
+  git add miniapp/wx/snapshot/constants.json miniapp/wx/snapshot/constants.js
+  echo "[pre-commit] snapshot synced and staged."
+fi

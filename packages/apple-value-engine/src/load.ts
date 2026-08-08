@@ -63,6 +63,10 @@ export function loadConstants(jsonText: string): Constants {
     }
   }
 
+  // v3.8 子对象 (嵌套于现有顶层键内, 提取为独立英文字段便于 release.ts 解析)
+  const releaseRhythmRaw = raw['苹果产品发布节奏'] as Record<string, unknown> | undefined;
+  const newReleaseImpactRaw = raw['新品发布对老款冲击'] as Record<string, unknown> | undefined;
+
   return {
     lastUpdated: metadata.last_updated as string,
     version: typeof metadata.version === 'string' ? metadata.version : '',
@@ -79,6 +83,11 @@ export function loadConstants(jsonText: string): Constants {
     costFormula: raw['月均成本计算公式'] as Constants['costFormula'],
     marketSnapshots: raw['实时市场价快照'] as Constants['marketSnapshots'],
     designTokens: raw['design_tokens'] as Constants['designTokens'],
+    waitPeriodModel: releaseRhythmRaw?.['_缺货等待期模型_v3.8'] as Constants['waitPeriodModel'],
+    releaseTimeValidation: releaseRhythmRaw?.['_发布时间预测校验_v3.8'] as Constants['releaseTimeValidation'],
+    macroFactorAdjustment: newReleaseImpactRaw?.['_宏观因子调整_v3.8'] as Constants['macroFactorAdjustment'],
+    impactTimeVaryingCurve: newReleaseImpactRaw?.['_冲击时变曲线_v3.8'] as Constants['impactTimeVaryingCurve'],
+    pricePredictionModel: newReleaseImpactRaw?.['_新品价格预测模型_v3.8'] as Constants['pricePredictionModel'],
   };
 }
 

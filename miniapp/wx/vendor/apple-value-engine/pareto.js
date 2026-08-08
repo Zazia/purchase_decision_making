@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.computeParetoFrontier = computeParetoFrontier;
 const performance_js_1 = require("./performance.js");
 const cost_js_1 = require("./cost.js");
+const release_js_1 = require("./release.js");
 /**
  * 计算帕累托前沿
  *
@@ -13,6 +14,15 @@ const cost_js_1 = require("./cost.js");
 function computeParetoFrontier(constants, params) {
     const categoryKey = resolveCategoryKey(constants, params.category);
     const candidates = extractCandidates(constants, categoryKey, params.buyTiming);
+    // v3.8: 当 considerWait !== false 时, 自动判断是否生成类型 B/C 候选
+    if (params.considerWait !== false) {
+        const macroContext = resolveMacroContext(constants, params.macroContext);
+        const releasePlan = (0, release_js_1.parseReleasePlan)(constants, categoryKey, macroContext);
+        if (releasePlan && (0, release_js_1.shouldGenerateWaitCandidates)(releasePlan, macroContext)) {
+            const waitCandidates = extractWaitCandidates(constants, categoryKey, releasePlan, macroContext, params.buyTiming);
+            candidates.push(...waitCandidates);
+        }
+    }
     // 为每个候选机型 × 持有年数生成方案点
     const points = [];
     for (const cand of candidates) {
@@ -29,9 +39,27 @@ function computeParetoFrontier(constants, params) {
     return { frontier, dominated, recommendationRange };
 }
 /**
+ * 解析宏观状态: macroContext 缺省时按 storageSuperCycleStage='none' + hasGlobalPriceHike=false 处理,
+ * analysisMonth 缺省时回退 constants.lastUpdated (YYYY-MM), 保证向后兼容。
+ */
+function resolveMacroContext(constants, macroContext) {
+    if (macroContext)
+        return macroContext;
+    const analysisMonth = constants.lastUpdated.slice(0, 7);
+    return {
+        storageSuperCycleStage: 'none',
+        hasGlobalPriceHike: false,
+        analysisMonth,
+    };
+}
+/**
  * 从市场快照提取候选机型
  * 支持「父品类」聚合: 当 categoryKey 本身不存在时, 搜索所有子品类
  * (如 "iphone" → iPhone_Pro + iPhone_proMax + iPhone_标准)
+ *
+ * buyTiming 语义:
+ *   - 'new' / 'used': 仅收集对应条件候选, 候选自身 buyTiming 与之一致
+ *   - 'both': 同时收集新品与二手候选, 每个候选自身 buyTiming 为 'new' 或 'used' (具体到机型)
  */
 function extractCandidates(constants, categoryKey, buyTiming) {
     // 确定要搜索的快照键列表
@@ -44,32 +72,86 @@ function extractCandidates(constants, categoryKey, buyTiming) {
         const prefix = categoryKey.toLowerCase() + '_';
         snapshotKeys = Object.keys(constants.marketSnapshots).filter((k) => !k.startsWith('_') && k.toLowerCase().startsWith(prefix));
     }
+    // 'both' 时同时匹配新品与二手; 每个候选自身 buyTiming 具体到机型
+    const conditions = buyTiming === 'both'
+        ? [{ tag: '新品', timing: 'new' }, { tag: '二手', timing: 'used' }]
+        : [{ tag: buyTiming === 'new' ? '新品' : '二手', timing: buyTiming === 'new' ? 'new' : 'used' }];
     const candidates = [];
     for (const snapKey of snapshotKeys) {
         const snapshots = constants.marketSnapshots[snapKey];
         if (!snapshots)
             continue;
         for (const [modelKey, entry] of Object.entries(snapshots)) {
-            const condition = buyTiming === 'new' ? '新品' : '二手';
-            if (!modelKey.includes(condition))
-                continue;
-            const parsed = parseModelKey(modelKey, snapKey);
-            if (!parsed)
-                continue;
-            const buyPrice = (0, cost_js_1.getBuyPrice)(entry, buyTiming);
-            if (buyPrice === null || buyPrice <= 0)
-                continue;
-            candidates.push({
-                modelKey,
-                chip: parsed.chip,
-                memoryGb: parsed.memoryGb,
-                storageGb: parsed.storageGb,
-                buyTiming,
-                buyPrice,
-                releaseDateKey: parsed.releaseDateKey,
-                categoryKey: snapKey,
-            });
+            for (const { tag, timing } of conditions) {
+                if (!modelKey.includes(tag))
+                    continue;
+                const parsed = parseModelKey(modelKey, snapKey);
+                if (!parsed)
+                    continue;
+                const buyPrice = (0, cost_js_1.getBuyPrice)(entry, timing);
+                if (buyPrice === null || buyPrice <= 0)
+                    continue;
+                candidates.push({
+                    modelKey,
+                    chip: parsed.chip,
+                    memoryGb: parsed.memoryGb,
+                    storageGb: parsed.storageGb,
+                    buyTiming: timing,
+                    buyPrice,
+                    releaseDateKey: parsed.releaseDateKey,
+                    categoryKey: snapKey,
+                    candidateType: 'A',
+                });
+            }
         }
+    }
+    return candidates;
+}
+// ============================================================================
+// v3.8 类型 B/C 候选生成 (等新品候选)
+// ============================================================================
+/**
+ * 生成类型 B（等新品买新品）与类型 C（等新品后买降价老款）候选
+ *
+ * 类型 B: 虚拟候选, 代表即将发布的新一代产品, 买入价为预测价
+ * 类型 C: 基于现有候选, 买入价施加冲击时变下降因子
+ *
+ * @param buyTiming 用户选择的买入时机 (控制类型 C 收集哪些老款)
+ */
+function extractWaitCandidates(constants, categoryKey, releasePlan, macroContext, buyTiming) {
+    const waitMonths = (0, release_js_1.computeWaitMonths)(releasePlan, macroContext);
+    const candidates = [];
+    // --- 类型 B: 等新品买新品 ---
+    const newProductPrice = (0, release_js_1.predictNewProductPrice)(constants, categoryKey, releasePlan);
+    if (newProductPrice > 0) {
+        candidates.push({
+            modelKey: `${categoryKey}_下一代新品`,
+            chip: '',
+            memoryGb: 0,
+            storageGb: 0,
+            buyTiming: 'new',
+            buyPrice: newProductPrice,
+            releaseDateKey: '',
+            categoryKey,
+            candidateType: 'B',
+            waitMonths,
+            predictedPrice: true,
+        });
+    }
+    // --- 类型 C: 等新品后买降价老款 ---
+    // 复用 extractCandidates 获取当前在售机型, 对每个施加冲击时变价格下降
+    const oldCandidates = extractCandidates(constants, categoryKey, buyTiming);
+    for (const oldCand of oldCandidates) {
+        const discountedPrice = (0, release_js_1.predictDiscountedOldPrice)(constants, oldCand.buyPrice, releasePlan, macroContext);
+        if (discountedPrice <= 0)
+            continue;
+        candidates.push({
+            ...oldCand,
+            buyPrice: discountedPrice,
+            candidateType: 'C',
+            waitMonths,
+            predictedPrice: true,
+        });
     }
     return candidates;
 }
@@ -149,16 +231,37 @@ function parseModelKey(modelKey, categoryKey) {
 // ============================================================================
 function buildPlanPoint(constants, cand, holdingYears, params) {
     const holdingMonths = holdingYears * 12;
-    // 当前机龄(月) — 用候选自身的子品类键查发布日期
-    const currentAgeMonths = computeAgeMonths(constants, cand.releaseDateKey);
-    if (currentAgeMonths < 0)
-        return null;
-    // 当前同品类新品价(残值分母) — 用候选自身的子品类键
-    const currentNewPrice = (0, cost_js_1.getCurrentNewPrice)(constants, cand.categoryKey);
-    // 月均成本 — 用候选自身的子品类键查保值率/维修费
-    const cost = (0, cost_js_1.computeMonthlyCost)(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
-    // 性能满足度 — 用候选自身的子品类键查基准芯片
-    const perf = (0, performance_js_1.computePerformance)(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
+    const waitMonths = cand.waitMonths ?? 0;
+    // ---- 按候选类型分流性能与成本计算 ----
+    let cost;
+    let perf;
+    if (cand.candidateType === 'B') {
+        // 类型 B: 等新品买新品 — S(0)=1.0, 机龄 0, 残值分母 = 买入价(预测新品价)
+        perf = (0, performance_js_1.computePerformanceForNewProduct)(constants, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
+        const currentNewPrice = cand.buyPrice; // 新品自身即当前新品价
+        cost = (0, cost_js_1.computeMonthlyCostForWaitCandidate)(constants, cand.categoryKey, cand.buyPrice, holdingMonths, currentNewPrice, holdingMonths);
+    }
+    else if (cand.candidateType === 'C') {
+        // 类型 C: 等新品后买降价老款 — 同款老芯片, 卖出时机龄 = 当前机龄 + 等待月数 + 持有月数
+        const currentAgeMonths = computeAgeMonths(constants, cand.releaseDateKey);
+        if (currentAgeMonths < 0)
+            return null;
+        const currentNewPrice = (0, cost_js_1.getCurrentNewPrice)(constants, cand.categoryKey);
+        const sellAgeMonths = currentAgeMonths + waitMonths + holdingMonths;
+        cost = (0, cost_js_1.computeMonthlyCostForWaitCandidate)(constants, cand.categoryKey, cand.buyPrice, holdingMonths, currentNewPrice, sellAgeMonths);
+        perf = (0, performance_js_1.computePerformance)(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
+    }
+    else {
+        // 类型 A: 现在买 — 原有逻辑
+        const currentAgeMonths = computeAgeMonths(constants, cand.releaseDateKey);
+        if (currentAgeMonths < 0)
+            return null;
+        const currentNewPrice = (0, cost_js_1.getCurrentNewPrice)(constants, cand.categoryKey);
+        cost = (0, cost_js_1.computeMonthlyCost)(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
+        perf = (0, performance_js_1.computePerformance)(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
+    }
+    // ---- 系统支持期风险标注 ----
+    const supportRisk = computeSystemSupportRisk(constants, cand, holdingMonths);
     return {
         model: `${cand.modelKey} × ${holdingYears}年`,
         chip: cand.chip,
@@ -172,7 +275,45 @@ function buildPlanPoint(constants, cand, holdingYears, params) {
         holdingMonths,
         performanceS0: perf.s0,
         performanceSN: perf.sN,
+        candidateType: cand.candidateType,
+        waitMonths: cand.waitMonths,
+        predictedPrice: cand.predictedPrice,
+        systemSupportRisk: supportRisk.risk,
+        systemSupportExceedMonths: supportRisk.exceedMonths,
     };
+}
+/**
+ * 计算系统支持期风险标注
+ * macOS 72 月 / iOS 60 月 (iPhone/iPad)
+ * 返回: normal(距尾声>12月) / near-end(≤12月) / exceeded(已超出)
+ */
+function computeSystemSupportRisk(constants, cand, holdingMonths) {
+    const threshold = getSystemSupportThreshold(cand.categoryKey);
+    const waitMonths = cand.waitMonths ?? 0;
+    // 买入时机龄
+    let buyAgeMonths;
+    if (cand.candidateType === 'B') {
+        buyAgeMonths = 0; // 新品机龄 0
+    }
+    else {
+        const age = computeAgeMonths(constants, cand.releaseDateKey);
+        buyAgeMonths = age < 0 ? 0 : age + waitMonths;
+    }
+    const sellAgeMonths = buyAgeMonths + holdingMonths;
+    if (sellAgeMonths >= threshold) {
+        return { risk: 'exceeded', exceedMonths: sellAgeMonths - threshold };
+    }
+    if (sellAgeMonths >= threshold - 12) {
+        return { risk: 'near-end' };
+    }
+    return { risk: 'normal' };
+}
+/** 系统支持期阈值(月): Mac=72, iPhone/iPad=60 */
+function getSystemSupportThreshold(categoryKey) {
+    const c = categoryKey.toLowerCase();
+    if (c.startsWith('iphone') || c.startsWith('ipad'))
+        return 60;
+    return 72; // Mac 系列 (含 Vision Pro 等)
 }
 /** 计算机龄(月) = (分析日期 - 发布日期) × 12 */
 function computeAgeMonths(constants, releaseDateKey) {
@@ -184,7 +325,20 @@ function computeAgeMonths(constants, releaseDateKey) {
             releaseDate = constants.productReleaseDates[withoutScreen];
         }
     }
-    // 模糊兜底 2: 按芯片名(最后一段)搜索其他尺寸/子品类的发布日期
+    // 模糊兜底 2: 芯片名紧凑/展开互试 (A17_Pro → A17Pro, M1_Pro → M1Pro)
+    if (!releaseDate) {
+        const compactKey = releaseDateKey.replace(/_(Pro|Max|Ultra)/g, '$1');
+        if (compactKey !== releaseDateKey) {
+            releaseDate = constants.productReleaseDates[compactKey];
+        }
+    }
+    if (!releaseDate) {
+        const expandedKey = releaseDateKey.replace(/(?<!_)(Pro|Max|Ultra)/g, '_$1');
+        if (expandedKey !== releaseDateKey) {
+            releaseDate = constants.productReleaseDates[expandedKey];
+        }
+    }
+    // 模糊兜底 3: 按芯片名(最后一段)搜索其他尺寸/子品类的发布日期
     // (如 "MacBook_Pro_14_M3Pro" 不存在, 但 "MacBook_Pro_16_M3Pro" 存在)
     if (!releaseDate) {
         const chip = releaseDateKey.split('_').pop();
@@ -251,16 +405,23 @@ function selectFrontier(points) {
 // 推荐区间截取
 // ============================================================================
 function selectRecommendationRange(frontier, params) {
-    // 截取: 买入价 ≤ 预算 且 性能 ≥ 性能地板
-    const plans = frontier.filter((p) => p.buyPrice <= params.budget && p.avgPerformance >= params.performanceFloor);
-    if (plans.length === 0) {
-        return { lowerCost: 0, upperCost: 0, plans: [] };
+    // v3.8: 取消性能地板过滤 (性能地板仅作图上参考线, 不再过滤候选)
+    // 预算内方案为主推荐, 超预算前沿方案作为参考展示(最多3个, 按买入价升序)
+    const inBudget = frontier.filter((p) => p.buyPrice <= params.budget);
+    const overBudget = frontier
+        .filter((p) => p.buyPrice > params.budget)
+        .sort((a, b) => a.buyPrice - b.buyPrice)
+        .slice(0, 3);
+    if (inBudget.length === 0) {
+        // 全部超预算: 取最接近预算的前3个作为兜底推荐
+        return { lowerCost: 0, upperCost: 0, plans: overBudget, overBudget: true };
     }
-    const costs = plans.map((p) => p.monthlyCost);
+    const costs = inBudget.map((p) => p.monthlyCost);
     return {
         lowerCost: Math.min(...costs),
         upperCost: Math.max(...costs),
-        plans: plans.sort((a, b) => a.monthlyCost - b.monthlyCost),
+        plans: inBudget.sort((a, b) => a.monthlyCost - b.monthlyCost),
+        overBudgetPlans: overBudget,
     };
 }
 // ============================================================================

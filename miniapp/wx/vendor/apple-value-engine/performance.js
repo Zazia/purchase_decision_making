@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.computePerformance = computePerformance;
+exports.computePerformanceForNewProduct = computePerformanceForNewProduct;
 exports.getChipCoefficient = getChipCoefficient;
 exports.getChipMultiCoreScore = getChipMultiCoreScore;
 exports.getCategoryFlagshipScore = getCategoryFlagshipScore;
@@ -22,11 +23,19 @@ const DEFAULT_A_CAGR = 0.15;
  * @param mCAGR M 系列 CAGR(默认 0.16)
  * @param aCAGR A 系列 CAGR(默认 0.15)
  */
+/** iPad 屏幕素质因子: 仅对iPad品类应用, 基于屏幕硬件参数客观评分 */
+function getIpadScreenFactor(category) {
+    const c = normalizeCategory(category);
+    if (c === 'ipad_pro') return 1.08;
+    if (c === 'ipad_标准') return 0.95;
+    return 1.0;
+}
 function computePerformance(constants, chipName, memoryGb, storageGb, category, holdingMonths, mCAGR = DEFAULT_M_CAGR, aCAGR = DEFAULT_A_CAGR) {
     const chipCoeff = getChipCoefficient(constants, chipName, category);
     const memWeight = getMemoryWeight(constants, category, memoryGb);
     const storageWeight = getStorageWeight(constants, category, storageGb);
-    const s0 = Math.min(1, chipCoeff * memWeight * storageWeight);
+    const screenFactor = getIpadScreenFactor(category);
+    const s0 = Math.min(1, chipCoeff * memWeight * storageWeight * screenFactor);
     // 默认使用基础 r 值(CAGR), 不自动应用代际跃升调整。
     // 跃升调整(r×1.5 / r×0.5)是对下一代新品性能预测的可选修正,
     // SKILL.md 示例均使用基础 r。调用方可通过 getEffectiveR() 获取调整后 r 再传入。
@@ -35,6 +44,40 @@ function computePerformance(constants, chipName, memoryGb, storageGb, category, 
     const sN = s0 / Math.pow(1 + r, holdingMonths / 12);
     const avgS = (s0 + sN) / 2;
     return { s0, sN, avgS, effectiveR: r };
+}
+/**
+ * 计算类型 B 新品 (等新品买新品) 的性能满足度
+ *
+ * SKILL.md 步骤 4.6: 新品为新的基准芯片, S(0) = 1.0
+ *   S(N) = 1.0 / (1 + effectiveR)^(N/12)
+ *   S̄(N) = (1.0 + S(N)) / 2
+ *
+ * effectiveR 通过 getEffectiveR 应用代际跃升调整:
+ *   - 若 nextGenChipName 已知且其代际转换在 per_generation详表_v3.8 标注为跃升/节点首发, 应用对应倍率
+ *   - 若 nextGenChipName 未提供, 使用基础 CAGR (按品类系列, 假设普通代际)
+ *
+ * @param category 品类 (用于判定 M/A 系列)
+ * @param holdingMonths 持有月数
+ * @param mCAGR M 系列 CAGR (默认 0.16)
+ * @param aCAGR A 系列 CAGR (默认 0.15)
+ * @param nextGenChipName 下一代芯片名 (如 "M6" / "A20_Pro"), 可选; 用于代际跃升识别
+ */
+function computePerformanceForNewProduct(constants, category, holdingMonths, mCAGR = DEFAULT_M_CAGR, aCAGR = DEFAULT_A_CAGR, nextGenChipName) {
+    const isMSeries = isMacCategory(category);
+    const baseR = isMSeries ? mCAGR : aCAGR;
+    // 若提供下一代芯片名, 用 getEffectiveR 识别代际跃升; 否则用基础 CAGR (普通代际假设)
+    const effectiveR = nextGenChipName
+        ? getEffectiveR(constants, nextGenChipName, mCAGR, aCAGR).r
+        : baseR;
+    const s0 = 1.0;
+    const sN = s0 / Math.pow(1 + effectiveR, holdingMonths / 12);
+    const avgS = (s0 + sN) / 2;
+    return { s0, sN, avgS, effectiveR };
+}
+/** 品类是否为 Mac 系列 (用于判定 M/A 芯片系列) */
+function isMacCategory(category) {
+    const c = normalizeCategory(category);
+    return c.startsWith('mac') || c.startsWith('imac');
 }
 /**
  * 计算芯片性能系数 = 该芯片多核跑分 / 品类旗舰芯片多核跑分
@@ -87,7 +130,7 @@ function getCategoryBenchmarkKey(category) {
         'iphone_pro': 'iPhone_iPad',
         'iphone_标准': 'iPhone_iPad',
         'ipad': 'iPhone_iPad',
-        'ipad_pro': 'iPhone_iPad',
+        'ipad_pro': 'Mac_mini_基础',
         'macbook_air': 'MacBook_Air',
         'macbook_pro': 'MacBook_Pro',
         'mac_mini': 'Mac_mini_基础',
@@ -112,6 +155,9 @@ function getStorageWeight(constants, category, storageGb) {
 /** 根据品类选择权重子表 */
 function getWeightTable(weights, category) {
     const c = normalizeCategory(category);
+    if (c === 'ipad_pro') {
+        return weights.Mac_基础 ?? {};
+    }
     if (c.startsWith('iphone') || c.startsWith('ipad')) {
         return weights.iPhone_iPad ?? {};
     }

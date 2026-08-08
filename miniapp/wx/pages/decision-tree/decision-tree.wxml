@@ -1,4 +1,16 @@
 <!-- pages/decision-tree/decision-tree.wxml -->
+<wxs module="util">
+  // 数组包含判断 (WXML 模板内无法直接调用 Array.includes)
+  function includes(arr, val) {
+    if (!arr) return false;
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i] === val) return true;
+    }
+    return false;
+  }
+  module.exports = { includes: includes };
+</wxs>
+
 <view class="container">
   <!-- 进度条 -->
   <view class="progress-bar">
@@ -12,21 +24,54 @@
   <view class="step-container {{fadeClass}}" wx:for="{{steps}}" wx:key="key" wx:if="{{index === currentStep}}">
     <view class="step-title">{{item.title}}</view>
 
-    <!-- 选项列表 -->
-    <view class="options">
-      <view
-        class="option-card"
-        wx:for="{{item.options}}"
-        wx:for-item="opt"
-        wx:key="label"
-        data-step="{{item.key}}"
-        data-value="{{opt.value}}"
-        bindtap="onSelectOption"
-      >
-        <view class="option-label">{{opt.label}}</view>
-        <view class="option-desc" wx:if="{{opt.desc}}">{{opt.desc}}</view>
+    <!-- 单选步骤: 卡片列表 -->
+    <block wx:if="{{!item.multi}}">
+      <view class="options">
+        <view
+          class="option-card"
+          wx:for="{{item.options}}"
+          wx:for-item="opt"
+          wx:key="label"
+          data-step="{{item.key}}"
+          data-value="{{opt.value}}"
+          bindtap="onSelectOption"
+        >
+          <view class="option-label">{{opt.label}}</view>
+          <view class="option-desc" wx:if="{{opt.desc}}">{{opt.desc}}</view>
+        </view>
       </view>
-    </view>
+    </block>
+
+    <!-- 多选步骤: chip 网格 + 都看看快捷项 + 下一步 -->
+    <block wx:else>
+      <view class="chips">
+        <view
+          class="chip {{util.includes(multiSelected, opt.value) ? 'chip-selected' : ''}}"
+          wx:for="{{item.options}}"
+          wx:for-item="opt"
+          wx:key="label"
+          data-step="{{item.key}}"
+          data-value="{{opt.value}}"
+          bindtap="onToggleMulti"
+        >
+          <text class="chip-label">{{opt.label}}</text>
+        </view>
+      </view>
+
+      <!-- 都看看快捷项 -->
+      <view
+        class="quick-all-card"
+        data-step="{{item.key}}"
+        bindtap="onQuickAll"
+      >
+        <text class="quick-all-text">{{item.quickAll}}</text>
+      </view>
+
+      <!-- 下一步按钮 (至少选 1 个才能点) -->
+      <view class="multi-next-wrap">
+        <view class="multi-next-btn {{canProceedMulti ? '' : 'disabled'}}" bindtap="onMultiNext">下一步</view>
+      </view>
+    </block>
 
     <!-- 不确定/帮我选 -->
     <view class="unsure-card" bindtap="onSelectUnsure">

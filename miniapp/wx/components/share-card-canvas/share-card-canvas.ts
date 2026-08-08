@@ -166,7 +166,7 @@ Component({
         // 月均成本(大字)
         ctx.fillStyle = C_PRIMARY;
         ctx.font = 'bold 80px "DM Sans", -apple-system, sans-serif';
-        const costText = `${Math.round(topPlan.monthlyCost * 10) / 10}`;
+        const costText = `${(Math.round(topPlan.monthlyCost * 100) / 100).toFixed(2)}`;
         ctx.fillText(costText, 80, cardY + 260);
 
         // 单位
@@ -247,7 +247,7 @@ Component({
       ctx.fillText('个人主体 · 非商业 · CC BY-NC 4.0 · github.com/Zazia/purchase_decision_making', 60, 1430);
     },
 
-    /** 绘制帕累托缩略图 */
+    /** 绘制帕累托缩略图 (含点位极简标注) */
     drawParetoThumbnail(
       ctx: CanvasRenderingContext2D,
       frontier: PlanPoint[],
@@ -291,14 +291,28 @@ Component({
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // 前沿点
+      // 前沿点 + 极简标注
       ctx.fillStyle = C_PRIMARY;
+      ctx.font = '20px -apple-system, "PingFang SC", sans-serif';
       sorted.forEach((p) => {
         const px = x + ((p.monthlyCost - minCost) / costRange) * w;
         const py = y + h - ((p.avgPerformance * 100 - minPerf) / perfRange) * h;
         ctx.beginPath();
         ctx.arc(px, py, 10, 0, Math.PI * 2);
         ctx.fill();
+
+        // 极简标注: chip + 持有年数 (如 "M2·3y", "A18·5y")
+        const chipLabel = p.chip || p.model.replace(/_.*$/, '');
+        const label = `${chipLabel}·${p.holdingYears}y`;
+        const labelWidth = ctx.measureText(label).width;
+        const labelX = px + 14;
+        const labelY = py - 14;
+        // 标注背景(半透明白色)
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.fillRect(labelX - 2, labelY - 15, labelWidth + 4, 22);
+        ctx.fillStyle = C_MUTED;
+        ctx.fillText(label, labelX, labelY);
+        ctx.fillStyle = C_PRIMARY;
       });
 
       // 坐标轴标签

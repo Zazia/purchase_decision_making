@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.computeMonthlyCost = computeMonthlyCost;
 exports.computeMaintenanceCost = computeMaintenanceCost;
+exports.computeMonthlyCostForWaitCandidate = computeMonthlyCostForWaitCandidate;
 exports.getCurrentNewPrice = getCurrentNewPrice;
 exports.getBuyPrice = getBuyPrice;
 const retention_js_1 = require("./retention.js");
@@ -50,6 +51,33 @@ function computeMaintenanceCost(constants, category, holdingMonths) {
     const batteryCost = batteryCount * batteryReplacement;
     const repairCost = holdingYears * annualRepair;
     return batteryCost + repairCost;
+}
+/**
+ * 类型 B/C 候选的月均成本计算
+ *
+ * 与类型 A 的差异 (SKILL.md 步骤 5.4):
+ *   - 残值 MUST NOT 施加新品发布冲击调整 (冲击已体现在买入价中, 或买入的就是新品)
+ *   - 卖出时机龄由调用方显式传入:
+ *     · 类型 B (等新品买新品): sellAgeMonths = holdingMonths (买入时为新机, 机龄 0)
+ *     · 类型 C (等新品后买降价老款): sellAgeMonths = 当前机龄 + 等待月数 + 持有月数
+ *
+ * @param sellAgeMonths 卖出时机龄 (月), 由调用方按候选类型计算
+ */
+function computeMonthlyCostForWaitCandidate(constants, category, buyPrice, holdingMonths, currentNewPrice, sellAgeMonths) {
+    const retentionRate = (0, retention_js_1.getRetentionRate)(constants.retentionCurves, category, sellAgeMonths);
+    const residual = (retentionRate / 100) * currentNewPrice;
+    const maintenanceCost = computeMaintenanceCost(constants, category, holdingMonths);
+    const monthlyCost = (buyPrice - residual + maintenanceCost) / holdingMonths;
+    return {
+        monthlyCost,
+        buyPrice,
+        residual,
+        maintenanceCost,
+        sellAgeMonths,
+        retentionRate,
+        currentNewPrice,
+        holdingMonths,
+    };
 }
 /** 品类名 → 维修成本表键名 */
 function mapCategoryToMaintenanceKey(category) {

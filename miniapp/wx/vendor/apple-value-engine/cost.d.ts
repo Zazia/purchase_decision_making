@@ -46,6 +46,18 @@ export declare function computeMonthlyCost(constants: Constants, category: strin
  */
 export declare function computeMaintenanceCost(constants: Constants, category: string, holdingMonths: number): number;
 /**
+ * 类型 B/C 候选的月均成本计算
+ *
+ * 与类型 A 的差异 (SKILL.md 步骤 5.4):
+ *   - 残值 MUST NOT 施加新品发布冲击调整 (冲击已体现在买入价中, 或买入的就是新品)
+ *   - 卖出时机龄由调用方显式传入:
+ *     · 类型 B (等新品买新品): sellAgeMonths = holdingMonths (买入时为新机, 机龄 0)
+ *     · 类型 C (等新品后买降价老款): sellAgeMonths = 当前机龄 + 等待月数 + 持有月数
+ *
+ * @param sellAgeMonths 卖出时机龄 (月), 由调用方按候选类型计算
+ */
+export declare function computeMonthlyCostForWaitCandidate(constants: Constants, category: string, buyPrice: number, holdingMonths: number, currentNewPrice: number, sellAgeMonths: number): CostBreakdown;
+/**
  * 从市场快照中提取当前同品类新品价(残值分母)
  * 优先取 新品官方价, 其次取快照 _说明 中的残值分母
  */

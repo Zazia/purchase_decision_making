@@ -281,7 +281,7 @@ describe('computeParetoFrontier', () => {
     }
   });
 
-  it('推荐区间过滤: 买入价 ≤ 预算 且 性能 ≥ 地板', () => {
+  it('推荐区间过滤: 买入价 ≤ 预算 (v3.8 取消性能地板过滤)', () => {
     const result = computeParetoFrontier(constants, {
       category: 'mac-mini',
       budget: 3000,
@@ -291,7 +291,8 @@ describe('computeParetoFrontier', () => {
     });
     for (const p of result.recommendationRange.plans) {
       expect(p.buyPrice).toBeLessThanOrEqual(3000);
-      expect(p.avgPerformance).toBeGreaterThanOrEqual(0.4);
+      // v3.8: 性能地板不再过滤候选, 仅作图上参考线
+      // 推荐区间内可能存在 avgPerformance < performanceFloor 的方案
     }
   });
 

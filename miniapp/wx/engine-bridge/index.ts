@@ -13,12 +13,15 @@
 // 因为微信小程序运行时不支持 bare import, 且 miniprogram_npm 机制需要开发者工具构建 npm 触发注册。
 // TS 编译时用 index.d.ts 做类型检查, 运行时 require 解析到 index.js。
 import { loadConstants, computeParetoFrontier } from '../vendor/apple-value-engine/index';
-import type { Constants, DecisionParams, ParetoFrontierResult } from '../vendor/apple-value-engine/index';
+import type { Constants, DecisionParams, MacroContext, ParetoFrontierResult } from '../vendor/apple-value-engine/index';
 
 // 本地快照(require 方式, 由小程序打包时注入)
 // 注意: 微信小程序运行时 require('xxx.json') 会被解析为 xxx.json.js 导致找不到模块,
 // 所以 scripts/sync-snapshot.mjs 会生成 constants.js 包装文件, 这里 require .js 版本。
-const snapshotRaw = require('../snapshot/constants.js') as Record<string, unknown>;
+// 顶部 MAY 含 MACRO_CONTEXT 字段(由维护者人工写入, 见 sync-snapshot.mjs / 任务 11.2)。
+const snapshotRaw = require('../snapshot/constants.js') as Record<string, unknown> & {
+  MACRO_CONTEXT?: MacroContext;
+};
 
 let cachedConstants: Constants | null = null;
 
@@ -41,14 +44,46 @@ export function getConstants(): Promise<Constants> {
 }
 
 /**
+ * 读取快照顶部维护者人工写入的宏观状态(MACRO_CONTEXT)。
+ *
+ * 见任务 11.2: sync-snapshot.mjs 不会自动生成此字段, 由维护者人工写入当前宏观状态。
+ * 缺省时返回 storageSuperCycleStage='none' + hasGlobalPriceHike=false,
+ * analysisMonth 回退 constants.lastUpdated 的 YYYY-MM, 保证向后兼容。
+ */
+export async function getMacroContext(): Promise<MacroContext> {
+  const constants = await getConstants();
+  const mc = snapshotRaw.MACRO_CONTEXT;
+  if (mc && typeof mc.storageSuperCycleStage === 'string' && typeof mc.hasGlobalPriceHike === 'boolean') {
+    return {
+      storageSuperCycleStage: mc.storageSuperCycleStage,
+      hasGlobalPriceHike: mc.hasGlobalPriceHike,
+      analysisMonth: typeof mc.analysisMonth === 'string' ? mc.analysisMonth : constants.lastUpdated.slice(0, 7),
+    };
+  }
+  return {
+    storageSuperCycleStage: 'none',
+    hasGlobalPriceHike: false,
+    analysisMonth: constants.lastUpdated.slice(0, 7),
+  };
+}
+
+/**
  * 调用引擎计算帕累托前沿
+ *
+ * 默认 considerWait=true, 自动注入 macroContext(从快照读取),
+ * 调用方可通过 params.considerWait=false / params.macroContext 显式覆盖。
  *
  * @param params 决策参数(品类/预算/持有期/买入时机/性能地板)
  * @returns { frontier, dominated, recommendationRange }
  */
 export async function compute(params: DecisionParams): Promise<ParetoFrontierResult> {
   const constants = await getConstants();
-  return computeParetoFrontier(constants, params);
+  const merged: DecisionParams = {
+    ...params,
+    considerWait: params.considerWait !== false ? true : false,
+    macroContext: params.macroContext ?? (await getMacroContext()),
+  };
+  return computeParetoFrontier(constants, merged);
 }
 
 /** 获取快照的 last_updated 日期(用于数据时效提示) */

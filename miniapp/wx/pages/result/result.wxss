@@ -172,6 +172,24 @@
   color: #86868F;
 }
 
+/* 候选类型徽章: 等新品后/等新品降价 (橙色) */
+.badge-wait {
+  background: #FFE9D1;
+  color: #C25E00;
+}
+
+/* 预测价小标 */
+.predict-tag {
+  display: inline-block;
+  margin-left: 6rpx;
+  padding: 0 8rpx;
+  font-size: 18rpx;
+  color: #C25E00;
+  background: #FFE9D1;
+  border-radius: 6rpx;
+  vertical-align: middle;
+}
+
 /* ============ 方案指标 ============ */
 .plan-metrics {
   display: flex;
@@ -253,6 +271,12 @@
   background: #007AFF;
 }
 
+/* 等新品方案 (类型 B/C) 浅蓝半透明 */
+.legend-wait {
+  background: #5AC8FA;
+  opacity: 0.7;
+}
+
 .legend-dominated {
   background: #C7C7CC;
   opacity: 0.5;
@@ -265,6 +289,10 @@
 
 .legend-floor {
   background: #2A8A61;
+}
+
+.legend-budget {
+  background: #FF9500;
 }
 
 /* ============ 页脚 ============ */
@@ -292,6 +320,27 @@
 
 .share-btn:active {
   opacity: 0.85;
+}
+
+/* ============ 报告入口 ============ */
+.report-entry-wrap {
+  padding: 8rpx 0 16rpx;
+  text-align: center;
+}
+
+.report-entry {
+  display: inline-block;
+  padding: 20rpx 48rpx;
+  color: #007AFF;
+  font-size: 30rpx;
+  font-weight: 500;
+  border: 2rpx solid #007AFF;
+  border-radius: 999rpx;
+  background: #FFFFFF;
+}
+
+.report-entry:active {
+  background: #E6F2FF;
 }
 
 .footer-fresh {

@@ -98,14 +98,24 @@ const result = computeParetoFrontier(constants, {
   category: 'mac-mini',      // 品类
   budget: 5000,              // 预算上限
   holdingYears: [2, 3, 4],   // 候选持有年数
-  buyTiming: 'used',         // 'new' 或 'used'
+  buyTiming: 'used',         // 'new' | 'used' | 'both'
   performanceFloor: 0.7,     // 性能地板(0-1)
+  considerWait: true,        // 是否考虑 v3.8 等新品候选(类型 B/C),默认 true
+  macroContext: {            // 宏观状态(可选,缺省时引擎按 'none'/false 处理)
+    storageSuperCycleStage: 'ongoing', // 'ongoing'|'peaking'|'easing'|'none'
+    hasGlobalPriceHike: true,          // 是否处于全球涨价潮
+    analysisMonth: '2026-08',          // 分析月(YYYY-MM)
+  },
 });
 
 // 4. result.frontier = 前沿非劣方案(按月均成本升序)
 //    result.dominated = 被支配方案
 //    result.recommendationRange = 用户偏好截取的推荐区间
+//    PlanPoint.candidateType: 'A'=现在买 / 'B'=等新品买新品 / 'C'=等新品后买降价老款
+//    PlanPoint.predictedPrice=true 表示买入价为预测值(类型 B/C),报告中需标注「预测值」
 ```
+
+> **macroContext 注入说明**:宏观状态取自 SOP 步骤 2「宏观扫描」的结果(`_分层扫描框架._L1结果` 与 `_L2判定`)。分析月接近新品发布期(≤ 90 天)且 `releaseConfidence !== 'low'` 时,引擎自动在候选中追加类型 B/C 等待方案,无需手动调用。`considerWait=false` 可显式关闭该机制(仅做现状对比)。
 
 ### 引擎路径与 SOP 文字路径的关系
 

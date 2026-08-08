@@ -1,0 +1,7 @@
+{
+  "_说明": "维护者人工维护的宏观状态文件。每次 constants.json 更新后, 维护者根据 SKILL.md 步骤2宏观扫描结果更新本文件。sync-snapshot.mjs 会将其注入 constants.js 顶部 MACRO_CONTEXT 字段, 供 engine-bridge 读取并传入引擎。",
+  "_更新依据": "constants.json 宏观因素扩展模型_v3.8._分层扫描框架._L1结果 与 _L2判定 (2026-08-02 快照)",
+  "storageSuperCycleStage": "ongoing",
+  "hasGlobalPriceHike": true,
+  "analysisMonth": "2026-08"
+}

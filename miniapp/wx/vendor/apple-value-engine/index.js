@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConstantsValidationError = exports.computeParetoFrontier = exports.getBuyPrice = exports.getCurrentNewPrice = exports.computeMaintenanceCost = exports.computeMonthlyCost = exports.getEffectiveR = exports.getStorageWeight = exports.getMemoryWeight = exports.getCategoryFlagshipScore = exports.getChipMultiCoreScore = exports.getChipCoefficient = exports.computePerformance = exports.getRetentionRate = exports.getKeyMap = exports.loadConstants = void 0;
+exports.ConstantsValidationError = exports.shouldGenerateWaitCandidates = exports.lookupImpactTimeVaryingFactor = exports.predictDiscountedOldPrice = exports.predictNewProductPrice = exports.computeWaitMonths = exports.parseReleasePlan = exports.computeParetoFrontier = exports.getBuyPrice = exports.getCurrentNewPrice = exports.computeMaintenanceCost = exports.computeMonthlyCostForWaitCandidate = exports.computeMonthlyCost = exports.getEffectiveR = exports.getStorageWeight = exports.getMemoryWeight = exports.getCategoryFlagshipScore = exports.getChipMultiCoreScore = exports.getChipCoefficient = exports.computePerformanceForNewProduct = exports.computePerformance = exports.getRetentionRate = exports.getKeyMap = exports.loadConstants = void 0;
 /**
  * apple-value-engine
  *
@@ -25,6 +25,7 @@ var retention_js_1 = require("./retention.js");
 Object.defineProperty(exports, "getRetentionRate", { enumerable: true, get: function () { return retention_js_1.getRetentionRate; } });
 var performance_js_1 = require("./performance.js");
 Object.defineProperty(exports, "computePerformance", { enumerable: true, get: function () { return performance_js_1.computePerformance; } });
+Object.defineProperty(exports, "computePerformanceForNewProduct", { enumerable: true, get: function () { return performance_js_1.computePerformanceForNewProduct; } });
 Object.defineProperty(exports, "getChipCoefficient", { enumerable: true, get: function () { return performance_js_1.getChipCoefficient; } });
 Object.defineProperty(exports, "getChipMultiCoreScore", { enumerable: true, get: function () { return performance_js_1.getChipMultiCoreScore; } });
 Object.defineProperty(exports, "getCategoryFlagshipScore", { enumerable: true, get: function () { return performance_js_1.getCategoryFlagshipScore; } });
@@ -33,11 +34,19 @@ Object.defineProperty(exports, "getStorageWeight", { enumerable: true, get: func
 Object.defineProperty(exports, "getEffectiveR", { enumerable: true, get: function () { return performance_js_1.getEffectiveR; } });
 var cost_js_1 = require("./cost.js");
 Object.defineProperty(exports, "computeMonthlyCost", { enumerable: true, get: function () { return cost_js_1.computeMonthlyCost; } });
+Object.defineProperty(exports, "computeMonthlyCostForWaitCandidate", { enumerable: true, get: function () { return cost_js_1.computeMonthlyCostForWaitCandidate; } });
 Object.defineProperty(exports, "computeMaintenanceCost", { enumerable: true, get: function () { return cost_js_1.computeMaintenanceCost; } });
 Object.defineProperty(exports, "getCurrentNewPrice", { enumerable: true, get: function () { return cost_js_1.getCurrentNewPrice; } });
 Object.defineProperty(exports, "getBuyPrice", { enumerable: true, get: function () { return cost_js_1.getBuyPrice; } });
 var pareto_js_1 = require("./pareto.js");
 Object.defineProperty(exports, "computeParetoFrontier", { enumerable: true, get: function () { return pareto_js_1.computeParetoFrontier; } });
+var release_js_1 = require("./release.js");
+Object.defineProperty(exports, "parseReleasePlan", { enumerable: true, get: function () { return release_js_1.parseReleasePlan; } });
+Object.defineProperty(exports, "computeWaitMonths", { enumerable: true, get: function () { return release_js_1.computeWaitMonths; } });
+Object.defineProperty(exports, "predictNewProductPrice", { enumerable: true, get: function () { return release_js_1.predictNewProductPrice; } });
+Object.defineProperty(exports, "predictDiscountedOldPrice", { enumerable: true, get: function () { return release_js_1.predictDiscountedOldPrice; } });
+Object.defineProperty(exports, "lookupImpactTimeVaryingFactor", { enumerable: true, get: function () { return release_js_1.lookupImpactTimeVaryingFactor; } });
+Object.defineProperty(exports, "shouldGenerateWaitCandidates", { enumerable: true, get: function () { return release_js_1.shouldGenerateWaitCandidates; } });
 var types_js_1 = require("./types.js");
 Object.defineProperty(exports, "ConstantsValidationError", { enumerable: true, get: function () { return types_js_1.ConstantsValidationError; } });
 //# sourceMappingURL=index.js.map

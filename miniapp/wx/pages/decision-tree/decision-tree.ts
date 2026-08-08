@@ -1,5 +1,6 @@
 // pages/decision-tree/decision-tree.ts
 // 5 步决策树表单: 品类 → 预算 → 持有期 → 新品/二手 → 性能地板
+// 持有期步骤为多选 (2/3/4/5 任选 N 个), 其余为单选
 
 interface StepOption {
   label: string;
@@ -11,6 +12,12 @@ interface Step {
   key: string;
   title: string;
   options: StepOption[];
+  /** 多选步骤: 点击选项切换选中态, 不自动进入下一步 */
+  multi?: boolean;
+  /** 多选步骤的「都看看」快捷项文案, 点击后默认勾选全部 */
+  quickAll?: string;
+  /** 多选步骤至少选 N 个才能下一步 */
+  minSelect?: number;
 }
 
 const STEPS: Step[] = [
@@ -40,7 +47,12 @@ const STEPS: Step[] = [
   {
     key: 'holdingYears',
     title: '打算用几年?',
+    multi: true,
+    quickAll: '都看看持有期',
+    minSelect: 1,
     options: [
+      { label: '1 年', value: 1, desc: '短期持有' },
+      { label: '1.5 年', value: 1.5, desc: '一年半' },
       { label: '2 年', value: 2 },
       { label: '3 年', value: 3 },
       { label: '4 年', value: 4 },
@@ -53,7 +65,7 @@ const STEPS: Step[] = [
     options: [
       { label: '新品', value: 'new', desc: '官方/京东自营' },
       { label: '二手', value: 'used', desc: '闲鱼/转转' },
-      { label: '都看看', value: 'used', desc: '同时对比两类' },
+      { label: '都看看', value: 'both', desc: '同时对比新品与二手' },
     ],
   },
   {
@@ -68,35 +80,59 @@ const STEPS: Step[] = [
 ];
 
 // 品类默认参数(选择「不确定」时使用)
-const DEFAULT_PARAMS: Record<string, { holdingYears: number[]; buyTiming: 'new' | 'used'; performanceFloor: number }> = {
-  'mac-mini': { holdingYears: [2, 3, 4], buyTiming: 'used', performanceFloor: 0.4 },
-  'macbook-air': { holdingYears: [2, 3, 4], buyTiming: 'used', performanceFloor: 0.4 },
-  'macbook-pro': { holdingYears: [3, 4, 5], buyTiming: 'used', performanceFloor: 0.5 },
-  'iphone': { holdingYears: [2, 3], buyTiming: 'used', performanceFloor: 0.5 },
-  'ipad': { holdingYears: [2, 3, 4], buyTiming: 'used', performanceFloor: 0.4 },
-  'imac': { holdingYears: [3, 4, 5], buyTiming: 'used', performanceFloor: 0.4 },
+const DEFAULT_PARAMS: Record<
+  string,
+  { holdingYears: number[]; buyTiming: 'new' | 'used' | 'both'; performanceFloor: number }
+> = {
+  'mac-mini': { holdingYears: [2, 3, 4], buyTiming: 'both', performanceFloor: 0.4 },
+  'macbook-air': { holdingYears: [2, 3, 4], buyTiming: 'both', performanceFloor: 0.4 },
+  'macbook-pro': { holdingYears: [3, 4, 5], buyTiming: 'both', performanceFloor: 0.5 },
+  'iphone': { holdingYears: [2, 3], buyTiming: 'both', performanceFloor: 0.5 },
+  'ipad': { holdingYears: [2, 3, 4], buyTiming: 'both', performanceFloor: 0.4 },
+  'imac': { holdingYears: [3, 4, 5], buyTiming: 'both', performanceFloor: 0.4 },
 };
+
+type SelectionValue = string | number | number[];
 
 Page({
   data: {
     steps: STEPS,
     currentStep: 0,
-    selections: {} as Record<string, string | number>,
+    selections: {} as Record<string, SelectionValue>,
     progress: 20,
     showAiHint: false,
     fadeClass: 'fade-in',
+    /** 当前多选步骤已选中的 value 数组(用于 wxml 高亮) */
+    multiSelected: [] as number[],
+    /** 当前多选步骤是否满足最少选择数 */
+    canProceedMulti: false,
   },
 
   onLoad() {
     this.setData({ fadeClass: 'fade-in' });
   },
 
-  // 选择某个选项
+  /** 进入某一步时同步多选状态到 data (供 wxml 渲染选中态) */
+  syncMultiState(stepKey: string) {
+    const step = STEPS.find((s) => s.key === stepKey);
+    if (!step || !step.multi) {
+      this.setData({ multiSelected: [], canProceedMulti: false });
+      return;
+    }
+    const sel = this.data.selections[stepKey];
+    const arr = Array.isArray(sel) ? (sel as number[]) : [];
+    const min = step.minSelect ?? 1;
+    this.setData({
+      multiSelected: arr,
+      canProceedMulti: arr.length >= min,
+    });
+  },
+
+  // 选择某个选项(单选步骤)
   onSelectOption(e: WechatMiniprogram.TouchEvent) {
     const { step, value } = e.currentTarget.dataset as { step: string; value: string | number };
     const selections = { ...this.data.selections, [step]: value };
 
-    // 埋点: 每步选择上报到本地存储
     this.trackEvent('step_select', { step, value, stepIndex: this.data.currentStep });
 
     this.setData({ selections });
@@ -107,16 +143,72 @@ Page({
     }, 250);
   },
 
+  /** 多选步骤: 切换某个选项的选中态 */
+  onToggleMulti(e: WechatMiniprogram.TouchEvent) {
+    const { step, value } = e.currentTarget.dataset as { step: string; value: number };
+    const stepDef = STEPS.find((s) => s.key === step);
+    const min = stepDef?.minSelect ?? 1;
+
+    const current = Array.isArray(this.data.selections[step])
+      ? (this.data.selections[step] as number[])
+      : [];
+    const numValue = Number(value);
+    let next: number[];
+    if (current.includes(numValue)) {
+      next = current.filter((v) => v !== numValue);
+    } else {
+      next = [...current, numValue];
+    }
+
+    const selections = { ...this.data.selections, [step]: next };
+    this.trackEvent('step_select_multi', { step, value: numValue, stepIndex: this.data.currentStep });
+    this.setData({
+      selections,
+      multiSelected: next,
+      canProceedMulti: next.length >= min,
+    });
+  },
+
+  /** 多选步骤「都看看」快捷项: 勾选全部选项 */
+  onQuickAll(e: WechatMiniprogram.TouchEvent) {
+    const { step } = e.currentTarget.dataset as { step: string };
+    const stepDef = STEPS.find((s) => s.key === step);
+    if (!stepDef) return;
+    const allValues = stepDef.options.map((o) => Number(o.value));
+    const min = stepDef.minSelect ?? 1;
+    const selections = { ...this.data.selections, [step]: allValues };
+    this.trackEvent('step_select_quick_all', { step, stepIndex: this.data.currentStep });
+    this.setData({
+      selections,
+      multiSelected: allValues,
+      canProceedMulti: allValues.length >= min,
+    });
+  },
+
+  /** 多选步骤「下一步」按钮 */
+  onMultiNext() {
+    const step = STEPS[this.data.currentStep];
+    if (!step.multi) return;
+    const min = step.minSelect ?? 1;
+    const sel = this.data.selections[step.key];
+    const arr = Array.isArray(sel) ? (sel as number[]) : [];
+    if (arr.length < min) {
+      wx.showToast({ title: `至少选 ${min} 个`, icon: 'none' });
+      return;
+    }
+    this.nextStep();
+  },
+
   // 选择「不确定/帮我选」
   onSelectUnsure() {
     const step = STEPS[this.data.currentStep];
     const category = String(this.data.selections.category ?? 'mac-mini');
     const defaults = DEFAULT_PARAMS[category] ?? DEFAULT_PARAMS['mac-mini'];
 
-    let value: string | number;
+    let value: SelectionValue;
     switch (step.key) {
       case 'holdingYears':
-        value = defaults.holdingYears.join(',');
+        value = defaults.holdingYears;
         break;
       case 'buyTiming':
         value = defaults.buyTiming;
@@ -158,6 +250,7 @@ Page({
         progress: Math.round(((next + 1) / STEPS.length) * 100),
         fadeClass: 'fade-in',
       });
+      this.syncMultiState(STEPS[next].key);
     }, 150);
   },
 
@@ -170,6 +263,7 @@ Page({
       progress: Math.round(((prev + 1) / STEPS.length) * 100),
       fadeClass: 'fade-in',
     });
+    this.syncMultiState(STEPS[prev].key);
   },
 
   // 跳转结果页
@@ -177,17 +271,24 @@ Page({
     const s = this.data.selections;
     const category = String(s.category ?? 'mac-mini');
     const budget = Number(s.budget ?? 5000);
-    const buyTiming = String(s.buyTiming ?? 'used') as 'new' | 'used';
+    const buyTiming = String(s.buyTiming ?? 'used') as 'new' | 'used' | 'both';
     const performanceFloor = Number(s.performanceFloor ?? 0.4);
 
-    // 持有期: 可能是单值或逗号分隔
-    let holdingYears: number[];
-    const hyRaw = String(s.holdingYears ?? '3');
-    if (hyRaw.includes(',')) {
-      holdingYears = hyRaw.split(',').map(Number);
-    } else {
-      holdingYears = [Number(hyRaw)];
+    // 持有期: 多选存为 number[], 不确定分支存为 number[], 兼容历史逗号字符串
+    let holdingYears: number[] = [];
+    const hy = s.holdingYears;
+    if (Array.isArray(hy)) {
+      holdingYears = (hy as number[]).map(Number).filter((n) => !isNaN(n) && n > 0);
+    } else if (typeof hy === 'string') {
+      holdingYears = hy
+        .split(',')
+        .map((x) => Number(x))
+        .filter((n) => !isNaN(n) && n > 0);
+    } else if (hy !== undefined) {
+      const n = Number(hy);
+      if (!isNaN(n) && n > 0) holdingYears = [n];
     }
+    if (holdingYears.length === 0) holdingYears = [3];
 
     // 传递给全局 + URL query
     const app = getApp();
@@ -202,7 +303,7 @@ Page({
   // 埋点: 上报到本地存储
   trackEvent(eventName: string, data: Record<string, unknown>) {
     try {
-      const log = wx.getStorageSync('decision_tree_events') as unknown[] || [];
+      const log = (wx.getStorageSync('decision_tree_events') as unknown[]) || [];
       log.push({ event: eventName, data, timestamp: Date.now() });
       wx.setStorageSync('decision_tree_events', log);
     } catch {

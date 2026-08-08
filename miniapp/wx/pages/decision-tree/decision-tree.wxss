@@ -82,6 +82,91 @@
   margin-top: 8rpx;
 }
 
+/* ============ 多选 chip ============ */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.chip {
+  flex: 0 0 auto;
+  min-width: 160rpx;
+  padding: 24rpx 36rpx;
+  border-radius: 999rpx;
+  border: 2rpx solid #D2D2D8;
+  background: #FFFFFF;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+/* 选中态: 品牌蓝填充 */
+.chip-selected {
+  background: #007AFF;
+  border-color: #007AFF;
+}
+
+.chip-selected .chip-label {
+  color: #FFFFFF;
+}
+
+.chip-label {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #1D1D1F;
+}
+
+/* 「都看看」快捷项 */
+.quick-all-card {
+  margin-top: 8rpx;
+  padding: 24rpx;
+  text-align: center;
+  border-radius: 16rpx;
+  border: 2rpx dashed #007AFF;
+  background: #E6F2FF;
+}
+
+.quick-all-card:active {
+  background: #D6EBFF;
+}
+
+.quick-all-text {
+  font-size: 28rpx;
+  color: #007AFF;
+  font-weight: 500;
+}
+
+/* 多选下一步按钮 */
+.multi-next-wrap {
+  margin-top: 32rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.multi-next-btn {
+  padding: 22rpx 96rpx;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  text-align: center;
+  background: #007AFF;
+  color: #FFFFFF;
+}
+
+.multi-next-btn:active {
+  background: #0063D4;
+}
+
+.multi-next-btn.disabled {
+  background: #C7C7CC;
+  color: #FFFFFF;
+}
+
 /* 不确定选项 */
 .unsure-card {
   margin-top: 24rpx;

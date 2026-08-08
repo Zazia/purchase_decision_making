@@ -11,6 +11,16 @@
       <view class="header-badges">
         <text class="badge badge-{{plan.buyTiming}}">{{buyTimingLabel}}</text>
         <text class="badge badge-hold">持有 {{plan.holdingYears}} 年</text>
+        <text class="badge badge-wait" wx:if="{{candidateTypeLabel}}">{{candidateTypeLabel}}</text>
+      </view>
+    </view>
+
+    <!-- 等待月数卡片 (仅类型 B/C) -->
+    <view class="wait-card" wx:if="{{waitMonths > 0}}">
+      <view class="wait-icon">⏳</view>
+      <view class="wait-content">
+        <view class="wait-title">等待 {{waitMonths}} 个月</view>
+        <view class="wait-desc">新品发布 + 上市到货后开始持有, 等待期不计入持有月数</view>
       </view>
     </view>
 
@@ -18,7 +28,7 @@
     <view class="metrics-card">
       <view class="metric-row">
         <view class="metric-cell">
-          <text class="metric-value primary">{{plan.monthlyCost}}</text>
+          <text class="metric-value primary">{{monthlyCost}}</text>
           <text class="metric-unit">元/月</text>
         </view>
         <view class="metric-cell">
@@ -33,7 +43,7 @@
       <view class="section-title">成本分解</view>
       <view class="breakdown-list">
         <view class="breakdown-row">
-          <text class="breakdown-label">买入价</text>
+          <text class="breakdown-label">买入价<text class="predict-tag" wx:if="{{predictedPrice}}">预测值</text></text>
           <text class="breakdown-value">{{plan.buyPrice}} 元</text>
         </view>
         <view class="breakdown-row">
@@ -55,7 +65,7 @@
         </view>
         <view class="breakdown-row total">
           <text class="breakdown-label">月均成本</text>
-          <text class="breakdown-value highlight">{{plan.monthlyCost}} 元/月</text>
+          <text class="breakdown-value highlight">{{monthlyCost}} 元/月</text>
         </view>
       </view>
     </view>
@@ -80,6 +90,17 @@
       </view>
       <view class="perf-note">
         性能满足度 = 芯片性能系数 × 内存权重 × 存储权重，持有期内基准芯片更新导致相对性能衰减。
+      </view>
+    </view>
+
+    <!-- 系统支持期风险卡片 -->
+    <view class="risk-card risk-{{supportRiskLevel}}" wx:if="{{supportRiskLabel}}">
+      <view class="risk-title">⚠ {{supportRiskLabel}}</view>
+      <view class="risk-desc" wx:if="{{supportRiskLevel === 'exceeded'}}">
+        持有期末已超出官方系统支持期, 可能无法获取安全更新, 新软件可能不兼容。此为风险提示, 不排除该方案。
+      </view>
+      <view class="risk-desc" wx:if="{{supportRiskLevel === 'near-end'}}">
+        持有期末接近系统支持期尾声, 建议关注后续系统更新政策。
       </view>
     </view>
 

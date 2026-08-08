@@ -43,6 +43,57 @@ export interface NewReleaseImpact {
   [k: string]: unknown;
 }
 
+// ----------------------------------------------------------------------------
+// v3.8 新品发布期相关 Constants 子结构 (中文键名保留, 由 release.ts 解析)
+// ----------------------------------------------------------------------------
+
+/** v3.8 缺货等待期模型 (嵌套于 苹果产品发布节奏._缺货等待期模型_v3.8) */
+export interface WaitPeriodModel {
+  _分品类上市到货延迟_基线?: Record<
+    string,
+    { 中位?: string; 悲观?: string; [k: string]: unknown }
+  >;
+  '_宏观产能延迟_v3.8'?: {
+    _宏观产能因子表?: Record<string, { 因子?: string; [k: string]: unknown }>;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+
+/** v3.8 发布时间预测校验 (嵌套于 苹果产品发布节奏._发布时间预测校验_v3.8) */
+export interface ReleaseTimeValidation {
+  // 键名带日期后缀 (如 _当前校验结果_2026-08-02), 解析时按前缀 _当前校验结果_ 查找
+  [resultKey: string]: Record<
+    string,
+    { 预测?: string; 实测?: string; 置信度?: string; 处理?: string; [k: string]: unknown }
+  > | unknown;
+}
+
+/** v3.8 宏观因子调整 (嵌套于 新品发布对老款冲击._宏观因子调整_v3.8) */
+export interface MacroFactorAdjustment {
+  _价格传导因子表?: Record<string, string>;
+  [k: string]: unknown;
+}
+
+/** v3.8 冲击时变曲线 (嵌套于 新品发布对老款冲击._冲击时变曲线_v3.8) */
+export interface ImpactTimeVaryingCurve {
+  [period: string]:
+    | { 残值调整因子?: number; 买入价下降因子?: number; [k: string]: unknown }
+    | string
+    | unknown;
+}
+
+/** v3.8 新品价格预测模型 (嵌套于 新品发布对老款冲击._新品价格预测模型_v3.8) */
+export interface PricePredictionModel {
+  _分品类预测涨幅表?: {
+    // 键名带日期后缀 (如 _当前值_2026-08), 解析时按前缀 _当前值_ 查找
+    [k: string]:
+      | Record<string, { 预测涨幅?: string; 中位数?: string; 依据?: string; [k: string]: unknown }>
+      | unknown;
+  };
+  [k: string]: unknown;
+}
+
 /** 维修成本 */
 export interface MaintenanceCosts {
   电池寿命周期_月: number;
@@ -96,14 +147,54 @@ export interface Constants {
   costFormula: CostFormula;
   marketSnapshots: MarketSnapshots;
   designTokens: DesignTokens;
+  // v3.8 新品发布期字段 (从 releaseRhythm / newReleaseImpact 中提取的子对象, 可选)
+  /** 缺货等待期模型 (苹果产品发布节奏._缺货等待期模型_v3.8) */
+  waitPeriodModel?: WaitPeriodModel;
+  /** 发布时间预测校验 (苹果产品发布节奏._发布时间预测校验_v3.8) */
+  releaseTimeValidation?: ReleaseTimeValidation;
+  /** 宏观因子调整 (新品发布对老款冲击._宏观因子调整_v3.8) */
+  macroFactorAdjustment?: MacroFactorAdjustment;
+  /** 冲击时变曲线 (新品发布对老款冲击._冲击时变曲线_v3.8) */
+  impactTimeVaryingCurve?: ImpactTimeVaryingCurve;
+  /** 新品价格预测模型 (新品发布对老款冲击._新品价格预测模型_v3.8) */
+  pricePredictionModel?: PricePredictionModel;
 }
 
 // ============================================================================
 // 决策参数与结果类型
 // ============================================================================
 
-/** 买入时机 */
-export type BuyTiming = 'new' | 'used';
+/** 买入时机: new=新品, used=二手, both=同时收集新品与二手候选 */
+export type BuyTiming = 'new' | 'used' | 'both';
+
+/** v3.8 宏观状态 (由调用方注入, 引擎不发起网络请求) */
+export interface MacroContext {
+  /** 存储超级周期阶段, 未触发为 'none' */
+  storageSuperCycleStage: 'ongoing' | 'peaking' | 'easing' | 'none';
+  /** 是否检测到苹果全线涨价事件 */
+  hasGlobalPriceHike: boolean;
+  /** 分析日期 (YYYY-MM), 用于计算距下次发布的月数 */
+  analysisMonth: string;
+}
+
+/** v3.8 品类发布计划 (从 constants 解析得出) */
+export interface ReleasePlan {
+  category: string;
+  /** 下次预计发布月 (YYYY-MM), 无预测时为 null */
+  nextReleaseMonth: string | null;
+  /** 发布时间预测置信度: high=已官宣/medium=同季度/low=偏离≥1季度或无信息 */
+  releaseConfidence: 'high' | 'medium' | 'low';
+  /** 上市到货延迟基线 (天), 来自 _分品类上市到货延迟_基线.中位 */
+  baselineDelayDays: number;
+  /** 上市到货延迟悲观值 (天), 来自 _分品类上市到货延迟_基线.悲观 */
+  pessimisticDelayDays: number;
+  /** 宏观产能因子 (1.0/1.5/2.0), 按 storageSuperCycleStage 查表 */
+  macroCapacityFactor: number;
+  /** 预测涨幅中位数 (如 0.12 表示 12%), 未触发宏观事件时为 0 */
+  predictedPriceHike?: number;
+  /** 该品类是否已涨价 (true 时类型 B 直接用快照官方价) */
+  hasHikeOccurred: boolean;
+}
 
 /** 决策参数 */
 export interface DecisionParams {
@@ -113,14 +204,18 @@ export interface DecisionParams {
   budget: number;
   /** 候选持有年数, 如 [2, 3, 4] */
   holdingYears: number[];
-  /** 买入时机: new=新品, used=二手 */
+  /** 买入时机: new=新品, used=二手, both=同时收集两类 */
   buyTiming: BuyTiming;
-  /** 性能地板(0-1), 用于截取推荐区间 */
+  /** 性能地板(0-1), 仅作图上参考线与推荐区间内徽章标注, 不再过滤候选 */
   performanceFloor: number;
   /** M 系列 CAGR(默认 0.16), 可注入不硬编码 */
   mSeriesCAGR?: number;
   /** A 系列 CAGR(默认 0.15), 可注入不硬编码 */
   aSeriesCAGR?: number;
+  /** 是否考虑等新品候选(默认 true, 引擎自动判断是否生成 B/C 候选) */
+  considerWait?: boolean;
+  /** 宏观状态(由调用方注入, 引擎不发起网络请求); 缺省按 none 处理 */
+  macroContext?: MacroContext;
 }
 
 /** 候选方案点(帕累托二维平面上的点) */
@@ -149,6 +244,17 @@ export interface PlanPoint {
   performanceS0: number;
   /** 持有期末性能满足度 S(N) (0-1) */
   performanceSN: number;
+  // v3.8 候选类型与等待期字段
+  /** 候选类型: A=现在买, B=等新品买新品, C=等新品后买降价老款 */
+  candidateType: 'A' | 'B' | 'C';
+  /** 等待月数 (仅类型 B/C, 含缺货延迟) */
+  waitMonths?: number;
+  /** 买入价是否为预测值 (类型 B/C 恒为 true) */
+  predictedPrice?: boolean;
+  /** 系统支持期风险标注 (来自步骤 1.6) */
+  systemSupportRisk?: 'normal' | 'near-end' | 'exceeded';
+  /** 超出系统支持期的月数 (仅 exceeded 时有值) */
+  systemSupportExceedMonths?: number;
 }
 
 /** 帕累托前沿结果 */

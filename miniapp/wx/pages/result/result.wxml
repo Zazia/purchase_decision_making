@@ -38,6 +38,7 @@
             <view class="plan-badges">
               <text class="badge badge-{{item.buyTiming}}">{{item.buyTimingLabel}}</text>
               <text class="badge badge-hold">{{item.holdingYears}}年</text>
+              <text class="badge badge-wait" wx:if="{{item.candidateBadge}}">{{item.candidateBadge}}</text>
             </view>
           </view>
           <view class="plan-metrics">
@@ -51,7 +52,7 @@
             </view>
             <view class="metric">
               <text class="metric-label">买入价</text>
-              <text class="metric-value-sm">{{item.buyPrice}}元</text>
+              <text class="metric-value-sm">{{item.buyPrice}}元<text class="predict-tag" wx:if="{{item.predictedPrice}}">预测</text></text>
             </view>
           </view>
         </view>
@@ -74,6 +75,7 @@
             <view class="plan-badges">
               <text class="badge badge-{{item.buyTiming}}">{{item.buyTimingLabel}}</text>
               <text class="badge badge-hold">{{item.holdingYears}}年</text>
+              <text class="badge badge-wait" wx:if="{{item.candidateBadge}}">{{item.candidateBadge}}</text>
             </view>
           </view>
           <view class="plan-metrics">
@@ -100,12 +102,20 @@
           <text>前沿方案</text>
         </view>
         <view class="legend-item">
+          <view class="legend-dot legend-wait"></view>
+          <text>等新品方案</text>
+        </view>
+        <view class="legend-item">
           <view class="legend-dot legend-dominated"></view>
           <text>已排除方案</text>
         </view>
         <view class="legend-item" wx:if="{{performanceFloor > 0}}">
           <view class="legend-line legend-floor"></view>
           <text>性能地板</text>
+        </view>
+        <view class="legend-item" wx:if="{{budget > 0}}">
+          <view class="legend-line legend-budget"></view>
+          <text>预算线</text>
         </view>
       </view>
       <pareto-chart
@@ -114,6 +124,7 @@
         dominated="{{dominated}}"
         recommendation-range="{{recommendationRange}}"
         performance-floor="{{performanceFloor}}"
+        budget="{{budget}}"
         bind:pointtap="onChartPointTap"
       />
     </view>
@@ -121,6 +132,11 @@
     <!-- Generate share card button -->
     <view class="share-btn-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
       <view class="share-btn" bindtap="onGenerateShareCard">生成分享卡</view>
+    </view>
+
+    <!-- 查看完整报告入口 -->
+    <view class="report-entry-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
+      <view class="report-entry" bindtap="onOpenReport">查看完整报告 ›</view>
     </view>
 
     <!-- Data freshness footer -->

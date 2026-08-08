@@ -74,6 +74,50 @@ export function computePerformance(
 }
 
 /**
+ * 计算类型 B 新品 (等新品买新品) 的性能满足度
+ *
+ * SKILL.md 步骤 4.6: 新品为新的基准芯片, S(0) = 1.0
+ *   S(N) = 1.0 / (1 + effectiveR)^(N/12)
+ *   S̄(N) = (1.0 + S(N)) / 2
+ *
+ * effectiveR 通过 getEffectiveR 应用代际跃升调整:
+ *   - 若 nextGenChipName 已知且其代际转换在 per_generation详表_v3.8 标注为跃升/节点首发, 应用对应倍率
+ *   - 若 nextGenChipName 未提供, 使用基础 CAGR (按品类系列, 假设普通代际)
+ *
+ * @param category 品类 (用于判定 M/A 系列)
+ * @param holdingMonths 持有月数
+ * @param mCAGR M 系列 CAGR (默认 0.16)
+ * @param aCAGR A 系列 CAGR (默认 0.15)
+ * @param nextGenChipName 下一代芯片名 (如 "M6" / "A20_Pro"), 可选; 用于代际跃升识别
+ */
+export function computePerformanceForNewProduct(
+  constants: Constants,
+  category: string,
+  holdingMonths: number,
+  mCAGR: number = DEFAULT_M_CAGR,
+  aCAGR: number = DEFAULT_A_CAGR,
+  nextGenChipName?: string,
+): PerformanceResult {
+  const isMSeries = isMacCategory(category);
+  const baseR = isMSeries ? mCAGR : aCAGR;
+  // 若提供下一代芯片名, 用 getEffectiveR 识别代际跃升; 否则用基础 CAGR (普通代际假设)
+  const effectiveR = nextGenChipName
+    ? getEffectiveR(constants, nextGenChipName, mCAGR, aCAGR).r
+    : baseR;
+
+  const s0 = 1.0;
+  const sN = s0 / Math.pow(1 + effectiveR, holdingMonths / 12);
+  const avgS = (s0 + sN) / 2;
+  return { s0, sN, avgS, effectiveR };
+}
+
+/** 品类是否为 Mac 系列 (用于判定 M/A 芯片系列) */
+function isMacCategory(category: string): boolean {
+  const c = normalizeCategory(category);
+  return c.startsWith('mac') || c.startsWith('imac');
+}
+
+/**
  * 计算芯片性能系数 = 该芯片多核跑分 / 品类旗舰芯片多核跑分
  */
 export function getChipCoefficient(constants: Constants, chipName: string, category: string): number {

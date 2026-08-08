@@ -21,6 +21,7 @@ export {
 } from './retention.js';
 export {
   computePerformance,
+  computePerformanceForNewProduct,
   getChipCoefficient,
   getChipMultiCoreScore,
   getCategoryFlagshipScore,
@@ -31,12 +32,21 @@ export {
 export type { PerformanceResult } from './performance.js';
 export {
   computeMonthlyCost,
+  computeMonthlyCostForWaitCandidate,
   computeMaintenanceCost,
   getCurrentNewPrice,
   getBuyPrice,
 } from './cost.js';
 export type { CostBreakdown } from './cost.js';
 export { computeParetoFrontier } from './pareto.js';
+export {
+  parseReleasePlan,
+  computeWaitMonths,
+  predictNewProductPrice,
+  predictDiscountedOldPrice,
+  lookupImpactTimeVaryingFactor,
+  shouldGenerateWaitCandidates,
+} from './release.js';
 export {
   ConstantsValidationError,
 } from './types.js';
@@ -46,6 +56,8 @@ export type {
   PlanPoint,
   ParetoFrontierResult,
   BuyTiming,
+  MacroContext,
+  ReleasePlan,
   RetentionCurves,
   ChipBenchmarks,
   ChipGenerationAssumptions,
@@ -59,4 +71,9 @@ export type {
   MarketSnapshots,
   MarketSnapshotEntry,
   DesignTokens,
+  WaitPeriodModel,
+  ReleaseTimeValidation,
+  MacroFactorAdjustment,
+  ImpactTimeVaryingCurve,
+  PricePredictionModel,
 } from './types.js';

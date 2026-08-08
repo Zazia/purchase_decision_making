@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "完整决策报告",
+  "usingComponents": {
+    "pareto-chart": "../../components/pareto-chart/pareto-chart"
+  }
+}
