@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帕累托买苹果 — 决策参数</title>
+<style>
+  :root { --brand:#007AFF; --fg:#1D1D1F; --muted:#86868F; --bg:#F5F5F7; --surface:#FFFFFF; --border:#D2D2D8; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--fg); line-height:1.6; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .card { background:var(--surface); border-radius:20px; padding:32px 24px; max-width:420px; width:100%; box-shadow:0 4px 24px rgba(29,29,31,0.08); }
+  .hero { background:linear-gradient(135deg,#007AFF,#0056CC); color:#fff; border-radius:16px; padding:24px; margin-bottom:20px; }
+  .hero h1 { font-size:22px; font-weight:700; margin-bottom:6px; }
+  .hero p { font-size:14px; opacity:.9; }
+  .section-title { font-size:15px; font-weight:600; color:var(--muted); margin-bottom:12px; }
+  .params { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+  .param { background:var(--bg); border-radius:10px; padding:12px 14px; }
+  .param-label { font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .param-value { font-size:16px; font-weight:600; color:var(--fg); }
+  .param.full { grid-column:1 / -1; }
+  .guide { border:2px dashed var(--border); border-radius:14px; padding:20px; margin-bottom:16px; background:#F0F7FF; }
+  .guide-title { font-size:16px; font-weight:700; color:var(--brand); margin-bottom:8px; }
+  .guide-text { font-size:14px; color:var(--fg); }
+  .guide-text strong { color:var(--brand); }
+  .cta { display:block; text-align:center; background:var(--brand); color:#fff; padding:14px; border-radius:999px; font-size:15px; font-weight:600; text-decoration:none; margin-top:8px; }
+  .cta:active { background:#0063D4; }
+  .footer { text-align:center; font-size:12px; color:var(--muted); margin-top:16px; }
+  .footer a { color:var(--brand); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="hero">
+    <h1>苹果购买决策分析</h1>
+    <p>用数据帮你选 · 帕累托前沿筛选</p>
+  </div>
+
+  <div class="section-title">决策参数摘要</div>
+  <div class="params" id="params"></div>
+
+  <div class="guide">
+    <div class="guide-title">查看完整分析</div>
+    <div class="guide-text">
+      在微信中搜索小程序<strong>「帕累托买苹果」</strong>，<br>
+      使用上方参数即可查看完整的购买方案、帕累托前沿图与推荐区间。
+    </div>
+  </div>
+
+  <a class="cta" href="weixin://">打开微信</a>
+
+  <div class="footer">
+    个人主体 · 非商业 · CC BY-NC 4.0 · <a href="https://github.com/Zazia/purchase_decision_making">GitHub</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  var q = {};
+  var pairs = location.search.replace(/^\?/, '').split('&');
+  for (var i = 0; i < pairs.length; i++) {
+    var kv = pairs[i].split('=');
+    if (kv.length === 2) q[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+  }
+
+  var CATEGORY_LABELS = {
+    'mac-mini': 'Mac mini',
+    'macbook-air': 'MacBook Air',
+    'macbook-pro': 'MacBook Pro',
+    'iphone': 'iPhone',
+    'ipad': 'iPad',
+    'imac': 'iMac'
+  };
+  var BT_LABELS = { 'new': '新品', 'used': '二手', 'both': '新品+二手' };
+
+  var category = q.category || 'mac-mini';
+  var budget = q.budget || '5000';
+  var buyTiming = q.buyTiming || 'used';
+  var perf = q.performanceFloor || '0.4';
+  var years = q.holdingYears || '3';
+
+  var rows = [
+    { label: '品类', value: CATEGORY_LABELS[category] || category, full: false },
+    { label: '预算', value: '¥' + budget, full: false },
+    { label: '购买时机', value: BT_LABELS[buyTiming] || buyTiming, full: false },
+    { label: '性能地板', value: (Math.round(Number(perf) * 1000) / 10) + '%', full: false },
+    { label: '持有期', value: years.split(',').join(' / ') + ' 年', full: true }
+  ];
+
+  var html = '';
+  for (var i = 0; i < rows.length; i++) {
+    html += '<div class="param' + (rows[i].full ? ' full' : '') + '">';
+    html += '<div class="param-label">' + rows[i].label + '</div>';
+    html += '<div class="param-value">' + rows[i].value + '</div>';
+    html += '</div>';
+  }
+  document.getElementById('params').innerHTML = html;
+})();
+</script>
+</body>
+</html>
