@@ -1,0 +1,37 @@
+<!-- pages/saved-list/saved-list.wxml -->
+<!-- 我的保存结果列表: 展示已缓存的结果快照, 点击回看, 长按删除 -->
+<view class="container">
+  <!-- 空态 -->
+  <view class="empty-state" wx:if="{{list.length === 0}}">
+    <view class="empty-icon">📋</view>
+    <view class="empty-text">暂无保存结果</view>
+    <view class="empty-hint">生成分享卡时会自动保存结果，去试试吧</view>
+    <view class="empty-btn" bindtap="onGoDecisionTree">去生成一份</view>
+  </view>
+
+  <!-- 结果列表 -->
+  <block wx:else>
+    <view class="list-header">共 {{list.length}} 条保存结果（最多保留 20 条）</view>
+
+    <view
+      class="result-card"
+      wx:for="{{list}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onTapItem"
+      bindlongpress="onLongPressItem"
+    >
+      <view class="card-title">{{item.headerTitle}}</view>
+      <view class="card-plan">{{item.topPlanLabel}}</view>
+      <view class="card-meta">
+        <text class="meta-budget">预算 ¥{{item.budget}}</text>
+        <text class="meta-time">{{item.savedTimeLabel}}</text>
+      </view>
+    </view>
+
+    <view class="list-tip">长按可删除某条结果</view>
+  </block>
+
+  <!-- 项目仓库链接 -->
+  <repo-footer />
+</view>

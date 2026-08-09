@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "完整决策报告",
   "usingComponents": {
-    "pareto-chart": "../../components/pareto-chart/pareto-chart"
+    "pareto-chart": "../../components/pareto-chart/pareto-chart",
+    "repo-footer": "../../components/repo-footer/repo-footer"
   }
 }

@@ -2,6 +2,8 @@
 // 5 步决策树表单: 品类 → 预算 → 持有期 → 新品/二手 → 性能地板
 // 持有期步骤为多选 (2/3/4/5 任选 N 个), 其余为单选
 
+import { getSavedCount } from '../../services/saved-results';
+
 interface StepOption {
   label: string;
   value: string | number;
@@ -48,7 +50,7 @@ const STEPS: Step[] = [
     key: 'holdingYears',
     title: '打算用几年?',
     multi: true,
-    quickAll: '都看看持有期',
+    quickAll: '都看看持有期 (推荐)',
     minSelect: 1,
     options: [
       { label: '1 年', value: 1, desc: '短期持有' },
@@ -65,7 +67,7 @@ const STEPS: Step[] = [
     options: [
       { label: '新品', value: 'new', desc: '官方/京东自营' },
       { label: '二手', value: 'used', desc: '闲鱼/转转' },
-      { label: '都看看', value: 'both', desc: '同时对比新品与二手' },
+      { label: '都看看 (推荐)', value: 'both', desc: '同时对比新品与二手' },
     ],
   },
   {
@@ -106,10 +108,22 @@ Page({
     multiSelected: [] as number[],
     /** 当前多选步骤是否满足最少选择数 */
     canProceedMulti: false,
+    /** 已保存结果数量 (第一页入口展示) */
+    savedCount: 0,
   },
 
   onLoad() {
-    this.setData({ fadeClass: 'fade-in' });
+    this.setData({ fadeClass: 'fade-in', savedCount: getSavedCount() });
+  },
+
+  /** 每次显示时刷新保存数量 (从 saved-list 返回时可能已变化) */
+  onShow() {
+    this.setData({ savedCount: getSavedCount() });
+  },
+
+  /** 跳转已保存结果列表 */
+  onViewSavedResults() {
+    wx.navigateTo({ url: '/pages/saved-list/saved-list' });
   },
 
   /** 进入某一步时同步多选状态到 data (供 wxml 渲染选中态) */
@@ -231,7 +245,7 @@ Page({
     setTimeout(() => {
       this.setData({ showAiHint: false });
       this.nextStep();
-    }, 1200);
+    }, 2600);
   },
 
   // 下一步

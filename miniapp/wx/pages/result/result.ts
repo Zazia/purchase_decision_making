@@ -2,6 +2,7 @@
 // 结果页: 调用引擎计算帕累托前沿, 结论先行展示方案列表 + 图表 + 数据时效
 
 import { compute, getDataFreshness } from '../../engine-bridge/index';
+import { getSavedResult, sortPreferredPlans } from '../../services/saved-results';
 
 /** 引擎返回的方案点(与 PlanPoint 对齐, 含 v3.8 候选类型字段) */
 interface PlanPoint {
@@ -29,6 +30,14 @@ interface PlanPoint {
   systemSupportExceedMonths?: number;
 }
 
+interface DecisionParams {
+  category: string;
+  budget: number;
+  buyTiming: 'new' | 'used' | 'both';
+  performanceFloor: number;
+  holdingYears: number[];
+}
+
 /** 用于页面展示的方案项 */
 interface PlanDisplayItem {
   key: string;
@@ -48,17 +57,19 @@ interface PlanDisplayItem {
   raw: PlanPoint;
 }
 
-interface DecisionParams {
-  category: string;
-  budget: number;
-  buyTiming: 'new' | 'used' | 'both';
-  performanceFloor: number;
-  holdingYears: number[];
-}
+const CATEGORY_LABELS: Record<string, string> = {
+  'mac-mini': 'Mac mini',
+  'macbook-air': 'MacBook Air',
+  'macbook-pro': 'MacBook Pro',
+  'iphone': 'iPhone',
+  'ipad': 'iPad',
+  'imac': 'iMac',
+};
 
 Page({
   data: {
     loading: true,
+    loadingHint: '正在计算帕累托前沿...',
     error: '' as string,
     isEmpty: false,
     relaxedHint: '',
@@ -72,13 +83,128 @@ Page({
     freshnessLevel: 'fresh' as 'fresh' | 'stale' | 'expired',
     days: 0,
     params: null as null | DecisionParams,
+    // 回看模式: 从保存结果进入时直接渲染快照, 不重算
+    isReplay: false,
+    savedId: '',
   },
 
   onLoad(query: Record<string, string>) {
+    // 回看模式: 从本地缓存读取已保存结果, 直接渲染不重算(用户可从结果页进入完整报告)
+    if (query.savedId) {
+      this.enterReplayMode(query.savedId);
+      return;
+    }
+    // 扫码场景: query.scene 是云端 _id (URL encoded), 走云函数拉 params
+    if (query.scene) {
+      const cloudId = decodeURIComponent(query.scene);
+      this.loadFromCloud(cloudId);
+      this.loadFreshness();
+      return;
+    }
+    // 转发场景: query 直接带 category/budget/..., 走 parseQuery 重算
     const params = this.parseQuery(query);
     this.setData({ params, performanceFloor: params.performanceFloor, budget: params.budget });
     this.loadResult(params);
     this.loadFreshness();
+  },
+
+  /**
+   * 扫码场景: 调云函数 share-result 的 get action 拉 params, 再走重算流程
+   * 失败 (过期/不存在/网络错) → modal 提示 + 返回上一页或首页
+   */
+  async loadFromCloud(cloudId: string) {
+    this.setData({ loading: true, loadingHint: '正在加载方案...', error: '' });
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'share-result',
+        data: { action: 'get', id: cloudId },
+      });
+      const result = res.result as
+        | { ok?: boolean; error?: string; params?: DecisionParams }
+        | undefined;
+
+      // 过期或不存在
+      if (!result || !result.ok || !result.params) {
+        const isExpired = result?.error === 'expired';
+        wx.showModal({
+          title: isExpired ? '方案已过期' : '方案不存在',
+          content: isExpired
+            ? '该分享已超过 30 天, 无法查看'
+            : '该分享记录可能已被清理, 请让对方重新生成分享',
+          showCancel: false,
+        });
+        this.navigateOut();
+        return;
+      }
+
+      // 成功 → 用 params 走现有重算流程
+      const params = result.params;
+      this.setData({
+        params,
+        performanceFloor: params.performanceFloor,
+        budget: params.budget,
+        loadingHint: '正在计算帕累托前沿...',
+      });
+      this.loadResult(params);
+    } catch (err) {
+      console.error('[result] loadFromCloud failed:', err);
+      wx.showModal({
+        title: '加载失败',
+        content: '请检查网络后重试',
+        showCancel: false,
+      });
+      this.navigateOut();
+    }
+  },
+
+  /** 返回上一页; 无上一页时 reLaunch 到首页 (decision-tree) */
+  navigateOut() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack();
+    } else {
+      wx.reLaunch({ url: '/pages/decision-tree/decision-tree' });
+    }
+  },
+
+  /** 回看模式: 从本地缓存读取已保存结果快照, 直接渲染不重算 */
+  enterReplayMode(savedId: string) {
+    const saved = getSavedResult(savedId);
+    if (!saved) {
+      wx.showModal({
+        title: '结果不存在',
+        content: '该保存结果可能已被删除，请返回列表查看其他结果',
+        showCancel: false,
+        confirmText: '返回',
+        success: () => this.navigateOut(),
+      });
+      return;
+    }
+
+    const { params, reportData, lastUpdated } = saved;
+    const frontier = reportData.frontier || [];
+    const dominated = reportData.dominated || [];
+    const recRange = reportData.recommendationRange;
+    const recKeys = new Set(
+      (recRange?.plans ?? []).map((p) => `${p.model}-${p.holdingYears}`),
+    );
+
+    this.setData({
+      loading: false,
+      isEmpty: frontier.length === 0,
+      relaxedHint: frontier.length === 0 ? '保存时无可行方案' : '',
+      plans: this.formatPlans(frontier, recKeys),
+      frontier,
+      dominated,
+      recommendationRange: recRange,
+      params,
+      performanceFloor: params.performanceFloor,
+      budget: params.budget,
+      isReplay: true,
+      savedId,
+      lastUpdated,
+      freshnessLevel: 'fresh',
+    });
   },
 
   /** 解析 URL query → DecisionParams (支持 buyTiming='both') */
@@ -284,7 +410,11 @@ Page({
         budget: params.budget,
       } as unknown as Record<string, unknown>;
     }
-    wx.navigateTo({ url: '/pages/report/report' });
+    // 回看模式带 savedId, 让 report 页复用同一份保存快照(含保存时数据日期)
+    const url = this.data.isReplay
+      ? `/pages/report/report?savedId=${this.data.savedId}`
+      : '/pages/report/report';
+    wx.navigateTo({ url });
   },
 
   /** 重试 */
@@ -294,18 +424,35 @@ Page({
     }
   },
 
-  /** 生成分享卡 → 跳转分享卡页, 推荐方案存 globalData */
+  /** 生成分享卡 → 跳转分享卡页, 组装完整 reportData 存 globalData */
   onGenerateShareCard() {
     const params = this.data.params;
     if (!params || this.data.plans.length === 0) return;
 
-    // 取推荐区间第一个方案作为分享卡主推
-    const topPlan = this.data.plans[0];
+    // 取最接近性能地板的方案作为分享卡主推(与完整报告 🥇 首选一致)
+    const recPlans = (this.data.recommendationRange?.plans ?? []) as PlanPoint[];
+    const pool: PlanPoint[] = recPlans.length > 0 ? recPlans : (this.data.frontier as PlanPoint[]);
+    const topPlanRaw = sortPreferredPlans(pool, params.performanceFloor)[0] ?? this.data.plans[0]?.raw ?? null;
+    const categoryLabel = CATEGORY_LABELS[params.category] || params.category;
+    const headerTitle = `${categoryLabel} 购买决策分析`;
+
+    // 组装完整 reportData (供 share-card 页缓存 + report 页回看)
+    const reportData = {
+      params,
+      frontier: this.data.frontier,
+      dominated: this.data.dominated,
+      recommendationRange: this.data.recommendationRange,
+      performanceFloor: params.performanceFloor,
+      budget: params.budget,
+    };
+
     const app = getApp();
     if (app.globalData) {
       app.globalData.shareCardData = {
         params,
-        topPlan: topPlan.raw,
+        reportData,
+        headerTitle,
+        topPlan: topPlanRaw,
         frontier: this.data.frontier,
       } as unknown as Record<string, unknown>;
     }

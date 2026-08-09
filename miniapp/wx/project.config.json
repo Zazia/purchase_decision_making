@@ -1,5 +1,6 @@
 {
   "miniprogramRoot": "./",
+  "cloudfunctionRoot": "cloudfunctions/",
   "projectname": "apple-value-analysis",
   "description": "苹果产品价值分析与购买决策工具",
   "appid": "wx2f00740110e78738",

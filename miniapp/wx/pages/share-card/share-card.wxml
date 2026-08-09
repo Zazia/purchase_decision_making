@@ -10,12 +10,23 @@
       top-plan="{{topPlan}}"
       frontier="{{frontier}}"
       last-updated="{{lastUpdated}}"
+      qrcode-base64="{{qrcodeBase64}}"
+      app-name="{{appName}}"
     />
   </view>
 
   <!-- 降级提示(canvas 渲染失败时) -->
   <view class="fallback-tip" wx:if="{{renderFailed}}">
     <view class="fallback-text">分享卡渲染失败，请截取上方画面分享</view>
+  </view>
+
+  <!-- 「展示我的方案」复选框: 勾选 → 图片上加小程序码 (调云函数); 不勾选 → 只显小程序名 -->
+  <view class="option-row">
+    <view class="option-label">
+      <view class="option-title">展示我的方案</view>
+      <view class="option-desc">勾选后图片上会生成小程序码，扫码即可查看本次方案</view>
+    </view>
+    <switch checked="{{showMyPlan}}" bindchange="onToggleShowMyPlan" color="#007AFF" />
   </view>
 
   <!-- 操作按钮 -->
@@ -31,9 +42,17 @@
     </button>
   </view>
 
+  <!-- 分享呼吁 -->
+  <view class="share-call">
+    帕累托买苹果是一个个人维护的开源项目，越多人使用并分享自己的成交价，我们的预测越准，请分享给更多人。
+  </view>
+
   <!-- 预览图 -->
   <view class="preview-wrap" wx:if="{{tempFilePath}}">
     <view class="preview-label">分享卡预览</view>
     <image class="preview-img" src="{{tempFilePath}}" mode="aspectFit" />
   </view>
+
+  <!-- 项目仓库链接 -->
+  <repo-footer />
 </view>

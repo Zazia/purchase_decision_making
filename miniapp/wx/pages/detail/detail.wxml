@@ -117,5 +117,8 @@
         持有期平均 = [S(0) + S(N)] ÷ 2
       </view>
     </view>
+
+    <!-- 项目仓库链接 -->
+    <repo-footer />
   </block>
 </view>

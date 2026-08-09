@@ -1,0 +1,15 @@
+/* components/repo-footer/repo-footer.wxss */
+.repo-footer {
+  text-align: center;
+  padding: 32rpx 24rpx 56rpx;
+}
+
+.repo-footer-text {
+  font-size: 22rpx;
+  color: #AEAEB2;
+  line-height: 1.6;
+}
+
+.repo-footer:active {
+  opacity: 0.6;
+}

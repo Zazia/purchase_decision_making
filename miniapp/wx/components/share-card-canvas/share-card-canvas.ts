@@ -1,6 +1,8 @@
 // components/share-card-canvas/share-card-canvas.ts
 // 分享卡 canvas 2d 离屏渲染组件: 1080×1440 竖图
-// 绘制内容: 标题 + 用户预算 + 推荐方案摘要 + 帕累托缩略图 + 小程序码占位 + 数据声明
+// 绘制内容: 标题 + 用户预算 + 推荐方案摘要 + 帕累托缩略图 + 小程序码 + 数据声明
+// 小程序码来自云函数 wx.openapi.wxacode.getUnlimited 返回的 base64, 经 base64ToArrayBuffer
+// + 写临时文件 + canvas.createImage + drawImage 绘制; 无码时降级为小程序名称文字
 
 /** 与 PlanPoint 对齐的方案点 */
 interface PlanPoint {
@@ -18,6 +20,13 @@ interface PlanPoint {
   performanceSN: number;
 }
 
+/** canvas.createImage() 返回的图片对象 (mini program Canvas 2D API) */
+interface CanvasImageLike {
+  src: string;
+  onload: (() => void) | null;
+  onerror: (() => void) | null;
+}
+
 // 设计 token
 const C_PRIMARY = '#007AFF';
 const C_BG = '#F5F5F7';
@@ -28,6 +37,16 @@ const C_BORDER = '#D2D2D8';
 const C_GRAY = '#C7C7CC';
 const C_SUCCESS = '#2A8A61';
 
+// 底部码区布局 (左对齐: 圆角矩形码框 + 右侧说明文字)
+const CODE_BOX_SIZE = 160; // 圆角矩形边长
+const CODE_INNER_SIZE = Math.round(CODE_BOX_SIZE * 0.8); // 小程序码实际尺寸 = 128, 占圆角矩形 80%
+const CODE_BOX_X = 60; // 左对齐
+const CODE_BOX_Y = 1140;
+const CODE_INNER_X = CODE_BOX_X + (CODE_BOX_SIZE - CODE_INNER_SIZE) / 2; // 76, 码在框内居中
+const CODE_INNER_Y = CODE_BOX_Y + (CODE_BOX_SIZE - CODE_INNER_SIZE) / 2; // 1156
+const CODE_TEXT_X = CODE_BOX_X + CODE_BOX_SIZE + 28; // 248, 码框右侧文字起始 x
+const CODE_BOX_CENTER_Y = CODE_BOX_Y + CODE_BOX_SIZE / 2; // 1220, 用于文字垂直对齐
+
 Component({
   properties: {
     budget: { type: Number, value: 0 },
@@ -36,6 +55,10 @@ Component({
     topPlan: { type: Object, value: null },
     frontier: { type: Array, value: [] },
     lastUpdated: { type: String, value: '' },
+    /** 小程序码 base64 (云函数返回; 空字符串 → 文字模式只显小程序名) */
+    qrcodeBase64: { type: String, value: '' },
+    /** 小程序名称 (文字模式显示) */
+    appName: { type: String, value: '帕累托买苹果' },
   },
 
   data: {
@@ -43,10 +66,26 @@ Component({
     renderFailed: false,
   },
 
+  // 实例属性 (非 data, 不参与 setData)
+  // _canvas: WechatMiniprogram.Canvas | null
+  // _qrcodeImg: Image | null  (canvas.createImage 返回的图片对象, 加载完成后用于 drawImage)
+  // _qrcodeLoading: boolean
+  // _qrcodeReadyPromise: Promise<void> | null  (供 whenQrcodeReady 等待)
+  // _pendingQrcodeBase64: string  (canvas 未就绪时缓存的 base64)
+  // _pendingQrcodeResolve: ((v: void) => void) | null  (pending promise 的 resolver)
+
   lifetimes: {
     attached() {
       // 延迟初始化, 确保组件已挂载
       setTimeout(() => this.initCanvas(), 200);
+    },
+    detached() {
+      this._canvas = null;
+      this._qrcodeImg = null;
+      this._qrcodeLoading = false;
+      this._qrcodeReadyPromise = null;
+      this._pendingQrcodeBase64 = '';
+      this._pendingQrcodeResolve = null;
     },
   },
 
@@ -55,6 +94,9 @@ Component({
       if (this.data.canvasReady) {
         this.redraw();
       }
+    },
+    'qrcodeBase64': function (val: string) {
+      this.loadQrcodeImage(val);
     },
   },
 
@@ -73,6 +115,7 @@ Component({
           }
 
           const canvas = res[0].node as WechatMiniprogram.Canvas;
+          this._canvas = canvas;
           const ctx = canvas.getContext('2d') as unknown as CanvasRenderingContext2D;
 
           // 设置像素缓冲区为 1080×1440
@@ -82,6 +125,19 @@ Component({
           try {
             this.drawCard(ctx);
             this.setData({ canvasReady: true, renderFailed: false });
+            // 处理 canvas 未就绪时 property 已就绪或 observer 已缓存 pending 的情况
+            const pendingBase64 = this._pendingQrcodeBase64;
+            if (pendingBase64 && this._pendingQrcodeResolve) {
+              const resolve = this._pendingQrcodeResolve;
+              this._pendingQrcodeBase64 = '';
+              this._pendingQrcodeResolve = null;
+              // 重新走 loadQrcodeImage, 把 pending promise 关联到真正的加载 promise
+              this.loadQrcodeImage(pendingBase64);
+              // 把 pending promise 与新 promise 串联
+              (this._qrcodeReadyPromise || Promise.resolve()).then(() => resolve());
+            } else if (this.properties.qrcodeBase64 && !this._qrcodeImg && !this._qrcodeLoading) {
+              this.loadQrcodeImage(this.properties.qrcodeBase64);
+            }
           } catch (err) {
             console.error('[share-card-canvas] Draw failed:', err);
             this.setData({ renderFailed: true });
@@ -91,24 +147,109 @@ Component({
 
     /** 重绘 */
     redraw() {
-      const query = this.createSelectorQuery();
-      query
-        .select('#share-canvas')
-        .fields({ node: true })
-        .exec((res) => {
-          if (!res || !res[0] || !res[0].node) return;
-          const canvas = res[0].node as WechatMiniprogram.Canvas;
-          const ctx = canvas.getContext('2d') as unknown as CanvasRenderingContext2D;
-          canvas.width = 1080;
-          canvas.height = 1440;
-          this.drawCard(ctx);
+      if (!this._canvas) {
+        this.initCanvas();
+        return;
+      }
+      const ctx = this._canvas.getContext('2d') as unknown as CanvasRenderingContext2D;
+      this._canvas.width = 1080;
+      this._canvas.height = 1440;
+      try {
+        this.drawCard(ctx);
+      } catch (err) {
+        console.error('[share-card-canvas] Redraw failed:', err);
+      }
+    },
+
+    /**
+     * 加载云函数返回的小程序码 base64 为 canvas Image
+     * 加载完成后触发一次重绘, 把图片绘制到 canvas
+     * 失败时静默降级为文字模式 (qrcodeImg 保持 null)
+     *
+     * 同时维护 _qrcodeReadyPromise, 供 whenQrcodeReady() 等待图片加载完成
+     */
+    loadQrcodeImage(base64: string) {
+      // 无值 → 清空已加载图片 + 重绘回文字模式, 立即 resolve
+      if (!base64) {
+        this._qrcodeImg = null;
+        this._qrcodeLoading = false;
+        this._qrcodeReadyPromise = Promise.resolve();
+        if (this.data.canvasReady) this.redraw();
+        return;
+      }
+
+      // canvas 未就绪 → 等 initCanvas 完成后再触发
+      if (!this._canvas) {
+        this._qrcodeLoading = true;
+        this._qrcodeReadyPromise = new Promise((resolve) => {
+          this._pendingQrcodeBase64 = base64;
+          this._pendingQrcodeResolve = resolve;
         });
+        return;
+      }
+
+      this._qrcodeLoading = true;
+      this._qrcodeReadyPromise = new Promise<void>((resolve) => {
+        const fs = wx.getFileSystemManager();
+        const filePath = `${wx.env.USER_DATA_PATH}/share_qrcode_${Date.now()}.jpg`;
+
+        try {
+          const buffer = wx.base64ToArrayBuffer(base64);
+          fs.writeFile({
+            filePath,
+            data: buffer,
+            encoding: 'binary',
+            success: () => {
+              const img = (this._canvas as WechatMiniprogram.Canvas).createImage();
+              img.onload = () => {
+                this._qrcodeImg = img;
+                this._qrcodeLoading = false;
+                // 清理临时文件 (图片已加载到内存, 文件可删)
+                fs.unlink({ filePath, fail: () => {} });
+                if (this.data.canvasReady) this.redraw();
+                resolve();
+              };
+              img.onerror = () => {
+                console.warn('[share-card-canvas] Qrcode image load failed');
+                this._qrcodeImg = null;
+                this._qrcodeLoading = false;
+                if (this.data.canvasReady) this.redraw();
+                resolve(); // 失败也 resolve, 让调用方继续走文字模式
+              };
+              img.src = filePath;
+            },
+            fail: (err) => {
+              console.warn('[share-card-canvas] Qrcode temp file write failed:', err);
+              this._qrcodeImg = null;
+              this._qrcodeLoading = false;
+              if (this.data.canvasReady) this.redraw();
+              resolve();
+            },
+          });
+        } catch (e) {
+          console.warn('[share-card-canvas] base64ToArrayBuffer failed:', e);
+          this._qrcodeImg = null;
+          this._qrcodeLoading = false;
+          if (this.data.canvasReady) this.redraw();
+          resolve();
+        }
+      });
+    },
+
+    /**
+     * 等待小程序码图片加载完成 (或失败/无码), 供 share-card 页在 exportImage 前调用
+     * 返回的 Promise 总会 resolve, 不会 reject (失败时降级为文字模式)
+     */
+    whenQrcodeReady(): Promise<void> {
+      return this._qrcodeReadyPromise || Promise.resolve();
     },
 
     /** 绘制分享卡 */
     drawCard(ctx: CanvasRenderingContext2D) {
       const topPlan = this.properties.topPlan as unknown as PlanPoint | null;
       const frontier = this.properties.frontier as unknown as PlanPoint[] | null;
+      const appName = this.properties.appName || '帕累托买苹果';
+      const qrcodeImg = this._qrcodeImg as unknown as CanvasImageLike | null;
 
       // ===== 1. 背景 =====
       ctx.fillStyle = C_BG;
@@ -147,7 +288,7 @@ Component({
         // 标签
         ctx.fillStyle = C_SUCCESS;
         ctx.font = '28px -apple-system, "PingFang SC", sans-serif';
-        ctx.fillText('月均成本最低方案', 80, cardY + 50);
+        ctx.fillText('推荐方案', 80, cardY + 50);
 
         // 机型名
         const modelLabel = topPlan.model
@@ -202,40 +343,59 @@ Component({
         // 图表标题
         ctx.fillStyle = C_FG;
         ctx.font = 'bold 32px -apple-system, "PingFang SC", sans-serif';
+        ctx.textAlign = 'left';
         ctx.fillText('帕累托前沿图', chartX + 40, chartY + 50);
+
+        // 图表说明 (标题下方左对齐, 浅色, 帮助理解前沿含义)
+        ctx.fillStyle = C_GRAY;
+        ctx.font = '22px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText('前沿上的点不存在性能更高且价格更低的选择', chartX + 40, chartY + 74);
 
         // 绘制缩略散点图
         this.drawParetoThumbnail(ctx, frontier, chartX + 40, chartY + 80, chartW - 80, chartH - 120);
       }
 
-      // ===== 5. 小程序码占位 =====
-      const qrY = 1150;
-      const qrSize = 180;
+      // ===== 5. 底部码区 (左对齐: 圆角矩形码框 + 右侧文字; 无码时文字左对齐) =====
+      if (qrcodeImg) {
+        // 白色圆角矩形码框 (160×160, 左对齐)
+        ctx.fillStyle = '#FFFFFF';
+        this.roundRect(ctx, CODE_BOX_X, CODE_BOX_Y, CODE_BOX_SIZE, CODE_BOX_SIZE, 20);
+        ctx.fill();
+        // 绘制小程序码图片 (128×128, 在圆角矩形内居中, 占 80%)
+        ctx.drawImage(
+          qrcodeImg as unknown as CanvasImageSource,
+          CODE_INNER_X,
+          CODE_INNER_Y,
+          CODE_INNER_SIZE,
+          CODE_INNER_SIZE,
+        );
 
-      // 占位框
-      ctx.fillStyle = C_SURFACE;
-      this.roundRect(ctx, 60, qrY, qrSize, qrSize, 16);
-      ctx.fill();
-      ctx.strokeStyle = C_BORDER;
-      ctx.lineWidth = 2;
-      this.roundRect(ctx, 60, qrY, qrSize, qrSize, 16);
-      ctx.stroke();
-
-      // 占位文字
-      ctx.fillStyle = C_MUTED;
-      ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('小程序码', 60 + qrSize / 2, qrY + qrSize / 2 + 8);
-      ctx.textAlign = 'left';
-
-      // 右侧引导文字
-      ctx.fillStyle = C_FG;
-      ctx.font = 'bold 36px -apple-system, "PingFang SC", sans-serif';
-      ctx.fillText('扫码进入小程序', 60 + qrSize + 40, qrY + 70);
-
-      ctx.fillStyle = C_MUTED;
-      ctx.font = '28px -apple-system, "PingFang SC", sans-serif';
-      ctx.fillText('输入预算, 获取你的购买方案', 60 + qrSize + 40, qrY + 120);
+        // 码框右侧文字 (左对齐, 三行: 主标题 / 小程序名 / 副标题)
+        ctx.textAlign = 'left';
+        // 主标题: 扫码查看我的方案
+        ctx.fillStyle = C_FG;
+        ctx.font = 'bold 32px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText('扫码查看我的方案', CODE_TEXT_X, CODE_BOX_CENTER_Y - 26);
+        // 小程序名
+        ctx.fillStyle = C_MUTED;
+        ctx.font = '28px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText(appName, CODE_TEXT_X, CODE_BOX_CENTER_Y + 14);
+        // 副标题
+        ctx.fillStyle = C_MUTED;
+        ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText('用数据帮你选', CODE_TEXT_X, CODE_BOX_CENTER_Y + 48);
+      } else {
+        // 文字模式: 无码框, 文字左对齐 (从 CODE_BOX_X 起始)
+        ctx.textAlign = 'left';
+        // 小程序名 (粗体大字)
+        ctx.fillStyle = C_FG;
+        ctx.font = 'bold 40px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText(appName, CODE_BOX_X, CODE_BOX_CENTER_Y - 14);
+        // 副标题
+        ctx.fillStyle = C_MUTED;
+        ctx.font = '26px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText('微信搜索小程序 · 用数据帮你选', CODE_BOX_X, CODE_BOX_CENTER_Y + 28);
+      }
 
       // ===== 6. 底部声明 =====
       ctx.fillStyle = C_MUTED;
@@ -347,24 +507,17 @@ Component({
     /** 导出图片, 返回 tempFilePath */
     exportImage(): Promise<string> {
       return new Promise((resolve, reject) => {
-        const query = this.createSelectorQuery();
-        query
-          .select('#share-canvas')
-          .fields({ node: true })
-          .exec((res) => {
-            if (!res || !res[0] || !res[0].node) {
-              reject(new Error('Canvas not found'));
-              return;
-            }
-            const canvas = res[0].node as WechatMiniprogram.Canvas;
-            wx.canvasToTempFilePath({
-              canvas: canvas,
-              fileType: 'png',
-              quality: 1,
-              success: (result) => resolve(result.tempFilePath),
-              fail: (err) => reject(err),
-            });
-          });
+        if (!this._canvas) {
+          reject(new Error('Canvas not ready'));
+          return;
+        }
+        wx.canvasToTempFilePath({
+          canvas: this._canvas as WechatMiniprogram.Canvas,
+          fileType: 'png',
+          quality: 1,
+          success: (result) => resolve(result.tempFilePath),
+          fail: (err) => reject(err),
+        });
       });
     },
   },

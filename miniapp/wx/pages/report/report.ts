@@ -3,6 +3,7 @@
 // 从 app.globalData.reportData 读取引擎结果 + 决策参数, 从 engine-bridge 读取常量元信息与宏观状态
 
 import { getConstants, getDataFreshness, getMacroContext } from '../../engine-bridge/index';
+import { getSavedResult, sortPreferredPlans, type SavedResult } from '../../services/saved-results';
 
 /** 与 PlanPoint 对齐的方案点(含 v3.8 候选类型字段) */
 interface PlanPoint {
@@ -151,12 +152,42 @@ Page({
     // 元信息
     lastUpdated: '',
     sopVersion: '',
-    // 导出
-    exportedFilePath: '',
-    hasExportedFile: false,
+    // 回看模式
+    isReplay: false,
+    replayLastUpdated: '',
   },
 
-  onLoad() {
+  onLoad(query: Record<string, string>) {
+    // 回看模式: 从缓存读取已保存的结果
+    if (query.savedId) {
+      this.enterReplayMode(query.savedId);
+      return;
+    }
+    this.loadReport();
+  },
+
+  /** 回看模式: 从缓存读取已保存的结果, 用 reportData 渲染, 跳过 loadReport */
+  enterReplayMode(savedId: string) {
+    const saved = getSavedResult(savedId);
+    if (!saved) {
+      wx.showModal({
+        title: '结果不存在',
+        content: '该保存结果可能已被删除，请返回列表查看其他结果',
+        showCancel: false,
+        confirmText: '返回',
+        success: () => wx.navigateBack(),
+      });
+      return;
+    }
+
+    // 将缓存的 reportData 写入 globalData, 复用 loadReport 渲染逻辑
+    const app = getApp();
+    if (app.globalData) {
+      app.globalData.reportData = saved.reportData as unknown as Record<string, unknown>;
+    }
+
+    // 标记回看模式, 使用保存时的数据日期
+    this.setData({ isReplay: true, replayLastUpdated: saved.lastUpdated });
     this.loadReport();
   },
 
@@ -199,7 +230,7 @@ Page({
       const alerts = this.buildAlerts(macroContext, frontier, categoryLabel);
 
       // ===== 推荐方案表 =====
-      const recommendRows = this.buildRecommendRows(recRange, frontier);
+      const recommendRows = this.buildRecommendRows(recRange, frontier, params.performanceFloor);
 
       // ===== 全候选方案表 =====
       const allCandidateRows = this.buildCandidateRows(frontier, dominated);
@@ -235,7 +266,7 @@ Page({
         macroFactors,
         confidenceRows,
         updateHints,
-        lastUpdated: freshness.lastUpdated,
+        lastUpdated: this.data.isReplay ? this.data.replayLastUpdated : freshness.lastUpdated,
         sopVersion: constants.version || '3.8',
       });
     } catch (err) {
@@ -261,14 +292,37 @@ Page({
     }
 
     const recPlans = recRange?.plans ?? [];
-    const top = recPlans[0] ?? frontier[0];
+    const pool = recPlans.length > 0 ? recPlans : frontier;
+    const top = sortPreferredPlans(pool, params.performanceFloor)[0] ?? frontier[0];
     const topModel = this.formatModelLabel(top.model);
-    const verdict = `${params.budget}元预算内，推荐方案为 ${topModel} ${top.buyTiming === 'new' ? '新品' : '二手'}，持有 ${top.holdingYears} 年`;
+    const timing = top.buyTiming === 'new' ? '新品' : '二手';
+    const holdYears = top.holdingYears;
 
-    // 摘要: 月均成本 + 性能 + 系统支持状态
+    // 预算关系: 预算内 / 略超预算(10%以内) / 超出较多(10%以上)
+    // verdict 用不同模板体现该关系
+    const budget = params.budget;
+    const buyPrice = Math.round(top.buyPrice);
+    const overRatio = budget > 0 ? (buyPrice - budget) / budget : 0;
+    let verdict: string;
+    if (overRatio <= 0) {
+      verdict = `${budget}元预算内，推荐 ${topModel} ${timing}，持有 ${holdYears} 年`;
+    } else if (overRatio <= 0.1) {
+      verdict = `略超${budget}元预算，推荐 ${topModel} ${timing}，持有 ${holdYears} 年`;
+    } else {
+      verdict = `超出${budget}元预算较多，推荐 ${topModel} ${timing}，持有 ${holdYears} 年`;
+    }
+
+    // 理由: 首选方案 = 最接近性能地板的方案
+    const floorPct = Math.round(params.performanceFloor * 1000) / 10;
+    const meetsFloor = top.avgPerformance >= params.performanceFloor;
+    const reason = meetsFloor
+      ? `该方案最接近你设定的性能地板（${floorPct}%）且满足要求，是达标方案中最经济的选择。`
+      : `当前方案均未达到性能地板（${floorPct}%），该方案性能最接近地板。`;
+
+    // 摘要: 买入价 + 月均成本 + 性能 + 系统支持状态
     const monthlyCost = (Math.round(top.monthlyCost * 100) / 100).toFixed(2);
     const perfPct = Math.round(top.avgPerformance * 1000) / 10;
-    let detail = `月均成本 ¥${monthlyCost}/月，持有期平均性能满足度 ${perfPct}%。`;
+    let detail = `${reason} 买入价 ¥${buyPrice}，月均成本 ¥${monthlyCost}/月，持有期平均性能满足度 ${perfPct}%。`;
     if (top.systemSupportRisk === 'exceeded') {
       detail += ` 持有期末超出系统支持期 ${top.systemSupportExceedMonths ?? 0} 月，需注意安全更新风险。`;
     } else if (top.systemSupportRisk === 'near-end') {
@@ -383,17 +437,19 @@ Page({
     return alerts;
   },
 
-  /** 推荐方案表: 取推荐区间内方案, 按月均成本升序 */
-  buildRecommendRows(recRange: RecommendationRange | null, frontier: PlanPoint[]): RecommendRow[] {
+  /** 推荐方案表: 取推荐区间内方案, 首选为最接近性能地板(优先达标)的方案 */
+  buildRecommendRows(recRange: RecommendationRange | null, frontier: PlanPoint[], performanceFloor: number): RecommendRow[] {
     const plans = (recRange?.plans ?? frontier).slice();
     if (plans.length === 0) return [];
 
-    const sorted = [...plans].sort((a, b) => a.monthlyCost - b.monthlyCost);
-    const minCost = sorted[0].monthlyCost;
+    // 首选: 最接近性能地板的方案(优先满足地板, 组内按与地板接近度升序; 接近度相同按月均成本升序)
+    const sorted = sortPreferredPlans(plans, performanceFloor);
+    const minCost = Math.min(...plans.map((p) => p.monthlyCost));
     const maxPerf = Math.max(...plans.map((p) => p.avgPerformance));
 
     return sorted.map((p, i) => {
       const reasons: string[] = [];
+      if (i === 0) reasons.push('最接近性能地板');
       if (p.monthlyCost === minCost) reasons.push('月均成本最低');
       if (p.avgPerformance === maxPerf) reasons.push('性能最高');
       if (p.candidateType === 'B') reasons.push('等新品发布后买入新品');
@@ -401,7 +457,7 @@ Page({
       if (p.systemSupportRisk === 'normal') reasons.push('持有期内系统支持正常');
       if (p.systemSupportRisk === 'exceeded') reasons.push(`持有期末超出支持期${p.systemSupportExceedMonths ?? 0}月`);
       if (p.systemSupportRisk === 'near-end') reasons.push('接近系统支持尾声');
-      if (reasons.length === 0) reasons.push(i === 0 ? '前沿上的方案' : '非劣方案');
+      if (reasons.length === 0) reasons.push('非劣方案');
 
       return {
         planLabel: i === 0 ? '🥇 首选' : `方案 ${i + 1}`,
@@ -595,161 +651,32 @@ Page({
     wx.navigateTo({ url: '/pages/detail/detail' });
   },
 
-  /** 导出为单文件 HTML */
-  onExportHtml() {
-    wx.showLoading({ title: '生成报告中...' });
-    try {
-      const html = this.buildExportHtml();
-      const dateStr = this.data.lastUpdated.replace(/-/g, '-');
-      const categorySlug = (this.data.headerTitle || 'report').split(' ')[0].toLowerCase();
-      const filename = `${dateStr}-${categorySlug}-决策报告.html`;
-      const filePath = `${wx.env.USER_DATA_PATH}/${filename}`;
-      const fs = wx.getFileSystemManager();
-      fs.writeFile({
-        filePath,
-        data: html,
-        encoding: 'utf8',
-        success: () => {
-          wx.hideLoading();
-          this.setData({ exportedFilePath: filePath, hasExportedFile: true });
-          wx.showModal({
-            title: '报告已保存',
-            content: `文件已保存到: ${filename}\n可点击"转发文件"分享给好友。`,
-            showCancel: false,
-            confirmText: '好的',
-          });
-        },
-        fail: (err) => {
-          wx.hideLoading();
-          wx.showToast({ title: `保存失败: ${err.errMsg || '未知错误'}`, icon: 'none' });
-        },
-      });
-    } catch (err) {
-      wx.hideLoading();
-      wx.showToast({ title: err instanceof Error ? err.message : '生成失败', icon: 'none' });
-    }
-  },
-
-  /** 转发 HTML 文件 */
-  onShareFile() {
-    if (!this.data.exportedFilePath) {
-      wx.showToast({ title: '请先导出报告', icon: 'none' });
+  /** 保存结果: 组装快照 → 存 globalData.shareCardData → 跳转 share-card 页 */
+  onSaveResult() {
+    const app = getApp();
+    const reportData = app.globalData?.reportData as unknown as ReportData | null;
+    if (!reportData || !reportData.params) {
+      wx.showToast({ title: '数据缺失，无法保存', icon: 'none' });
       return;
     }
-    wx.shareFileMessage({
-      filePath: this.data.exportedFilePath,
-      success: () => {
-        wx.showToast({ title: '已唤起转发', icon: 'success' });
-      },
-      fail: (err) => {
-        // 用户取消分享不算错误
-        if (err.errMsg && err.errMsg.includes('cancel')) return;
-        wx.showToast({ title: `转发失败: ${err.errMsg || '未知错误'}`, icon: 'none' });
-      },
-    });
-  },
 
-  /** 组装单文件 HTML(便携摘要版, 不依赖外部资源) */
-  buildExportHtml(): string {
-    const rows = this.data.allCandidateRows.map((r) => {
-      const paretoBadge = r.paretoLevel === 'frontier'
-        ? '<span class="badge success">前沿</span>'
-        : '<span class="badge error">被支配</span>';
-      const supportBadge = r.supportLevel === 'exceeded'
-        ? `<span class="badge error">${r.supportLabel}</span>`
-        : r.supportLevel === 'near-end'
-          ? `<span class="badge warning">${r.supportLabel}</span>`
-          : '<span class="badge success">正常</span>';
-      const waitBadge = r.candidateBadge
-        ? `<span class="badge warning">${r.candidateBadge}</span>`
-        : '';
-      const predictTag = r.predictedPrice ? ' <em>(预测值)</em>' : '';
-      return `<tr><td>${r.model}</td><td>${r.holdingMonths}月</td><td>¥${r.buyPrice.toLocaleString()}${predictTag}</td><td>${r.s0Pct}</td><td>${r.avgSPct}</td><td>¥${r.residual.toLocaleString()}</td><td>¥${r.monthlyCost}/月</td><td>${paretoBadge}${waitBadge ? ' ' + waitBadge : ''}</td><td>${supportBadge}</td></tr>`;
-    }).join('\n');
+    const headerTitle = this.data.headerTitle || `${reportData.params.category} 购买决策分析`;
+    const recPlans = reportData.recommendationRange?.plans ?? [];
+    const pool = recPlans.length > 0 ? recPlans : (reportData.frontier ?? []);
+    const topPlan = sortPreferredPlans(pool, reportData.performanceFloor)[0] ?? reportData.frontier?.[0] ?? null;
 
-    const kpiHtml = this.data.kpiCards.map((k) =>
-      `<div class="kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="unit">${k.unit}</div></div>`,
-    ).join('');
+    // 组装 shareCardData 供 share-card 页使用
+    if (app.globalData) {
+      app.globalData.shareCardData = {
+        params: reportData.params,
+        reportData,
+        headerTitle,
+        topPlan,
+        frontier: reportData.frontier || [],
+      };
+    }
 
-    const alertHtml = this.data.alerts.map((a) =>
-      `<div class="alert alert-${a.level}"><strong>${a.title}</strong><br>${a.desc}</div>`,
-    ).join('');
-
-    const recommendHtml = this.data.recommendRows.map((r) =>
-      `<tr><td>${r.planLabel}</td><td>${r.config}</td><td>¥${r.buyPrice.toLocaleString()}${r.predictedPrice ? ' <em>(预测值)</em>' : ''}</td><td>${r.holdingMonths}月</td><td>¥${r.monthlyCost}/月</td><td>${r.performancePct}%</td><td>${r.reason}</td></tr>`,
-    ).join('');
-
-    const macroHtml = this.data.macroFactors.map((m) =>
-      `<div class="macro"><span class="dot dot-${m.level}"></span><div><strong>${m.title}</strong><br>${m.desc}</div></div>`,
-    ).join('');
-
-    const confHtml = this.data.confidenceRows.map((c) =>
-      `<tr><td>${c.item}</td><td><span class="badge ${c.levelClass}">${c.level}</span></td><td>${c.desc}</td></tr>`,
-    ).join('');
-
-    const hintsHtml = this.data.updateHints.map((h) => `<p>• ${h}</p>`).join('');
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${this.data.headerTitle}</title>
-<style>
-:root { --brand:#007AFF; --accent:#E8F0FE; --success:#34C759; --warning:#FF9500; --error:#FF3B30; --gray:#6B7280; --dark:#1F2937; }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#F9FAFB; color:var(--dark); line-height:1.6; padding:24px; }
-.container { max-width:960px; margin:0 auto; }
-.header { background:#fff; border-radius:16px; padding:32px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-.header h1 { font-size:28px; margin-bottom:8px; }
-.header .meta { color:var(--gray); font-size:14px; }
-.conclusion { background:linear-gradient(135deg,var(--brand),#0056CC); color:#fff; border-radius:16px; padding:32px; margin-bottom:24px; }
-.conclusion h2 { font-size:18px; margin-bottom:16px; opacity:.9; }
-.conclusion .verdict { font-size:24px; font-weight:700; margin-bottom:12px; }
-.conclusion .detail { font-size:15px; opacity:.9; }
-.kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
-.kpi { background:#fff; border-radius:12px; padding:20px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-.kpi .label { font-size:12px; color:var(--gray); margin-bottom:8px; }
-.kpi .value { font-size:32px; font-weight:600; color:var(--brand); }
-.kpi .unit { font-size:14px; color:var(--gray); margin-top:4px; }
-.alert { padding:16px; border-radius:12px; margin-bottom:16px; font-size:14px; }
-.alert-warning { background:#FEF3C7; color:#92400E; }
-.alert-info { background:var(--accent); color:#1A56DB; }
-.alert-error { background:#FEE2E2; color:#991B1B; }
-.section { background:#fff; border-radius:16px; padding:32px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-.section h2 { font-size:20px; margin-bottom:20px; }
-table { width:100%; border-collapse:collapse; font-size:14px; }
-th { background:#F3F4F6; padding:12px 16px; text-align:left; font-size:13px; color:var(--gray); border-bottom:2px solid #E5E7EB; }
-td { padding:12px 16px; border-bottom:1px solid #E5E7EB; }
-tr:last-child td { border-bottom:none; }
-.badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; }
-.badge.success { background:#D1FAE5; color:#065F46; }
-.badge.warning { background:#FEF3C7; color:#92400E; }
-.badge.error { background:#FEE2E2; color:#991B1B; }
-em { color:var(--warning); font-style:normal; font-size:12px; }
-.macro { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid #F3F4F6; }
-.macro:last-child { border-bottom:none; }
-.dot { width:8px; height:8px; border-radius:50%; margin-top:8px; flex-shrink:0; }
-.dot-warning { background:var(--warning); }
-.dot-info { background:var(--brand); }
-.dot-error { background:var(--error); }
-@media (max-width:640px) { body{padding:12px;} .header{padding:20px;} .header h1{font-size:22px;} .conclusion{padding:24px;} .kpi-row{grid-template-columns:repeat(2,1fr);} table{font-size:12px;} th,td{padding:8px 10px;} }
-</style>
-</head>
-<body>
-<div class="container">
-<div class="header"><h1>${this.data.headerTitle}</h1><div class="meta">${this.data.headerMeta}</div></div>
-<div class="conclusion"><h2>结论与推荐方案</h2><div class="verdict">${this.data.conclusionVerdict}</div><div class="detail">${this.data.conclusionDetail}</div></div>
-<div class="kpi-row">${kpiHtml}</div>
-${alertHtml}
-<div class="section"><h2>推荐方案</h2><table><thead><tr><th>方案</th><th>配置</th><th>买入价</th><th>持有期</th><th>月均成本</th><th>性能满足度</th><th>推荐理由</th></tr></thead><tbody>${recommendHtml}</tbody></table></div>
-<div class="section"><h2>全部候选方案 (${this.data.allCandidateTotal})</h2><table><thead><tr><th>型号</th><th>持有期</th><th>买入价</th><th>S₀(%)</th><th>S̄(%)</th><th>期末残值</th><th>月均成本</th><th>帕累托</th><th>系统支持</th></tr></thead><tbody>${rows}</tbody></table></div>
-<div class="section"><h2>宏观因素与常量校验</h2>${macroHtml}</div>
-<div class="section"><h2>数据置信度与不确定性</h2><table><thead><tr><th>数据项</th><th>置信度</th><th>说明</th></tr></thead><tbody>${confHtml}</tbody></table></div>
-<div class="section"><h2>更新提示</h2><div style="font-size:14px;color:var(--gray);line-height:1.8;">${hintsHtml}</div></div>
-</div>
-</body>
-</html>`;
+    wx.navigateTo({ url: '/pages/share-card/share-card' });
   },
 
   /** 用户点击右上角分享 */

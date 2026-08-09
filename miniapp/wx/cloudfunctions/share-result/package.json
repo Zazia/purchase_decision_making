@@ -1,0 +1,9 @@
+{
+  "name": "share-result",
+  "version": "1.0.0",
+  "description": "保存/读取/生成小程序码: 云端 ID 模式分享卡扫码入口",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

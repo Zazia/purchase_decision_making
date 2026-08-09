@@ -13,6 +13,8 @@
   },
   "license": "CC-BY-NC-4.0",
   "devDependencies": {
-    "playwright": "^1.62.1"
+    "jsqr": "^1.4.0",
+    "playwright": "^1.62.1",
+    "qrcode-generator": "^2.0.4"
   }
 }

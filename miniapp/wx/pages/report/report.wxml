@@ -172,15 +172,17 @@
       </view>
     </view>
 
-    <!-- 导出与转发按钮 -->
-    <view class="export-wrap">
-      <view class="export-btn" bindtap="onExportHtml">导出为 HTML 文件</view>
-      <view class="share-btn {{hasExportedFile ? '' : 'btn-disabled'}}" bindtap="onShareFile">转发文件</view>
+    <!-- 保存结果按钮 (回看模式下不显示) -->
+    <view class="save-result-wrap" wx:if="{{!isReplay}}">
+      <view class="save-result-btn" bindtap="onSaveResult">保存结果</view>
     </view>
 
     <!-- 数据时效页脚 -->
     <view class="footer">
-      <text class="footer-text">数据更新于 {{lastUpdated}} · SOP v{{sopVersion}}</text>
+      <text class="footer-text">{{isReplay ? '保存时数据更新于' : '数据更新于'}} {{lastUpdated}} · SOP v{{sopVersion}}</text>
     </view>
+
+    <!-- 项目仓库链接 -->
+    <repo-footer />
   </block>
 </view>

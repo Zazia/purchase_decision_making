@@ -3,7 +3,7 @@
   <!-- Loading -->
   <view class="state-wrap" wx:if="{{loading}}">
     <view class="loading-spinner"></view>
-    <text class="state-text">正在计算帕累托前沿...</text>
+    <text class="state-text">{{loadingHint}}</text>
   </view>
 
   <!-- Error -->
@@ -127,11 +127,12 @@
         budget="{{budget}}"
         bind:pointtap="onChartPointTap"
       />
+      <view class="chart-note">前沿上的点不存在性能更高且价格更低的选择</view>
     </view>
 
     <!-- Generate share card button -->
-    <view class="share-btn-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
-      <view class="share-btn" bindtap="onGenerateShareCard">生成分享卡</view>
+    <view class="share-btn-wrap" wx:if="{{!isEmpty && plans.length > 0 && !isReplay}}">
+      <view class="share-btn" bindtap="onGenerateShareCard">保存结果</view>
     </view>
 
     <!-- 查看完整报告入口 -->
@@ -149,4 +150,7 @@
       </block>
     </view>
   </block>
+
+  <!-- 项目仓库链接 -->
+  <repo-footer />
 </view>

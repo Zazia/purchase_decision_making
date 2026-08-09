@@ -90,9 +90,12 @@ purchase_decision_making/
 │       └── tests/                 # 一致性单测 / consistency tests
 ├── miniapp/
 │   └── wx/                        # 微信原生小程序工程 / WeChat native mini-program
-│       ├── pages/                 # 决策树/结果/详情/分享卡 / decision-tree/result/detail/share-card
+│       ├── pages/                 # 决策树/结果/详情/分享卡/报告/已保存列表 / decision-tree/result/detail/share-card/report/saved-list
 │       ├── components/            # 帕累托图/分享卡canvas / pareto-chart/share-card-canvas
+│       ├── cloudfunctions/        # 云函数 / Cloud functions
+│       │   └── share-result/      # 分享结果保存/读取/小程序码生成 / share-result save/get/qrcode
 │       ├── engine-bridge/         # 引擎适配层 / engine adapter
+│       ├── services/              # 本地缓存服务 / local cache service (saved-results)
 │       ├── snapshot/              # constants.json 月更快照 / monthly snapshot
 │       └── project.config.json    # AppID: wx2f00740110e78738
 └── .gitignore
@@ -171,12 +174,16 @@ A WeChat mini-program is available, AppID: `wx2f00740110e78738`, category "Tools
 2. **结果页 / Result page**: 调用 `apple-value-engine` 计算帕累托前沿，结论先行展示非劣方案列表 + 散点图
 3. **方案详情 / Plan detail**: 点击方案卡片查看完整成本分解（买入价/残值/维修/性能满足度）
 4. **分享卡 / Share card**: 生成 1080×1440 分享图，支持保存到相册与转发
+5. **保存与回看 / Save & replay**: 生成分享卡即缓存完整结果快照，首页可查看已保存列表，点击回看完整报告
+6. **扫码查看方案 / Scan to view**: 分享卡上的小程序码携带云端 ID，扫码即可在他人小程序中复现同一决策方案（30 天有效）
 
 ### 技术架构 / Tech Architecture
 
 - **引擎复用 / Engine reuse**: 小程序通过 `workspace:*` 协议引用 `apple-value-engine`，与 skill 共用同一份帕累托算法
 - **数据快照 / Data snapshot**: `constants.json` 月更快照打包进小程序版本，结果页底部显示数据更新日期与时效分级
 - **ec-canvas 图表 / Chart**: 静态帕累托散点图，关闭 tooltip/缩放，点击点位跳详情页
+- **云开发 / Cloud development**: `share-result` 云函数提供分享结果云端存储（30 天过期）+ 小程序码生成（`wxacode.getUnlimited`），扫码即可复现方案
+- **本地缓存 / Local cache**: `services/saved-results.ts` 用 `wx.setStorageSync` 保存完整结果快照（最多 20 条），支持回看与列表管理
 - **个人主体合规 / Compliance**: 无支付、无外链、无导购字样，详见 [STANCE.md](STANCE.md)
 
 ### 本地开发 / Local Development
@@ -190,6 +197,21 @@ npm install
 # 3. 工具 → 构建 npm / Tools → Build npm
 # 4. 预览/真机调试 / Preview / Real device debug
 ```
+
+#### 云开发配置 / Cloud Development Setup
+
+分享卡的「展示我的方案」小程序码功能依赖微信云开发。未配置时分享卡会自动降级为文字模式（只显小程序名），不影响其他功能。
+
+The "show my plan" QR code on the share card relies on WeChat Cloud Development. Without configuration, the share card degrades to text-only mode (showing only the mini-program name); other features are unaffected.
+
+1. 微信开发者工具 → 云开发 → 开通，记录云环境 ID / Open Cloud Development, note the env ID
+2. 云开发 → 数据库 → 新建集合 `shared_results`，权限规则设为「仅创建者可读写」/ Create collection `shared_results`, permission "only creator can read/write"
+3. 编辑 [miniapp/wx/app.ts](miniapp/wx/app.ts) 的 `CLOUD_ENV` 常量为你的云环境 ID / Edit `CLOUD_ENV` in app.ts
+4. 右键 `cloudfunctions/share-result` → 「上传并部署：云端安装依赖」/ Right-click `cloudfunctions/share-result` → "Upload and Deploy: Install Dependencies in Cloud"
+
+> **云函数权限 / Cloud function permissions**: `wxacode.getUnlimited` 必须从小程序端触发调用，不能在云开发控制台直接测试（会报 `invalid wx openapi access_token`）。在小程序内点击「生成分享卡」即可触发。
+
+> **小程序名 / Mini-program name**: 小程序端无 API 自动获取自身名称，`appName` 集中配置在 [app.ts](miniapp/wx/app.ts) 的 `globalData.appName`，审核改名后改这一处即可全局生效。
 
 ---
 

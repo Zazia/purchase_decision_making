@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "分享卡",
   "usingComponents": {
-    "share-card-canvas": "../../components/share-card-canvas/share-card-canvas"
+    "share-card-canvas": "../../components/share-card-canvas/share-card-canvas",
+    "repo-footer": "../../components/repo-footer/repo-footer"
   }
 }

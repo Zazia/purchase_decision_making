@@ -187,6 +187,24 @@
   color: #86868F;
 }
 
+/* 查看已保存的结果入口 */
+.saved-entry {
+  margin-top: 20rpx;
+  padding: 24rpx;
+  text-align: center;
+  border-radius: 16rpx;
+  background: #F5F5F7;
+}
+
+.saved-entry:active {
+  background: #E8E8ED;
+}
+
+.saved-entry-text {
+  font-size: 28rpx;
+  color: #515154;
+}
+
 /* 导航栏 */
 .nav-bar {
   margin-top: 40rpx;

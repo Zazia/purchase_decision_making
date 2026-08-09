@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "openapi": [
+      "wxacode.getUnlimited"
+    ]
+  },
+  "memorySize": 256,
+  "timeout": 5
+}

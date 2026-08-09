@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "方案详情",
+  "navigationBarTitleText": "我的保存结果",
   "usingComponents": {
     "repo-footer": "../../components/repo-footer/repo-footer"
   }

@@ -1,0 +1,105 @@
+/* pages/saved-list/saved-list.wxss */
+/* 设计 token 对齐 constants.json design_tokens */
+
+.container {
+  min-height: 100vh;
+  background: #F5F5F7;
+  padding: 24rpx 24rpx 80rpx;
+  box-sizing: border-box;
+}
+
+/* ============ 空态 ============ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 200rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 96rpx;
+  margin-bottom: 32rpx;
+}
+
+.empty-text {
+  font-size: 34rpx;
+  color: #1D1D1F;
+  font-weight: 500;
+}
+
+.empty-hint {
+  font-size: 28rpx;
+  color: #86868F;
+  margin-top: 16rpx;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.empty-btn {
+  margin-top: 48rpx;
+  padding: 24rpx 80rpx;
+  background: #007AFF;
+  color: #FFFFFF;
+  font-size: 30rpx;
+  border-radius: 999rpx;
+}
+
+.empty-btn:active {
+  background: #0063D4;
+}
+
+/* ============ 列表 ============ */
+.list-header {
+  font-size: 26rpx;
+  color: #86868F;
+  padding: 8rpx 8rpx 24rpx;
+}
+
+.result-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.result-card:active {
+  background: #F5F5F7;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1D1D1F;
+  line-height: 1.4;
+}
+
+.card-plan {
+  font-size: 28rpx;
+  color: #007AFF;
+  margin-top: 12rpx;
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20rpx;
+}
+
+.meta-budget {
+  font-size: 26rpx;
+  color: #515154;
+}
+
+.meta-time {
+  font-size: 24rpx;
+  color: #86868F;
+}
+
+.list-tip {
+  text-align: center;
+  font-size: 24rpx;
+  color: #AEAEB2;
+  padding: 32rpx 0;
+}

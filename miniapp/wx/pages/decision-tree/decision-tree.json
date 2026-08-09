@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "购买决策引导",
-  "usingComponents": {}
+  "usingComponents": {
+    "repo-footer": "../../components/repo-footer/repo-footer"
+  }
 }

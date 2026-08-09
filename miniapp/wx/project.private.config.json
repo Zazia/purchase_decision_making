@@ -1,7 +1,19 @@
 {
   "libVersion": "3.17.1",
   "projectname": "apple-value-analysis",
-  "condition": {},
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "模拟分享卡进入",
+          "pathName": "pages/result/result",
+          "query": "category=mac-mini&budget=5000&buyTiming=both&performanceFloor=0.4&holdingYears=2,3,4",
+          "scene": null,
+          "launchMode": "default"
+        }
+      ]
+    }
+  },
   "setting": {
     "urlCheck": false,
     "coverView": true,

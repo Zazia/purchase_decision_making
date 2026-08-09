@@ -77,6 +77,15 @@
     <view class="unsure-card" bindtap="onSelectUnsure">
       <text class="unsure-text">不确定 / 帮我选</text>
     </view>
+
+    <!-- 第一页: 查看已保存的结果入口 -->
+    <view
+      class="saved-entry"
+      wx:if="{{currentStep === 0 && savedCount > 0}}"
+      bindtap="onViewSavedResults"
+    >
+      <text class="saved-entry-text">查看已保存的结果 ({{savedCount}})</text>
+    </view>
   </view>
 
   <!-- 上一步按钮 -->
@@ -86,6 +95,9 @@
 
   <!-- AI 顾问提示 -->
   <view class="ai-hint {{showAiHint ? 'show' : ''}}">
-    AI 顾问功能开发中, 已为您使用默认参数
+    AI 顾问功能开发中, 已为您使用默认参数。您可以点击下方仓库下载开源 skill 实现更多定制化功能
   </view>
+
+  <!-- 项目仓库链接 -->
+  <repo-footer />
 </view>

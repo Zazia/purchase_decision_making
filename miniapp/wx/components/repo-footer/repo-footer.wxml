@@ -1,0 +1,5 @@
+<!-- components/repo-footer/repo-footer.wxml -->
+<!-- 页面底部项目仓库链接 (浅灰小字, 点击复制) -->
+<view class="repo-footer" bindtap="onTap">
+  <text class="repo-footer-text">项目仓库 · github.com/Zazia/purchase_decision_making</text>
+</view>
