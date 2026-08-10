@@ -24,7 +24,7 @@
   <view class="option-row">
     <view class="option-label">
       <view class="option-title">展示我的方案</view>
-      <view class="option-desc">勾选后图片上会生成小程序码，扫码即可查看本次方案</view>
+      <view class="option-desc">无论是否展示小程序二维码，都可以点击分享的链接打开本次结果</view>
     </view>
     <switch checked="{{showMyPlan}}" bindchange="onToggleShowMyPlan" color="#007AFF" />
   </view>

@@ -23,19 +23,11 @@ const DEFAULT_A_CAGR = 0.15;
  * @param mCAGR M 系列 CAGR(默认 0.16)
  * @param aCAGR A 系列 CAGR(默认 0.15)
  */
-/** iPad 屏幕素质因子: 仅对iPad品类应用, 基于屏幕硬件参数客观评分 */
-function getIpadScreenFactor(category) {
-    const c = normalizeCategory(category);
-    if (c === 'ipad_pro') return 1.08;
-    if (c === 'ipad_标准') return 0.95;
-    return 1.0;
-}
 function computePerformance(constants, chipName, memoryGb, storageGb, category, holdingMonths, mCAGR = DEFAULT_M_CAGR, aCAGR = DEFAULT_A_CAGR) {
     const chipCoeff = getChipCoefficient(constants, chipName, category);
     const memWeight = getMemoryWeight(constants, category, memoryGb);
     const storageWeight = getStorageWeight(constants, category, storageGb);
-    const screenFactor = getIpadScreenFactor(category);
-    const s0 = Math.min(1, chipCoeff * memWeight * storageWeight * screenFactor);
+    const s0 = Math.min(1, chipCoeff * memWeight * storageWeight);
     // 默认使用基础 r 值(CAGR), 不自动应用代际跃升调整。
     // 跃升调整(r×1.5 / r×0.5)是对下一代新品性能预测的可选修正,
     // SKILL.md 示例均使用基础 r。调用方可通过 getEffectiveR() 获取调整后 r 再传入。
@@ -130,7 +122,7 @@ function getCategoryBenchmarkKey(category) {
         'iphone_pro': 'iPhone_iPad',
         'iphone_标准': 'iPhone_iPad',
         'ipad': 'iPhone_iPad',
-        'ipad_pro': 'Mac_mini_基础',
+        'ipad_pro': 'iPhone_iPad',
         'macbook_air': 'MacBook_Air',
         'macbook_pro': 'MacBook_Pro',
         'mac_mini': 'Mac_mini_基础',
@@ -155,9 +147,6 @@ function getStorageWeight(constants, category, storageGb) {
 /** 根据品类选择权重子表 */
 function getWeightTable(weights, category) {
     const c = normalizeCategory(category);
-    if (c === 'ipad_pro') {
-        return weights.Mac_基础 ?? {};
-    }
     if (c.startsWith('iphone') || c.startsWith('ipad')) {
         return weights.iPhone_iPad ?? {};
     }

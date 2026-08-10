@@ -23,13 +23,12 @@ function parseReleasePlan(constants, categoryKey, macroContext) {
     // 优先选 confidence 最高的子品类 (high > medium > low)
     if (!rhythm) {
         const prefix = categoryKey.toLowerCase() + '_';
-        const subKeys = Object.keys(constants.releaseRhythm || {})
-            .filter(function (k) { return !k.startsWith('_') && k.toLowerCase().startsWith(prefix); });
-        var bestConf = -1;
-        for (var _i = 0, subKeys_1 = subKeys; _i < subKeys_1.length; _i++) {
-            var sk = subKeys_1[_i];
-            var conf = lookupConfidence(constants, sk);
-            var rank = conf === 'high' ? 2 : conf === 'medium' ? 1 : 0;
+        const subKeys = Object.keys(constants.releaseRhythm ?? {})
+            .filter((k) => !k.startsWith('_') && k.toLowerCase().startsWith(prefix));
+        let bestConf = -1;
+        for (const sk of subKeys) {
+            const conf = lookupConfidence(constants, sk);
+            const rank = conf === 'high' ? 2 : conf === 'medium' ? 1 : 0;
             if (rank > bestConf) {
                 bestConf = rank;
                 resolvedCategoryKey = sk;

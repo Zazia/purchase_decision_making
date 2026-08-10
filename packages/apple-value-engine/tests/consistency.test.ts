@@ -72,11 +72,11 @@ describe('getRetentionRate', () => {
     expect(rate).toBeCloseTo(75.5, 1);
   });
 
-  it('范围外外推: 72月按48-60月斜率外推', () => {
-    // iPhone_ProMax: 48月=42, 60月=32, 斜率=(32-42)/12=-0.833/月
-    // 72月 = 32 + (-0.833)×12 = 22, 保底3%
+  it('范围外外推: 72月按指数衰减外推(v3.9)', () => {
+    // iPhone_ProMax: 60月=32, floor=3, half_life=24
+    // R(72) = 3 + (32-3) × 0.5^((72-60)/24) = 3 + 29 × 0.5^0.5 ≈ 23.5
     const rate = getRetentionRate(constants.retentionCurves, 'iPhone_ProMax', 72);
-    expect(rate).toBeCloseTo(22, 0);
+    expect(rate).toBeCloseTo(23.5, 1);
   });
 
   it('保值率不低于 3% 保底', () => {
@@ -173,23 +173,23 @@ describe('computeMonthlyCost', () => {
     constants = loadConstants(constantsJson);
   });
 
-  it('constants.json 示例: Mac mini M2 二手, 买入2400, 持24月, 月均≈72元', () => {
+  it('constants.json 示例: Mac mini M2 二手, 买入2400, 持24月(v3.9.1曲线修订+指数衰减)', () => {
     // 示例: 买入价2400, 当前机龄42月, 持24月→卖出66月
-    // Mac_mini 保值率: 60月=18%(查表), 48月=25%, 48-60月斜率=(18-25)/12=-0.583/月
-    // 66月 = 18 + (-0.583)×6 = 14.5%
-    // 残值 = 5999 × 14.5% = 870
+    // Mac_mini: 60月=35%(v3.9.1修订), floor=5, half_life=24 (v3.9 指数衰减外推)
+    // R(66) = 5 + (35-5) × 0.5^((66-60)/24) = 5 + 30 × 0.8409 ≈ 30.23%
+    // 残值 = 5999 × 30.23% ≈ 1814
     // 维修 = Mac_mini无电池 + 100/年×2 = 200
-    // 月均 = (2400 - 870 + 200) / 24 = 72.08
+    // 月均 = (2400 - 1814 + 200) / 24 ≈ 32.8
     const cost = computeMonthlyCost(constants, 'Mac_mini', 2400, 42, 24, 5999);
-    expect(cost.retentionRate).toBeCloseTo(14.5, 1);
-    expect(cost.residual).toBeCloseTo(870, 0);
+    expect(cost.retentionRate).toBeCloseTo(30.23, 1);
+    expect(cost.residual).toBeCloseTo(1813, 0);
     expect(cost.maintenanceCost).toBe(200);
-    expect(cost.monthlyCost).toBeCloseTo(72.08, 1);
+    expect(cost.monthlyCost).toBeCloseTo(32.8, 1);
   });
 
   it('月均成本误差 ≤ 0.5 元', () => {
     const cost = computeMonthlyCost(constants, 'Mac_mini', 2400, 42, 24, 5999);
-    expect(Math.abs(cost.monthlyCost - 72.08)).toBeLessThan(0.5);
+    expect(Math.abs(cost.monthlyCost - 32.77)).toBeLessThan(0.5);
   });
 
   it('spec 示例: mac-mini 二手 2700, 持3年, 保值率0.42, 新品4499, 维修200/年', () => {

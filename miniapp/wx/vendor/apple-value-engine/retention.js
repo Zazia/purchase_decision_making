@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRetentionRate = getRetentionRate;
+/** 默认外推参数(常量中未指定时使用) */
+const DEFAULT_FLOOR = 3;
+const DEFAULT_HALF_LIFE = 24;
 /**
  * 查询某品类在指定月数的保值率(%)
  * @param curves 保值率曲线表
@@ -23,7 +26,10 @@ function getRetentionRate(curves, category, months) {
     if (!curve) {
         throw new Error(`Retention curve not found for category: ${category}`);
     }
-    // 解析月数并排序
+    // 读取外推参数(非数字键, 不参与插值点)
+    const floor = readParam(curve, '_floor', DEFAULT_FLOOR);
+    const halfLife = readParam(curve, '_half_life_months', DEFAULT_HALF_LIFE);
+    // 解析月数并排序(过滤掉非数字键如 _floor / _half_life_months)
     const points = Object.entries(curve)
         .map(([k, v]) => ({ month: Number(k), rate: Number(v) }))
         .filter((p) => !Number.isNaN(p.month) && !Number.isNaN(p.rate))
@@ -35,16 +41,13 @@ function getRetentionRate(curves, category, months) {
     if (months <= points[0].month) {
         return clampRate(points[0].rate);
     }
-    // 高于最大月数: 按末段斜率外推
+    // 高于最大月数: 指数衰减外推(v3.9)
+    // R(t) = floor + (R(last) - floor) × 0.5^((t - last_month) / half_life)
     const last = points[points.length - 1];
     if (months >= last.month) {
-        if (points.length >= 2) {
-            const prev = points[points.length - 2];
-            const slope = (last.rate - prev.rate) / (last.month - prev.month);
-            const extrapolated = last.rate + slope * (months - last.month);
-            return clampRate(extrapolated);
-        }
-        return clampRate(last.rate);
+        const decay = Math.pow(0.5, (months - last.month) / halfLife);
+        const extrapolated = floor + (last.rate - floor) * decay;
+        return clampRate(extrapolated);
     }
     // 范围内: 线性插值
     for (let i = 0; i < points.length - 1; i++) {
@@ -57,6 +60,15 @@ function getRetentionRate(curves, category, months) {
         }
     }
     return clampRate(last.rate);
+}
+/**
+ * 从曲线对象读取外推参数(数字), 缺失或无效时返回默认值
+ * curve 类型为 Record<number, number>, 但 JSON 运行时键为 string, 需类型断言访问
+ */
+function readParam(curve, key, defaultValue) {
+    const raw = curve[key];
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : defaultValue;
 }
 /** 保值率保底 3%, 上限 100% */
 function clampRate(rate) {

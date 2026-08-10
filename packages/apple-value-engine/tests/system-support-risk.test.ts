@@ -98,8 +98,11 @@ describe('system-support-risk', () => {
     const iphoneAll = [...iphoneResult.frontier, ...iphoneResult.dominated];
     const macExceeded = macAll.filter((p) => p.systemSupportRisk === 'exceeded').length;
     const iphoneExceeded = iphoneAll.filter((p) => p.systemSupportRisk === 'exceeded').length;
-    // iPhone 阈值更低 (60 vs 72), exceeded 数量应 ≥ Mac
-    expect(iphoneExceeded).toBeGreaterThanOrEqual(macExceeded);
+    // iPhone 阈值更低 (60 vs 72), exceeded 比例应 ≥ Mac
+    // 注: 用比例而非绝对数量, 因候选机型数量可能不同(如 Mac_mini 补充了更多二手条目)
+    const macExceededRatio = macExceeded / macAll.length;
+    const iphoneExceededRatio = iphoneExceeded / iphoneAll.length;
+    expect(iphoneExceededRatio).toBeGreaterThanOrEqual(macExceededRatio);
   });
 
   it('normal 时 systemSupportExceedMonths 为 undefined', () => {

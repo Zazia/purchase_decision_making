@@ -406,22 +406,16 @@ function selectFrontier(points) {
 // ============================================================================
 function selectRecommendationRange(frontier, params) {
     // v3.8: 取消性能地板过滤 (性能地板仅作图上参考线, 不再过滤候选)
-    // 预算内方案为主推荐, 超预算前沿方案作为参考展示(最多3个, 按买入价升序)
-    const inBudget = frontier.filter((p) => p.buyPrice <= params.budget);
-    const overBudget = frontier
-        .filter((p) => p.buyPrice > params.budget)
-        .sort((a, b) => a.buyPrice - b.buyPrice)
-        .slice(0, 3);
-    if (inBudget.length === 0) {
-        // 全部超预算: 取最接近预算的前3个作为兜底推荐
-        return { lowerCost: 0, upperCost: 0, plans: overBudget, overBudget: true };
+    // 仅保留买入价 ≤ 预算 硬约束
+    const plans = frontier.filter((p) => p.buyPrice <= params.budget);
+    if (plans.length === 0) {
+        return { lowerCost: 0, upperCost: 0, plans: [] };
     }
-    const costs = inBudget.map((p) => p.monthlyCost);
+    const costs = plans.map((p) => p.monthlyCost);
     return {
         lowerCost: Math.min(...costs),
         upperCost: Math.max(...costs),
-        plans: inBudget.sort((a, b) => a.monthlyCost - b.monthlyCost),
-        overBudgetPlans: overBudget,
+        plans: plans.sort((a, b) => a.monthlyCost - b.monthlyCost),
     };
 }
 // ============================================================================

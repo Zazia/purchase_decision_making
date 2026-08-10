@@ -258,10 +258,6 @@ export interface ParetoFrontierResult {
         upperCost: number;
         /** 推荐区间内的方案 */
         plans: PlanPoint[];
-        /** 超预算的前沿参考方案(最多3个, 按买入价升序) */
-        overBudgetPlans?: PlanPoint[];
-        /** 是否全部超预算(兜底模式) */
-        overBudget?: boolean;
     };
 }
 /** 常量校验错误 */
