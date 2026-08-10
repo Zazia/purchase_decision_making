@@ -42,7 +42,9 @@
 - 「重算 → 切换视图」需要在同一页面内做「原始版/用户修改版」切换，独立页面会引入页面栈跳转成本；
 - 状态管理服务 `services/scheme-editor-state.ts` 仍是独立模块，只持有纯数据与撤销栈，不耦合页面。
 
-**编辑态数据流**：`view` 模式数据 = result 页原始 `frontier`/`dominated`/`recommendationRange`；进入 `edit` 模式时，从 `scheme-editor-state` 加载/初始化 `EditedPlanPoint[]`；「重新生成」调用 `engine-bridge.recomputeFromEditedPlans` → 回写 result 页 `data` 的 `userModified` 副本 + 切到 `userModified` 视图。
+**编辑器表头布局**：不显示「手动修改方案」标题。左侧放「← 返回」图标按钮，右侧放「↩ 撤销」图标按钮（仅 `canUndo` 时可见），中间放「重算报告」和「导出长图」两个功能按钮。「上传分享」不在表头出现——上传分享留到用户回到结果页后点击「保存结果」时的分享卡界面中。
+
+**编辑态数据流**：`view` 模式数据 = result 页原始 `frontier`/`dominated`/`recommendationRange`；进入 `edit` 模式时，从 `scheme-editor-state` 加载/初始化 `EditedPlanPoint[]`；「重算报告」调用 `engine-bridge.recomputeFromEditedPlans` → 回写 result 页 `data` 的 `userModified` 副本 + 切到 `userModified` 视图。
 
 **备选方案**：独立 `pages/scheme-editor/` + `globalData` 传方案集——否决，多一层序列化且重算回传要再走一次 `globalData`，徒增复杂度。
 
@@ -50,7 +52,7 @@
 
 **决策**：`scheme-editor-state` 维护一个 `history: EditorSnapshot[]` 数组 + `cursor` 指针。每次编辑 push 一个完整 `EditorSnapshot`（含全部 `EditedPlanPoint` + 分组状态）。撤销 = `cursor--` 并恢复该快照。自动保存 = 每次 push 后 `wx.setStorageSync('scheme_editor_draft_<resultKey>', snapshot)`，与 `saved-results` 的 key 前缀隔离。
 
-**为何快照式而非命令式（记录每个操作）**：编辑动作类型多（改价/渠道/排除/暂不考虑/新增/删除/恢复），命令式 undo 需要为每类动作写逆操作，易漏且难测。快照式用空间换正确性，单快照 < 50KB（与 `saved-results` 单条预估一致），20 步撤销 < 1MB，在 `wx.setStorageSync` 单 key 1MB 限制内。若担心超限，可限制 history 上限为 30 步、超出时丢弃最旧。
+**为何快照式而非命令式（记录每个操作）**：编辑动作类型多（改价/渠道/排除/移到末尾/条件筛选/新增/删除/恢复），命令式 undo 需要为每类动作写逆操作，易漏且难测。快照式用空间换正确性，单快照 < 50KB（与 `saved-results` 单条预估一致），20 步撤销 < 1MB，在 `wx.setStorageSync` 单 key 1MB 限制内。若担心超限，可限制 history 上限为 30 步、超出时丢弃最旧。
 
 **draft key 与 result 关联**：`resultKey = ${category}-${budget}-${holdingYears.join(',')}-${buyTiming}-${performanceFloor}`（与 `buildSharePath` 同款参数指纹）。同一组决策参数的编辑草稿复用一个 draft；不同参数互不干扰。回看模式（`savedId`）的 draft key 额外带 `savedId`，避免覆盖实时计算场景的草稿。
 
@@ -102,7 +104,44 @@
 
 **决策**：result 页 `data` 增加 `original: { frontier, dominated, recommendationRange }` 与 `userModified: { ... } | null` 两份，加 `viewMode: 'original' | 'userModified'`。`pareto-chart` 与方案列表绑定到 `viewMode` 选中的那份。报告页通过 `globalData.reportData` 接收当前 `viewMode` 的数据，并在顶部根据来源渲染「基于用户输入价」标注。
 
+**用户修改版保存也走分享卡流程**：用户修改版回到结果页后，点击「保存结果」时调用 `onGenerateShareCard` 而非直接 `saveResult`。`onGenerateShareCard` 需判断 `viewMode`，若为 `userModified` 则将 `userModified` 数据写入 `globalData.shareCardData`，并附带 `isUserModified: true` 标记。share-card 页据此标注「基于用户输入价」。这样用户修改版与原始版的保存/分享体验完全一致。
+
 **为何不替换原数据**：spec 要求「用户 MUST 能在原始版与用户修改版之间切换查看」；替换会丢失原始版，需要重新跑引擎（成本高且可能与快照时效漂移）。
+
+### D7: 条件筛选面板取代硬编码批量排除按钮
+
+**决策**：将原来的两个硬编码按钮（「排除 8G 内存」「排除持有期 > 3 年」）替换为一组完整的「条件筛选」面板，放在方案列表上方。面板包含以下维度的复选框筛选：
+
+| 维度 | 数据来源 | 筛选方式 |
+|------|---------|----------|
+| 芯片 | `point.chip` 去重 | 复选框，列出所有出现的芯片名 |
+| 内存 | `point.memoryGb` 或从 model 解析 | 复选框，如 8G / 16G / 24G |
+| 存储 | 从 model 解析（如 256G / 512G / 1T） | 复选框 |
+| 持有期 | `point.holdingYears` 去重 | 复选框，如 1年 / 2年 / 3年 |
+| 系列 | 从 model 或 categoryKey 解析子系列 | 复选框，如 iPhone / Plus / Pro / Pro Max |
+| 前沿 | 引擎原始计算时的 frontier vs dominated | 复选框：「前沿选项」/「非前沿选项」|
+| 价格 | `point.buyPrice` 范围 | 区间输入（最低价、最高价） |
+
+**交互规则**：
+- 默认全部勾选（不筛除任何方案）
+- 取消某个选项的勾选 → 对应方案标记 `deferred=true`，移到末尾「暂不考虑」分组
+- 重新勾选 → 对应方案恢复到主列表（`deferred=false`）
+- 所有筛选操作记入撤销栈
+
+**系列解析逻辑**：从 `model` 字符串中提取子系列名。iPhone 品类：匹配 Pro Max / Pro / Plus / SE / 无后缀(标准版)。iPad 品类：匹配 Air / Pro / mini / 无后缀。Mac 品类：使用 `categoryKey` 本身（Mac_mini / MacBook_Air / MacBook_Pro 等）。解析函数封装在 `scheme-editor-state.ts` 中供筛选面板与表格渲染共用。
+
+**为何用 `deferred` 而非 `excluded`**：`excluded` 语义为「用户明确排除，不参与重算但保留在原位（灰显）」；条件筛选的语义更接近「暂时不看」，放到末尾折叠区更合适。用户仍可在暂不考虑分组中恢复。
+
+### D8: 渠道选项区分新品/二手 + 补全渠道 + ￥符号
+
+**决策**：
+1. **买入价输入**：去掉「买入价」文字标签，在 input 前加「￥」符号作为前缀。
+2. **渠道选项**：去掉「渠道」文字标签和「快照价」选项。渠道列表扩充为：`['闲鱼', '转转', '京东', '淘宝', '拼多多', '爱回收', '官方旗舰店', '其他']`。
+3. **新品/二手默认渠道**：根据 `buyTiming` 区分——新品默认填「京东」，后方自动出现「国补」勾选框；二手默认填「闲鱼」。
+4. **「其他」自定义输入**：选择「其他」后，自动出现一个文本输入框（带下划线样式）供用户自行填写渠道名，填写内容存入 `channel` 字段。
+5. **「暂不考虑」→「移到末尾」**：操作按钮文案从「暂不考虑」改为「移到末尾」，语义和技术实现（`deferred=true`）不变。
+
+**为何去掉「快照价」**：原设计中「快照价」表示用户未修改渠道，但用户对此概念不理解。改为按新品/二手自动填入合理默认值，语义更清晰。引擎侧不关心渠道字段，渠道仅供展示和影子库记录用。
 
 ## Risks / Trade-offs
 

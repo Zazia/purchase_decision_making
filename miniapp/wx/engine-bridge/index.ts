@@ -12,8 +12,8 @@
 // 用相对路径 import 替代 bare import 'apple-value-engine',
 // 因为微信小程序运行时不支持 bare import, 且 miniprogram_npm 机制需要开发者工具构建 npm 触发注册。
 // TS 编译时用 index.d.ts 做类型检查, 运行时 require 解析到 index.js。
-import { loadConstants, computeParetoFrontier } from '../vendor/apple-value-engine/index';
-import type { Constants, DecisionParams, MacroContext, ParetoFrontierResult } from '../vendor/apple-value-engine/index';
+import { loadConstants, computeParetoFrontier, recomputeFrontierFromPoints } from '../vendor/apple-value-engine/index';
+import type { Constants, DecisionParams, MacroContext, ParetoFrontierResult, EditedPlanPoint } from '../vendor/apple-value-engine/index';
 
 // 本地快照(require 方式, 由小程序打包时注入)
 // 注意: 微信小程序运行时 require('xxx.json') 会被解析为 xxx.json.js 导致找不到模块,
@@ -86,10 +86,48 @@ export async function compute(params: DecisionParams): Promise<ParetoFrontierRes
   return computeParetoFrontier(constants, merged);
 }
 
+/**
+ * 按用户编辑后的方案集重算帕累托前沿
+ *
+ * 与 compute() 的差异: 不重新从 constants 市场快照提取候选,
+ * 而是在 editedPoints 上做帕累托筛选与推荐区间截取。
+ * 透传 mSeriesCAGR / aSeriesCAGR (缺省走引擎默认), 不需要 macroContext
+ * (重算不涉及类型 B/C 候选生成, 用户编辑的是已有方案)。
+ *
+ * @param params 决策参数 (用于推荐区间截取与 CAGR 透传)
+ * @param editedPoints 用户编辑后的方案集
+ * @returns { frontier, dominated, recommendationRange }
+ */
+export async function recomputeFromEditedPlans(
+  params: DecisionParams,
+  editedPoints: EditedPlanPoint[],
+): Promise<ParetoFrontierResult> {
+  const constants = await getConstants();
+  return recomputeFrontierFromPoints(constants, params, editedPoints);
+}
+
 /** 获取快照的 last_updated 日期(用于数据时效提示) */
 export async function getSnapshotDate(): Promise<string> {
   const constants = await getConstants();
   return constants.lastUpdated;
+}
+
+/**
+ * 获取已知芯片名列表 (从 constants.chipBenchmarks 提取)
+ * 用于编辑器新增自定义方案时的芯片下拉选择
+ */
+export async function getKnownChips(): Promise<string[]> {
+  const constants = await getConstants();
+  const chips: string[] = [];
+  const benchmarks = constants.chipBenchmarks as Record<string, Record<string, unknown> | undefined>;
+  if (benchmarks) {
+    for (const category of Object.values(benchmarks)) {
+      if (category && typeof category === 'object') {
+        chips.push(...Object.keys(category));
+      }
+    }
+  }
+  return chips;
 }
 
 /**

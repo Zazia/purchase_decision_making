@@ -26,6 +26,7 @@ interface PlanPoint {
   predictedPrice?: boolean;
   systemSupportRisk?: 'normal' | 'near-end' | 'exceeded';
   systemSupportExceedMonths?: number;
+  source?: 'original' | 'edited' | 'custom';
 }
 
 interface RecommendationRange {
@@ -160,18 +161,30 @@ Component({
       // 按 candidateType 拆分前沿点 (不 round 坐标, 避免点位重叠导致点击失效)
       const typeAData = frontier
         .filter((p) => p.candidateType !== 'B' && p.candidateType !== 'C')
-        .map((p) => ({
-          name: this.formatPointName(p),
-          value: [p.monthlyCost, p.avgPerformance * 100, p.buyPrice, p],
-        }));
+        .map((p) => {
+          const item: any = {
+            name: this.formatPointName(p),
+            value: [p.monthlyCost, p.avgPerformance * 100, p.buyPrice, p],
+          };
+          if (p.source === 'edited' || p.source === 'custom') {
+            item.itemStyle = { color: C_PRIMARY, borderColor: '#FF9500', borderWidth: 2 };
+          }
+          return item;
+        });
       const typeBCData = frontier
         .filter((p) => p.candidateType === 'B' || p.candidateType === 'C')
-        .map((p) => ({
-          name: this.formatPointName(p),
-          value: [p.monthlyCost, p.avgPerformance * 100, p.buyPrice, p],
-          // 类型 B 三角形, 类型 C 菱形
-          symbol: p.candidateType === 'B' ? 'triangle' : 'diamond',
-        }));
+        .map((p) => {
+          const item: any = {
+            name: this.formatPointName(p),
+            value: [p.monthlyCost, p.avgPerformance * 100, p.buyPrice, p],
+            // 类型 B 三角形, 类型 C 菱形
+            symbol: p.candidateType === 'B' ? 'triangle' : 'diamond',
+          };
+          if (p.source === 'edited' || p.source === 'custom') {
+            item.itemStyle = { color: C_WAIT, opacity: 0.7, borderColor: '#FF9500', borderWidth: 2 };
+          }
+          return item;
+        });
 
       // 被支配数据(灰显 + 细描边让位置可见)
       const dominatedData = dominated.map((p) => ({

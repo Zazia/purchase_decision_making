@@ -14,8 +14,160 @@
 
   <!-- Result -->
   <block wx:else>
-    <!-- Empty with fallback -->
-    <view class="empty-card" wx:if="{{isEmpty}}">
+    <!-- 编辑模式 (manual-scheme-editor) -->
+    <block wx:if="{{editorMode === 'edit'}}">
+      <view class="editor-header">
+        <view class="editor-back-btn" bindtap="onExitEditor">‹ 返回</view>
+        <text class="editor-title">手动修改方案</text>
+        <view class="editor-header-actions">
+          <view class="editor-undo-btn" wx:if="{{canUndo}}" bindtap="onEditorUndo">撤销</view>
+          <view class="editor-export-btn" bindtap="onEditorExport">导出长图</view>
+          <view class="editor-upload-btn" bindtap="uploadPriceIntake">上传分享</view>
+          <view class="editor-recompute-btn" bindtap="onEditorRecompute">重新生成</view>
+        </view>
+      </view>
+
+      <view class="editor-content">
+        <!-- 批量排除快捷按钮 -->
+        <view class="editor-batch-actions">
+          <view class="batch-btn" data-action="exclude8G" bindtap="onEditorBatchExclude">排除 8G 内存</view>
+          <view class="batch-btn" data-action="excludeLongHold" bindtap="onEditorBatchExclude">排除持有期 > 3 年</view>
+        </view>
+
+        <!-- 主列表方案表格 -->
+        <view class="editor-table">
+          <view class="editor-row {{item.excluded ? 'excluded' : ''}}" wx:for="{{editorMainPoints}}" wx:key="rowId">
+            <view class="editor-row-header">
+              <view class="editor-row-info">
+                <text class="editor-model">{{item.model}}</text>
+                <text class="editor-tag tag-custom" wx:if="{{item.source === 'custom'}}">自添加</text>
+                <text class="editor-tag tag-edited" wx:if="{{item.source === 'edited'}}">已改价</text>
+                <text class="editor-tag tag-excluded" wx:if="{{item.excluded}}">已排除</text>
+              </view>
+              <view class="editor-row-meta">
+                <text>{{item.buyTiming === 'new' ? '新品' : '二手'}} · {{item.holdingYears}}年</text>
+              </view>
+            </view>
+
+            <view class="editor-row-fields">
+              <!-- 买入价 (可编辑) -->
+              <view class="field-group">
+                <text class="field-label">买入价</text>
+                <input
+                  class="price-input {{editorPriceErrors[item.rowId] ? 'error' : ''}}"
+                  type="digit"
+                  value="{{item.editedBuyPrice || item.buyPrice}}"
+                  data-row-id="{{item.rowId}}"
+                  bindinput="onEditorPriceChange"
+                />
+                <text class="field-error" wx:if="{{editorPriceErrors[item.rowId]}}">{{editorPriceErrors[item.rowId]}}</text>
+              </view>
+
+              <!-- 渠道 picker -->
+              <view class="field-group">
+                <text class="field-label">渠道</text>
+                <picker
+                  mode="selector"
+                  range="{{editorChannels}}"
+                  data-row-id="{{item.rowId}}"
+                  bindchange="onEditorChannelChange"
+                >
+                  <view class="picker-text">{{item.channel || '快照价'}}</view>
+                </picker>
+              </view>
+
+              <!-- 国补勾选 (仅渠道=京东国补时显示) -->
+              <view class="field-group" wx:if="{{item.channel === '京东国补'}}">
+                <view class="subsidy-toggle {{item.useSubsidy ? 'active' : ''}}" data-row-id="{{item.rowId}}" bindtap="onEditorSubsidyToggle">
+                  <text>{{item.useSubsidy ? '✓ 使用国补' : '使用国补'}}</text>
+                </view>
+              </view>
+            </view>
+
+            <view class="editor-row-actions">
+              <view class="action-btn exclude-btn {{item.excluded ? 'active' : ''}}" data-row-id="{{item.rowId}}" bindtap="onEditorExcludeToggle">
+                {{item.excluded ? '✓ 已排除' : '排除'}}
+              </view>
+              <view class="action-btn defer-btn" data-row-id="{{item.rowId}}" bindtap="onEditorDefer">暂不考虑</view>
+              <view class="action-btn delete-btn" wx:if="{{item.source === 'custom'}}" data-row-id="{{item.rowId}}" bindtap="onEditorDeletePlan">删除</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 新增自定义方案入口 -->
+        <view class="add-plan-entry" bindtap="onEditorShowAddForm" wx:if="{{!editorShowAddForm}}">+ 新增自定义方案</view>
+
+        <!-- 新增自定义方案表单 -->
+        <view class="add-plan-form" wx:if="{{editorShowAddForm}}">
+          <view class="form-title">新增自定义方案</view>
+          <view class="form-row">
+            <text class="form-label">机型名</text>
+            <input class="form-input" type="text" placeholder="如 M2 Mac mini" data-field="model" bindinput="onEditorAddFormField" />
+          </view>
+          <view class="form-row">
+            <text class="form-label">芯片</text>
+            <picker mode="selector" range="{{editorKnownChips}}" data-field="chip" bindchange="onEditorAddFormField">
+              <view class="picker-text">{{editorAddForm.chip || '请选择芯片'}}</view>
+            </picker>
+          </view>
+          <view class="form-row-group">
+            <view class="form-row">
+              <text class="form-label">内存(GB)</text>
+              <input class="form-input" type="digit" value="{{editorAddForm.memoryGb}}" data-field="memoryGb" bindinput="onEditorAddFormField" />
+            </view>
+            <view class="form-row">
+              <text class="form-label">存储(GB)</text>
+              <input class="form-input" type="digit" value="{{editorAddForm.storageGb}}" data-field="storageGb" bindinput="onEditorAddFormField" />
+            </view>
+          </view>
+          <view class="form-row-group">
+            <view class="form-row">
+              <text class="form-label">买入时机</text>
+              <picker mode="selector" range="{{['新品', '二手']}}" data-field="buyTiming" bindchange="onEditorAddFormField">
+                <view class="picker-text">{{editorAddForm.buyTiming === 'new' ? '新品' : '二手'}}</view>
+              </picker>
+            </view>
+            <view class="form-row">
+              <text class="form-label">持有期(年)</text>
+              <input class="form-input" type="digit" value="{{editorAddForm.holdingYears}}" data-field="holdingYears" bindinput="onEditorAddFormField" />
+            </view>
+          </view>
+          <view class="form-row">
+            <text class="form-label">买入价</text>
+            <input class="form-input" type="digit" placeholder=">0" data-field="buyPrice" bindinput="onEditorAddFormField" />
+          </view>
+          <view class="form-actions">
+            <view class="form-btn form-cancel" bindtap="onEditorCancelAddForm">取消</view>
+            <view class="form-btn form-confirm" bindtap="onEditorAddPlan">添加</view>
+          </view>
+        </view>
+
+        <!-- 暂不考虑分组 -->
+        <view class="deferred-group" wx:if="{{editorDeferredPoints.length > 0}}">
+          <view class="deferred-title">暂不考虑 ({{editorDeferredPoints.length}})</view>
+          <view class="deferred-row" wx:for="{{editorDeferredPoints}}" wx:key="rowId">
+            <text class="deferred-model">{{item.model}}</text>
+            <view class="action-btn restore-btn" data-row-id="{{item.rowId}}" bindtap="onEditorRestore">恢复</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 查看模式 -->
+    <block wx:else>
+      <!-- viewMode 切换 tabs (仅当有用户修改版时显示) -->
+      <view class="view-mode-tabs" wx:if="{{userModified}}">
+        <view class="view-mode-tab {{viewMode === 'original' ? 'active' : ''}}" data-mode="original" bindtap="onSwitchViewMode">原始版</view>
+        <view class="view-mode-tab {{viewMode === 'userModified' ? 'active' : ''}}" data-mode="userModified" bindtap="onSwitchViewMode">用户修改版</view>
+      </view>
+
+      <!-- "基于用户输入价" 标注 (仅 viewMode='userModified') -->
+      <view class="user-modified-banner" wx:if="{{viewMode === 'userModified'}}">
+        <text>基于用户输入价</text>
+      </view>
+
+      <!-- Empty with fallback -->
+      <view class="empty-card" wx:if="{{isEmpty}}">
       <view class="empty-icon">⚠️</view>
       <view class="empty-title">当前约束下无非劣方案</view>
       <view class="empty-desc">{{relaxedHint}}</view>
@@ -130,14 +282,24 @@
       <view class="chart-note">前沿上的点不存在性能更高且价格更低的选择</view>
     </view>
 
-    <!-- Generate share card button -->
-    <view class="share-btn-wrap" wx:if="{{!isEmpty && plans.length > 0 && !isReplay}}">
+    <!-- Generate share card button (原始版且非回看模式) -->
+    <view class="share-btn-wrap" wx:if="{{!isEmpty && plans.length > 0 && !isReplay && viewMode === 'original'}}">
       <view class="share-btn" bindtap="onGenerateShareCard">保存结果</view>
+    </view>
+
+    <!-- 保存用户修改版 (仅 viewMode='userModified') -->
+    <view class="share-btn-wrap" wx:if="{{viewMode === 'userModified' && userModified}}">
+      <view class="share-btn" bindtap="onSaveUserModified">保存用户修改版</view>
     </view>
 
     <!-- 查看完整报告入口 -->
     <view class="report-entry-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
       <view class="report-entry" bindtap="onOpenReport">查看完整报告 ›</view>
+    </view>
+
+    <!-- 手动修改方案入口 (空结果页隐藏) -->
+    <view class="report-entry-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
+      <view class="report-entry" bindtap="onEnterEditor">手动修改方案 ›</view>
     </view>
 
     <!-- Data freshness footer -->
@@ -149,6 +311,7 @@
         <text class="footer-link" bindtap="onOpenGitHub">复制 GitHub 链接</text>
       </block>
     </view>
+    </block>
   </block>
 
   <!-- 项目仓库链接 -->

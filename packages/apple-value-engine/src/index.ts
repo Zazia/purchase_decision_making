@@ -38,7 +38,7 @@ export {
   getBuyPrice,
 } from './cost.js';
 export type { CostBreakdown } from './cost.js';
-export { computeParetoFrontier } from './pareto.js';
+export { computeParetoFrontier, recomputeFrontierFromPoints, buildPlanPointFromInputs } from './pareto.js';
 export {
   parseReleasePlan,
   computeWaitMonths,
@@ -76,4 +76,7 @@ export type {
   MacroFactorAdjustment,
   ImpactTimeVaryingCurve,
   PricePredictionModel,
+  EditedPlanPoint,
+  CustomPlanInputs,
+  RecomputeParams,
 } from './types.js';

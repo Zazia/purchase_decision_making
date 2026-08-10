@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConstantsValidationError = exports.shouldGenerateWaitCandidates = exports.lookupImpactTimeVaryingFactor = exports.predictDiscountedOldPrice = exports.predictNewProductPrice = exports.computeWaitMonths = exports.parseReleasePlan = exports.computeParetoFrontier = exports.getBuyPrice = exports.getCurrentNewPrice = exports.computeMaintenanceCost = exports.computeMonthlyCostForWaitCandidate = exports.computeMonthlyCost = exports.getEffectiveR = exports.getStorageWeight = exports.getMemoryWeight = exports.getCategoryFlagshipScore = exports.getChipMultiCoreScore = exports.getChipCoefficient = exports.computePerformanceForNewProduct = exports.computePerformance = exports.getRetentionRate = exports.getKeyMap = exports.loadConstants = void 0;
+exports.ConstantsValidationError = exports.shouldGenerateWaitCandidates = exports.lookupImpactTimeVaryingFactor = exports.predictDiscountedOldPrice = exports.predictNewProductPrice = exports.computeWaitMonths = exports.parseReleasePlan = exports.buildPlanPointFromInputs = exports.recomputeFrontierFromPoints = exports.computeParetoFrontier = exports.getBuyPrice = exports.getCurrentNewPrice = exports.computeMaintenanceCost = exports.computeMonthlyCostForWaitCandidate = exports.computeMonthlyCost = exports.getEffectiveR = exports.getStorageWeight = exports.getMemoryWeight = exports.getCategoryFlagshipScore = exports.getChipMultiCoreScore = exports.getChipCoefficient = exports.computePerformanceForNewProduct = exports.computePerformance = exports.getRetentionRate = exports.getKeyMap = exports.loadConstants = void 0;
 /**
  * apple-value-engine
  *
@@ -40,6 +40,8 @@ Object.defineProperty(exports, "getCurrentNewPrice", { enumerable: true, get: fu
 Object.defineProperty(exports, "getBuyPrice", { enumerable: true, get: function () { return cost_js_1.getBuyPrice; } });
 var pareto_js_1 = require("./pareto.js");
 Object.defineProperty(exports, "computeParetoFrontier", { enumerable: true, get: function () { return pareto_js_1.computeParetoFrontier; } });
+Object.defineProperty(exports, "recomputeFrontierFromPoints", { enumerable: true, get: function () { return pareto_js_1.recomputeFrontierFromPoints; } });
+Object.defineProperty(exports, "buildPlanPointFromInputs", { enumerable: true, get: function () { return pareto_js_1.buildPlanPointFromInputs; } });
 var release_js_1 = require("./release.js");
 Object.defineProperty(exports, "parseReleasePlan", { enumerable: true, get: function () { return release_js_1.parseReleasePlan; } });
 Object.defineProperty(exports, "computeWaitMonths", { enumerable: true, get: function () { return release_js_1.computeWaitMonths; } });

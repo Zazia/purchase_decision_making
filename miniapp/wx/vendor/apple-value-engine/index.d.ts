@@ -21,8 +21,8 @@ export { computePerformance, computePerformanceForNewProduct, getChipCoefficient
 export type { PerformanceResult } from './performance.js';
 export { computeMonthlyCost, computeMonthlyCostForWaitCandidate, computeMaintenanceCost, getCurrentNewPrice, getBuyPrice, } from './cost.js';
 export type { CostBreakdown } from './cost.js';
-export { computeParetoFrontier } from './pareto.js';
+export { computeParetoFrontier, recomputeFrontierFromPoints, buildPlanPointFromInputs } from './pareto.js';
 export { parseReleasePlan, computeWaitMonths, predictNewProductPrice, predictDiscountedOldPrice, lookupImpactTimeVaryingFactor, shouldGenerateWaitCandidates, } from './release.js';
 export { ConstantsValidationError, } from './types.js';
-export type { Constants, DecisionParams, PlanPoint, ParetoFrontierResult, BuyTiming, MacroContext, ReleasePlan, RetentionCurves, ChipBenchmarks, ChipGenerationAssumptions, ExperienceWeights, ReleaseRhythm, NewReleaseImpact, MaintenanceCosts, PerformanceFormula, ProductReleaseDates, CostFormula, MarketSnapshots, MarketSnapshotEntry, DesignTokens, WaitPeriodModel, ReleaseTimeValidation, MacroFactorAdjustment, ImpactTimeVaryingCurve, PricePredictionModel, } from './types.js';
+export type { Constants, DecisionParams, PlanPoint, ParetoFrontierResult, BuyTiming, MacroContext, ReleasePlan, RetentionCurves, ChipBenchmarks, ChipGenerationAssumptions, ExperienceWeights, ReleaseRhythm, NewReleaseImpact, MaintenanceCosts, PerformanceFormula, ProductReleaseDates, CostFormula, MarketSnapshots, MarketSnapshotEntry, DesignTokens, WaitPeriodModel, ReleaseTimeValidation, MacroFactorAdjustment, ImpactTimeVaryingCurve, PricePredictionModel, EditedPlanPoint, CustomPlanInputs, RecomputeParams, } from './types.js';
 //# sourceMappingURL=index.d.ts.map

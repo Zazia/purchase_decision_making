@@ -1,0 +1,9 @@
+{
+  "name": "price-intake",
+  "version": "1.0.0",
+  "description": "Receive price intake submissions",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

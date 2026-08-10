@@ -272,6 +272,70 @@ export interface ParetoFrontierResult {
   };
 }
 
+/**
+ * 用户编辑后的方案点
+ *
+ * - source='original': 来自原 result 页快照, 未被用户修改 (引擎按原 buyPrice 重算)
+ * - source='edited':   用户修改了买入价 (引擎用 editedBuyPrice 重算月均成本)
+ * - source='custom':   用户新增的自定义方案 (引擎用 buildPlanPointFromInputs 构建)
+ *
+ * excluded/deferred 标记由端内编辑器维护, 引擎重算时过滤掉这两类。
+ * channel/useSubsidy 为端内众包回传影子库用, 引擎透传不参与计算。
+ */
+export interface EditedPlanPoint extends PlanPoint {
+  /** 用户覆盖的买入价 (仅 source='edited' 时有意义, 引擎重算时替代 buyPrice) */
+  editedBuyPrice?: number;
+  /** 方案来源: 原始 / 用户改价 / 用户新增 */
+  source: 'original' | 'edited' | 'custom';
+  /** 已排除: 引擎重算时过滤掉 */
+  excluded?: boolean;
+  /** 暂不考虑: 引擎重算时过滤掉 (与 excluded 同义, 端内用于分组区分) */
+  deferred?: boolean;
+  /** 购买渠道 (端内众包回传用, 引擎不参与计算) */
+  channel?: string;
+  /** 是否使用国补 (端内众包回传用) */
+  useSubsidy?: boolean;
+}
+
+/**
+ * 用户新增自定义方案的输入参数
+ * 用于 buildPlanPointFromInputs 与 recomputeFrontierFromPoints 内部构建。
+ */
+export interface CustomPlanInputs {
+  /** 机型名 (展示用, 如 "M2 Mac mini") */
+  model: string;
+  /** 芯片 (如 "M2", 必须能在 constants.chipBenchmarks 中匹配, 否则抛 ConstantsValidationError) */
+  chip: string;
+  /** 内存 GB */
+  memoryGb: number;
+  /** 存储 GB */
+  storageGb: number;
+  /** 品类 key (如 "Mac_mini", 与 constants.marketSnapshots 键名对齐) */
+  categoryKey: string;
+  /** 买入时机 */
+  buyTiming: BuyTiming;
+  /** 买入价 (元) */
+  buyPrice: number;
+  /** 持有年数 */
+  holdingYears: number;
+  /** 候选类型 (默认 'A', 用于系统支持期风险标注) */
+  candidateType?: 'A' | 'B' | 'C';
+  /** 等待月数 (仅类型 B/C) */
+  waitMonths?: number;
+  /** 买入价是否为预测值 */
+  predictedPrice?: boolean;
+  /** 用于在端内众包回传时透传的渠道与国补标记 */
+  channel?: string;
+  useSubsidy?: boolean;
+  /** M 系列 CAGR (透传给 computePerformance, 缺省用引擎默认) */
+  mSeriesCAGR?: number;
+  /** A 系列 CAGR (透传给 computePerformance, 缺省用引擎默认) */
+  aSeriesCAGR?: number;
+}
+
+/** recomputeFrontierFromPoints 的参数 (与 DecisionParams 同口径) */
+export type RecomputeParams = DecisionParams;
+
 /** 常量校验错误 */
 export class ConstantsValidationError extends Error {
   constructor(public readonly fieldName: string, message?: string) {

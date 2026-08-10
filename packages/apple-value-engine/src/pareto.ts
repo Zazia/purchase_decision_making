@@ -5,7 +5,18 @@
  * 前沿点定义: 不存在其他点同时满足「成本更低且性能更高」(至少一个严格不等)。
  * 用户偏好(性能地板/预算上限)仅用于在前沿上截取推荐区间, 不改变前沿本身。
  */
-import type { Constants, DecisionParams, PlanPoint, BuyTiming, MacroContext, ReleasePlan } from './types.js';
+import type {
+  Constants,
+  DecisionParams,
+  PlanPoint,
+  BuyTiming,
+  MacroContext,
+  ReleasePlan,
+  EditedPlanPoint,
+  CustomPlanInputs,
+  RecomputeParams,
+} from './types.js';
+import { ConstantsValidationError } from './types.js';
 import { computePerformance, computePerformanceForNewProduct } from './performance.js';
 import { computeMonthlyCost, computeMonthlyCostForWaitCandidate, getCurrentNewPrice, getBuyPrice } from './cost.js';
 import {
@@ -63,6 +74,226 @@ export function computeParetoFrontier(
   const recommendationRange = selectRecommendationRange(frontier, params);
 
   return { frontier, dominated, recommendationRange };
+}
+
+// ============================================================================
+// 按给定方案集重算前沿 (用户编辑后)
+// ============================================================================
+
+/**
+ * 按给定方案集重算帕累托前沿
+ *
+ * 与 `computeParetoFrontier` 的差异:
+ *   - 不重新从 constants 市场快照提取候选 (extractCandidates)
+ *   - 在调用方传入的 EditedPlanPoint[] 上做帕累托筛选与推荐区间截取
+ *   - source='edited' 的方案用 editedBuyPrice 重算月均成本 (性能满足度不变)
+ *   - source='custom' 的方案用 buildPlanPointFromInputs 重新构建 (因端内只有自定义字段)
+ *   - source='original' 的方案直接复用原 PlanPoint (口径与原始计算一致)
+ *   - excluded/deferred 的方案过滤掉, 不参与重算
+ *
+ * 口径一致性: 复用 selectFrontier / selectRecommendationRange / computeMonthlyCost /
+ *   computePerformance, 保证「未改价重算 == 原始结果」(误差 ≤ 0.5 元 / ≤ 0.001)。
+ *
+ * @param constants 常量数据
+ * @param params    决策参数 (用于推荐区间截取与 CAGR 透传)
+ * @param editedPoints 用户编辑后的方案集 (含 original/edited/custom/excluded/deferred 标记)
+ * @returns { frontier, dominated, recommendationRange }
+ */
+export function recomputeFrontierFromPoints(
+  constants: Constants,
+  params: RecomputeParams,
+  editedPoints: EditedPlanPoint[],
+): ParetoFrontierResult {
+  // 1. 过滤 excluded / deferred
+  const active = editedPoints.filter((p) => !p.excluded && !p.deferred);
+
+  // 2. 逐个重建 PlanPoint (original 直接复用, edited 重算成本, custom 用 buildPlanPointFromInputs)
+  const points: PlanPoint[] = [];
+  for (const ep of active) {
+    const point = rebuildPlanPoint(constants, params, ep);
+    if (point) points.push(point);
+  }
+
+  // 3. 复用 selectFrontier / selectRecommendationRange
+  const { frontier, dominated } = selectFrontier(points);
+  const recommendationRange = selectRecommendationRange(frontier, params);
+  return { frontier, dominated, recommendationRange };
+}
+
+/**
+ * 把单个 EditedPlanPoint 重建为 PlanPoint。
+ * - source='original': 直接复用 (口径与原始计算一致)
+ * - source='edited':   用 editedBuyPrice 重算月均成本 (性能不变)
+ * - source='custom':   用 buildPlanPointFromInputs 完整重建 (因端内只有自定义字段)
+ */
+function rebuildPlanPoint(
+  constants: Constants,
+  params: RecomputeParams,
+  ep: EditedPlanPoint,
+): PlanPoint | null {
+  if (ep.source === 'original') {
+    return ep;
+  }
+  if (ep.source === 'edited') {
+    return rebuildEditedPlanPoint(constants, params, ep);
+  }
+  // source === 'custom'
+  return rebuildCustomPlanPoint(constants, params, ep);
+}
+
+/**
+ * 用 editedBuyPrice 重算月均成本 (性能满足度、保值率、维修成本口径不变)。
+ *
+ * 实现策略: 构造一个 Candidate (复用原方案的芯片/内存/存储/品类/候选类型/等待月数/
+ * 发布日期 key), 用 editedBuyPrice 作为 buyPrice, 走 buildPlanPoint 同款计算。
+ * 这样保证月均成本公式与 computeParetoFrontier 完全一致 (含 v3.8 候选类型 B/C 分支)。
+ */
+function rebuildEditedPlanPoint(
+  constants: Constants,
+  params: RecomputeParams,
+  ep: EditedPlanPoint,
+): PlanPoint | null {
+  const editedBuyPrice = typeof ep.editedBuyPrice === 'number' ? ep.editedBuyPrice : ep.buyPrice;
+  if (!(editedBuyPrice > 0)) return null; // 非法买入价拦截
+
+  const categoryKey = resolveCategoryKeyFromPlanPoint(constants, ep);
+  // 构造 Candidate, 复用原方案的发布日期 key 与候选类型 (保证机龄计算口径一致)
+  const cand: Candidate = {
+    modelKey: stripHoldingYearsSuffix(ep.model),
+    chip: ep.chip,
+    memoryGb: extractMemoryGb(ep),
+    storageGb: extractStorageGb(ep),
+    buyTiming: ep.buyTiming,
+    buyPrice: editedBuyPrice,
+    releaseDateKey: resolveReleaseDateKeyFromModel(ep, categoryKey),
+    categoryKey,
+    candidateType: ep.candidateType ?? 'A',
+    waitMonths: ep.waitMonths,
+    predictedPrice: ep.predictedPrice,
+  };
+  return buildPlanPoint(constants, cand, ep.holdingYears, params);
+}
+
+/**
+ * 用 buildPlanPointFromInputs 完整重建自定义方案。
+ * EditedPlanPoint 已经包含 chip/memory/storage 等字段 (端内新增时填入),
+ * 这里把它们组装成 CustomPlanInputs 调 buildPlanPointFromInputs。
+ */
+function rebuildCustomPlanPoint(
+  constants: Constants,
+  params: RecomputeParams,
+  ep: EditedPlanPoint,
+): PlanPoint | null {
+  if (!(ep.buyPrice > 0)) return null;
+  const inputs: CustomPlanInputs = {
+    model: stripHoldingYearsSuffix(ep.model),
+    chip: ep.chip,
+    memoryGb: extractMemoryGb(ep),
+    storageGb: extractStorageGb(ep),
+    categoryKey: resolveCategoryKeyFromPlanPoint(constants, ep),
+    buyTiming: ep.buyTiming,
+    buyPrice: ep.buyPrice,
+    holdingYears: ep.holdingYears,
+    candidateType: ep.candidateType ?? 'A',
+    waitMonths: ep.waitMonths,
+    predictedPrice: ep.predictedPrice,
+    channel: ep.channel,
+    useSubsidy: ep.useSubsidy,
+    mSeriesCAGR: params.mSeriesCAGR,
+    aSeriesCAGR: params.aSeriesCAGR,
+  };
+  try {
+    return buildPlanPointFromInputs(constants, inputs);
+  } catch {
+    // 自定义方案芯片无法解析 → 不参与重算 (端内应在提交前拦截, 引擎这里兜底)
+    return null;
+  }
+}
+
+/** 去掉 model 末尾 " × Ny年" 后缀, 得到 modelKey */
+function stripHoldingYearsSuffix(model: string): string {
+  return model.replace(/\s*×\s*\d+年$/, '');
+}
+
+/** 从 PlanPoint 提取内存 GB (没有则回退默认 8) */
+function extractMemoryGb(p: PlanPoint): number {
+  // PlanPoint 没有显式 memoryGb 字段, 从 model 解析 (如 "M2_16G_256G_二手 × 3年")
+  const m = p.model.match(/(\d+)G_(\d+)G/);
+  if (m) return Number(m[1]);
+  // iPhone 产品名格式: "iPhone_16_Pro_256G_二手 × 3年"
+  const iPhone = p.model.match(/^iPhone_[^_]+(?:_[^_]+)?_(\d+)G/);
+  if (iPhone) return 6;
+  // 仅一个 GB 段 (如 "M3_24寸_二手"), 视为存储
+  return 8;
+}
+
+/** 从 PlanPoint 提取存储 GB (没有则回退默认 256) */
+function extractStorageGb(p: PlanPoint): number {
+  const m = p.model.match(/(\d+)G_(\d+)G/);
+  if (m) return Number(m[2]);
+  const single = p.model.match(/_(\d+)G_/);
+  if (single) return Number(single[1]);
+  const tail = p.model.match(/_(\d+)G(?:\s*×|$)/);
+  if (tail) return Number(tail[1]);
+  return 256;
+}
+
+/**
+ * 从 PlanPoint 推导 releaseDateKey (用于 computeAgeMonths)。
+ * 端内编辑后没有保留 releaseDateKey, 这里从 model 解析 (与 parseModelKey 同款)。
+ *
+ * parseModelKey 的 releaseDateKey 推导规则:
+ *   - iPhone: "iPhone_16_Pro_256G_二手" → "iPhone_16" (前两段)
+ *   - Mac (无屏幕尺寸): "M2_16G_256G_二手" → "${categoryKey}_${rawChip}" = "Mac_mini_M2"
+ *   - Mac (带屏幕尺寸): "M5_Pro_14寸_16G_512G_新品" → "${categoryKey}_${screenSize}_${rawChip}"
+ */
+function resolveReleaseDateKeyFromModel(p: PlanPoint, categoryKey: string): string {
+  const modelKey = stripHoldingYearsSuffix(p.model);
+  const segments = modelKey.split('_');
+
+  // iPhone 特殊处理: 取前两段 (iPhone_16), 不含 Pro/ProMax 后缀
+  if (segments[0] === 'iPhone') {
+    return segments.slice(0, 2).join('_');
+  }
+
+  // 找内存/存储段
+  const gbSegments: { index: number; value: number }[] = [];
+  segments.forEach((seg, i) => {
+    if (/^(\d+)G$/i.test(seg)) {
+      gbSegments.push({ index: i, value: Number(seg.replace(/G$/i, '')) });
+    }
+  });
+  // 屏幕尺寸段
+  const screenSizeMatch = segments.find((s) => /^\d+寸$/.test(s));
+  const screenSize = screenSizeMatch ? screenSizeMatch.replace('寸', '') : '';
+
+  // 芯片段 = 内存段之前的所有段(去掉屏幕尺寸)
+  const chipEndIndex = gbSegments.length >= 2 ? gbSegments[0].index : (gbSegments[0]?.index ?? segments.length);
+  const chipSegments = segments.slice(0, chipEndIndex).filter((s) => !/^\d+寸$/.test(s));
+  const rawChip = chipSegments.join('_'); // 原始芯片名 (M1Pro / M2), 与 productReleaseDates 键对齐
+
+  if (!rawChip) return '';
+  if (screenSize) return `${categoryKey}_${screenSize}_${rawChip}`;
+  return `${categoryKey}_${rawChip}`;
+}
+
+/**
+ * 从 PlanPoint 推导 categoryKey (用于保值率/维修/性能查表)。
+ * 优先用解析过的子品类 (如 "Mac_mini"); 找不到时回退品类前缀 (如 "iPhone")。
+ */
+function resolveCategoryKeyFromPlanPoint(constants: Constants, p: PlanPoint): string {
+  // 在 marketSnapshots 中找包含此 modelKey 的子品类
+  const modelKey = stripHoldingYearsSuffix(p.model);
+  for (const [snapKey, snaps] of Object.entries(constants.marketSnapshots)) {
+    if (snapKey.startsWith('_')) continue;
+    if (Object.prototype.hasOwnProperty.call(snaps, modelKey)) {
+      return snapKey;
+    }
+  }
+  // 兜底: 按 chip 推断品类 (M 系列 → Mac_mini, A 系列 → iPhone_Pro)
+  if (p.chip.startsWith('M')) return 'Mac_mini';
+  if (p.chip.startsWith('A')) return 'iPhone_Pro';
+  return 'Mac_mini';
 }
 
 /**
@@ -318,11 +549,181 @@ function parseModelKey(
 // 方案点构建
 // ============================================================================
 
+/**
+ * 校验芯片名是否在 constants.chipBenchmarks 中可解析。
+ * 支持 M 系列与 A 系列, 以及规范化前后的写法 (M1Pro / M1_Pro)。
+ * @returns 规范化后的芯片名 (与 chipBenchmarks 键对齐); 不可解析时返回 null
+ */
+function resolveChipBenchmark(constants: Constants, chip: string): string | null {
+  if (!chip) return null;
+  // 1. 直接命中 (M 系列)
+  const mBench = constants.chipBenchmarks.Mac芯片 ?? {};
+  if (mBench[chip]) return chip;
+  // 2. 规范化后命中 (M1Pro → M1_Pro)
+  const normalized = normalizeChipName(chip);
+  if (mBench[normalized]) return normalized;
+  // 3. A 系列
+  const aBench = constants.chipBenchmarks.iPhone_iPad芯片 ?? {};
+  if (aBench[chip]) return chip;
+  if (aBench[normalized]) return normalized;
+  // 4. 紧凑化兜底 (M1_Pro → M1Pro)
+  const compact = chip.replace(/_(Pro|Max|Ultra)/g, '$1');
+  if (mBench[compact]) return compact;
+  if (aBench[compact]) return compact;
+  return null;
+}
+
+/**
+ * 按显式输入构建方案点 (供端内用户新增自定义方案 + recomputeFrontierFromPoints 共用)。
+ *
+ * 与 buildPlanPoint (从快照 Candidate 构建) 的差异:
+ *   - 不依赖 constants.marketSnapshots 中的 modelKey, 由调用方传 model 字符串
+ *   - 必须传 chip/memoryGb/storageGb/categoryKey, 芯片无法解析时抛 ConstantsValidationError
+ *   - 用 buildPlanPoint 同款的成本/性能/系统支持期风险计算, 保证口径一致
+ *
+ * candidateType 默认 'A' (现在买); 类型 B/C 由调用方显式传入并附带 waitMonths。
+ *
+ * @throws ConstantsValidationError 当芯片无法在 chipBenchmarks 中匹配
+ * @returns PlanPoint; 类型 C 且无 releaseDateKey 时返回 null (端内应在提交前避免此场景)
+ */
+export function buildPlanPointFromInputs(
+  constants: Constants,
+  inputs: CustomPlanInputs,
+): PlanPoint | null {
+  const resolvedChip = resolveChipBenchmark(constants, inputs.chip);
+  if (!resolvedChip) {
+    throw new ConstantsValidationError(
+      'chipBenchmarks',
+      `无法识别该芯片: ${inputs.chip}, 无法重算`,
+    );
+  }
+
+  const candidateType = inputs.candidateType ?? 'A';
+
+  // 复用 Candidate 接口, 内部走 buildPlanPoint 同款计算
+  const cand: Candidate = {
+    modelKey: inputs.model,
+    chip: resolvedChip,
+    memoryGb: inputs.memoryGb,
+    storageGb: inputs.storageGb,
+    buyTiming: inputs.buyTiming,
+    buyPrice: inputs.buyPrice,
+    releaseDateKey: '', // 用户新增方案无发布日期 key, buildPlanPoint 内部 computeAgeMonths 会返回 -1
+    categoryKey: inputs.categoryKey,
+    candidateType,
+    waitMonths: inputs.waitMonths,
+    predictedPrice: inputs.predictedPrice,
+  };
+
+  // 类型 A 需要 releaseDateKey 计算 currentAgeMonths; 类型 B 不需要机龄
+  if (candidateType === 'A') {
+    // 用户新增方案无法提供发布日期, 机龄按 0 处理 (即视为当前刚发布机型)
+    // 这里直接走 buildPlanPoint 类型 A 分支, 但用 0 机龄兜底
+    return buildPlanPointFromCandidateWithAgeOverride(
+      constants,
+      cand,
+      inputs.holdingYears,
+      0, // currentAgeMonths 兜底为 0
+      getCurrentNewPrice(constants, inputs.categoryKey),
+      inputs.mSeriesCAGR,
+      inputs.aSeriesCAGR,
+    );
+  }
+  // 类型 B/C 走原 buildPlanPoint (不依赖机龄解析的兜底分支)
+  // 注: 类型 C 需要 releaseDateKey 计算机龄, 用户新增方案没有, 可能返回 null
+  return buildPlanPoint(constants, cand, inputs.holdingYears, {
+    mSeriesCAGR: inputs.mSeriesCAGR,
+    aSeriesCAGR: inputs.aSeriesCAGR,
+  });
+}
+
+/**
+ * 类型 A 的兜底构建: 用显式 currentAgeMonths + currentNewPrice 计算,
+ * 跳过 computeAgeMonths 的发布日期查找 (用户新增方案没有发布日期)。
+ */
+function buildPlanPointFromCandidateWithAgeOverride(
+  constants: Constants,
+  cand: Candidate,
+  holdingYears: number,
+  currentAgeMonths: number,
+  currentNewPrice: number,
+  mSeriesCAGR?: number,
+  aSeriesCAGR?: number,
+): PlanPoint {
+  const holdingMonths = holdingYears * 12;
+  const cost = computeMonthlyCost(
+    constants,
+    cand.categoryKey,
+    cand.buyPrice,
+    currentAgeMonths,
+    holdingMonths,
+    currentNewPrice,
+  );
+  const perf = computePerformance(
+    constants,
+    cand.chip,
+    cand.memoryGb,
+    cand.storageGb,
+    cand.categoryKey,
+    holdingMonths,
+    mSeriesCAGR,
+    aSeriesCAGR,
+  );
+  const supportRisk = computeSystemSupportRiskForAge(cand, currentAgeMonths, holdingMonths);
+
+  return {
+    model: `${cand.modelKey} × ${holdingYears}年`,
+    chip: cand.chip,
+    buyTiming: cand.buyTiming,
+    holdingYears,
+    monthlyCost: cost.monthlyCost,
+    avgPerformance: perf.avgS,
+    buyPrice: cand.buyPrice,
+    residual: cost.residual,
+    maintenanceCost: cost.maintenanceCost,
+    holdingMonths,
+    performanceS0: perf.s0,
+    performanceSN: perf.sN,
+    candidateType: cand.candidateType,
+    waitMonths: cand.waitMonths,
+    predictedPrice: cand.predictedPrice,
+    systemSupportRisk: supportRisk.risk,
+    systemSupportExceedMonths: supportRisk.exceedMonths,
+  };
+}
+
+/**
+ * 计算系统支持期风险标注 (显式机龄版本, 供 buildPlanPointFromInputs 用)。
+ * 复用 getSystemSupportThreshold / 候选类型 → buyAgeMonths 推导。
+ */
+function computeSystemSupportRiskForAge(
+  cand: Candidate,
+  currentAgeMonths: number,
+  holdingMonths: number,
+): { risk: 'normal' | 'near-end' | 'exceeded'; exceedMonths?: number } {
+  const threshold = getSystemSupportThreshold(cand.categoryKey);
+  const waitMonths = cand.waitMonths ?? 0;
+  let buyAgeMonths: number;
+  if (cand.candidateType === 'B') {
+    buyAgeMonths = 0;
+  } else {
+    buyAgeMonths = currentAgeMonths < 0 ? 0 : currentAgeMonths + waitMonths;
+  }
+  const sellAgeMonths = buyAgeMonths + holdingMonths;
+  if (sellAgeMonths >= threshold) {
+    return { risk: 'exceeded', exceedMonths: sellAgeMonths - threshold };
+  }
+  if (sellAgeMonths >= threshold - 12) {
+    return { risk: 'near-end' };
+  }
+  return { risk: 'normal' };
+}
+
 function buildPlanPoint(
   constants: Constants,
   cand: Candidate,
   holdingYears: number,
-  params: DecisionParams,
+  params: DecisionParams | { mSeriesCAGR?: number; aSeriesCAGR?: number },
 ): PlanPoint | null {
   const holdingMonths = holdingYears * 12;
   const waitMonths = cand.waitMonths ?? 0;
