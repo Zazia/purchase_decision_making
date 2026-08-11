@@ -118,7 +118,7 @@ Page({
     // 编辑器: 暂不考虑分组方案
     editorDeferredPoints: [] as EditedPlanPoint[],
     // 编辑器: 渠道选项
-    editorChannels: ['快照价', '闲鱼', '转转', '京东国补', '官方旗舰店', '其他'],
+    editorChannels: ['快照价', '官网', '京东', '拼多多', '淘宝', '闲鱼', '拍拍', '爱回收', '转转', '其他'],
     // 编辑器: 已知芯片列表 (新增自定义方案用)
     editorKnownChips: [] as string[],
     // 编辑器: 是否显示新增方案表单
@@ -135,6 +135,13 @@ Page({
     },
     // 编辑器: 买入价校验错误 (rowId -> 错误消息)
     editorPriceErrors: {} as Record<string, string>,
+    // 条件筛选面板
+    filterExpanded: false,
+    filterChips: [] as Array<{value: string; label: string; active: boolean}>,
+    filterMemory: [] as Array<{value: string; label: string; active: boolean}>,
+    filterStorage: [] as Array<{value: string; label: string; active: boolean}>,
+    filterHolding: [] as Array<{value: string; label: string; active: boolean}>,
+    filterTiming: [] as Array<{value: string; label: string; active: boolean}>,
   },
 
   onLoad(query: Record<string, string>) {
@@ -545,15 +552,56 @@ Page({
     editorState = null;
   },
 
-  /** 从 snapshot 更新编辑器视图 (主列表 + 暂不考虑分组 + 撤销状态) */
+  /** 从 snapshot 更新编辑器视图 (主列表 + 移到末尾分组 + 撤销状态 + 筛选面板) */
   updateEditorView(snapshot: EditorSnapshot) {
     const mainPoints = snapshot.points.filter((p) => !p.deferred);
     const deferredPoints = snapshot.points.filter((p) => p.deferred);
+
+    // 构建筛选面板维度 (从 mainPoints 中提取唯一值, 全部默认 active=true 表示不筛除)
+    const chipSet = new Set<string>();
+    const memSet = new Set<number>();
+    const storSet = new Set<number>();
+    const holdSet = new Set<number>();
+    const timingSet = new Set<string>();
+    for (const p of snapshot.points) {
+      chipSet.add(p.chip);
+      const mem = p.memoryGb ?? this.extractMemoryGbFromModel(p.model);
+      memSet.add(mem);
+      const stor = p.storageGb ?? this.extractStorageGbFromModel(p.model);
+      storSet.add(stor);
+      holdSet.add(p.holdingYears);
+      timingSet.add(p.buyTiming);
+    }
+
+    // 保持已有的 active 状态 (如果之前已设过筛选)
+    const prevChips = new Map(this.data.filterChips.map((c) => [c.value, c.active]));
+    const prevMem = new Map(this.data.filterMemory.map((c) => [c.value, c.active]));
+    const prevStor = new Map(this.data.filterStorage.map((c) => [c.value, c.active]));
+    const prevHold = new Map(this.data.filterHolding.map((c) => [c.value, c.active]));
+    const prevTiming = new Map(this.data.filterTiming.map((c) => [c.value, c.active]));
+
+    const filterChips = [...chipSet].sort().map((v) => ({
+      value: v, label: v, active: prevChips.has(v) ? prevChips.get(v)! : true,
+    }));
+    const filterMemory = [...memSet].sort((a, b) => a - b).map((v) => ({
+      value: String(v), label: `${v}GB`, active: prevMem.has(String(v)) ? prevMem.get(String(v))! : true,
+    }));
+    const filterStorage = [...storSet].sort((a, b) => a - b).map((v) => ({
+      value: String(v), label: v >= 1000 ? `${v / 1000}TB` : `${v}GB`, active: prevStor.has(String(v)) ? prevStor.get(String(v))! : true,
+    }));
+    const filterHolding = [...holdSet].sort((a, b) => a - b).map((v) => ({
+      value: String(v), label: `${v}年`, active: prevHold.has(String(v)) ? prevHold.get(String(v))! : true,
+    }));
+    const filterTiming = [...timingSet].sort().map((v) => ({
+      value: v, label: v === 'new' ? '新品' : '二手', active: prevTiming.has(v) ? prevTiming.get(v)! : true,
+    }));
+
     this.setData({
       editorSnapshot: snapshot,
       editorMainPoints: mainPoints,
       editorDeferredPoints: deferredPoints,
       canUndo: editorState?.canUndo() ?? false,
+      filterChips, filterMemory, filterStorage, filterHolding, filterTiming,
     });
   },
 
@@ -562,6 +610,73 @@ Page({
     const m = model.match(/(\d+)G_(\d+)G/);
     if (m) return Number(m[1]);
     return 8;
+  },
+
+  /** 从 model 解析存储 GB */
+  extractStorageGbFromModel(model: string): number {
+    const m = model.match(/\d+G_(\d+)G/);
+    if (m) return Number(m[1]);
+    return 256;
+  },
+
+  /** 展开/折叠筛选面板 */
+  onToggleFilterPanel() {
+    this.setData({ filterExpanded: !this.data.filterExpanded });
+  },
+
+  /** 筛选 chip 切换: 取消勾选 → 对应方案 deferred=true 移到末尾 */
+  onFilterToggle(e: WechatMiniprogram.TouchEvent) {
+    const dim = e.currentTarget.dataset.dim as string;
+    const val = e.currentTarget.dataset.value as string;
+    const snap = this.cloneSnapshot();
+    if (!snap) return;
+
+    // 更新 filter state
+    const filterKey = `filter${dim.charAt(0).toUpperCase() + dim.slice(1)}` as
+      'filterChips' | 'filterMemory' | 'filterStorage' | 'filterHolding' | 'filterTiming';
+    // Actually filterChips → dim='chip', key = 'filterChips'. Let's map properly:
+    const keyMap: Record<string, string> = {
+      chip: 'filterChips', memory: 'filterMemory', storage: 'filterStorage',
+      holding: 'filterHolding', timing: 'filterTiming',
+    };
+    const dataKey = keyMap[dim];
+    if (!dataKey) return;
+
+    const filterArr = [...(this.data as any)[dataKey]] as Array<{value: string; label: string; active: boolean}>;
+    const target = filterArr.find((f) => f.value === val);
+    if (!target) return;
+    target.active = !target.active;
+    const nowActive = target.active;
+
+    // 应用到 snapshot: 根据维度判定匹配的 point
+    for (const p of snap.points) {
+      const match = this.pointMatchesDim(p, dim, val);
+      if (match) {
+        if (!nowActive) {
+          // 取消勾选 → 移到末尾
+          p.deferred = true;
+          if (!snap.deferredRowIds.includes(p.rowId)) snap.deferredRowIds.push(p.rowId);
+        } else {
+          // 恢复勾选 → 取消移到末尾
+          p.deferred = false;
+          snap.deferredRowIds = snap.deferredRowIds.filter((id) => id !== p.rowId);
+        }
+      }
+    }
+
+    editorState?.push(snap);
+    (this as any).setData({ [dataKey]: filterArr });
+    this.updateEditorView(snap);
+  },
+
+  /** 判断方案是否匹配筛选维度 */
+  pointMatchesDim(p: EditedPlanPoint, dim: string, val: string): boolean {
+    if (dim === 'chip') return p.chip === val;
+    if (dim === 'memory') return String(p.memoryGb ?? this.extractMemoryGbFromModel(p.model)) === val;
+    if (dim === 'storage') return String(p.storageGb ?? this.extractStorageGbFromModel(p.model)) === val;
+    if (dim === 'holding') return String(p.holdingYears) === val;
+    if (dim === 'timing') return p.buyTiming === val;
+    return false;
   },
 
   /** 创建当前快照的深拷贝 (用于编辑后 push) */
@@ -614,17 +729,39 @@ Page({
     const point = snap.points.find((p) => p.rowId === rowId);
     if (!point) return;
 
-    // 「快照价」表示未修改渠道
+    const errors = { ...this.data.editorPriceErrors };
+
     if (channel === '快照价') {
+      // 恢复原价, 不可手动修改价格
       point.channel = undefined;
+      point.editedBuyPrice = undefined;
+      point.source = 'original';
+      point.excluded = false;
+      (point as any)._isCustomChannel = false;
+      delete errors[rowId];
+    } else if (channel === '其他') {
+      point.channel = '';
+      (point as any)._isCustomChannel = true;
     } else {
       point.channel = channel;
-    }
-    // 京东国补 + 国补 → useSubsidy=true (默认勾选)
-    if (channel === '京东国补') {
-      point.useSubsidy = true;
+      (point as any)._isCustomChannel = false;
     }
 
+    editorState?.push(snap);
+    this.setData({ editorPriceErrors: errors });
+    this.updateEditorView(snap);
+  },
+
+  /** 自定义渠道输入 */
+  onEditorCustomChannelInput(e: WechatMiniprogram.Input) {
+    const rowId = e.currentTarget.dataset.rowId as string;
+    const value = e.detail.value;
+    const snap = this.cloneSnapshot();
+    if (!snap) return;
+    const point = snap.points.find((p) => p.rowId === rowId);
+    if (!point) return;
+
+    point.channel = value;
     editorState?.push(snap);
     this.updateEditorView(snap);
   },
@@ -800,7 +937,8 @@ Page({
       rowId: `row-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       memoryGb: form.memoryGb,
       storageGb: form.storageGb,
-      channel: form.buyTiming === 'new' ? '官方旗舰店' : '闲鱼',
+      channel: form.buyTiming === 'new' ? '京东' : '闲鱼',
+      useSubsidy: form.buyTiming === 'new',
     };
 
     snap.points.push(newPoint);
@@ -849,7 +987,6 @@ Page({
       
       this.setData({ tempFilePath: tempPath });
       wx.showToast({ title: '已保存到相册', icon: 'success' });
-      this.checkPriceIntakePrompt();
     } catch (e) {
       wx.showToast({ title: '导出失败', icon: 'none' });
     }
@@ -892,8 +1029,6 @@ Page({
         plans: this.formatPlans(userModified.frontier, recKeys),
         editorMode: 'view',
       });
-      
-      this.checkPriceIntakePrompt();
     } catch (err) {
       wx.showToast({
         title: err instanceof Error ? err.message : '计算失败',
@@ -995,7 +1130,7 @@ Page({
     });
   },
 
-  /** 保存用户修改版: 生成独立 id 快照, headerTitle 标注「用户修改版」, 不覆盖原快照 */
+  /** 保存用户修改版: 跳转到分享卡页面，在分享卡生成时缓存快照 */
   onSaveUserModified() {
     const params = this.data.params;
     const userModified = this.data.userModified;
@@ -1015,24 +1150,24 @@ Page({
       budget: params.budget,
     };
 
-    try {
-      const id = saveResult({
+    // 组装 shareCardData 并跳转到 share-card 页
+    const recPlans = (userModified.recommendationRange?.plans ?? []) as PlanPoint[];
+    const pool: PlanPoint[] = recPlans.length > 0 ? recPlans : userModified.frontier;
+    const topPlanRaw = sortPreferredPlans(pool, params.performanceFloor)[0] ?? userModified.frontier[0] ?? null;
+
+    const app = getApp();
+    if (app.globalData) {
+      app.globalData.shareCardData = {
         params,
         reportData,
         headerTitle,
-        lastUpdated: this.data.lastUpdated,
-        cloudId: null,
-      });
-      wx.showToast({ title: '已保存用户修改版', icon: 'success' });
-      // 不覆盖原快照: 不更新当前 savedId, 用户修改版作为独立条目出现在列表
-      console.log('[result] user-modified snapshot saved:', id);
-    } catch (err) {
-      wx.showModal({
-        title: '保存失败',
-        content: err instanceof Error ? err.message : '请清理存储后重试',
-        showCancel: false,
-      });
+        topPlan: topPlanRaw,
+        frontier: userModified.frontier,
+      } as unknown as Record<string, unknown>;
     }
+
+    const query = `category=${params.category}&budget=${params.budget}`;
+    wx.navigateTo({ url: `/pages/share-card/share-card?${query}` });
   },
 
   /** 重试 */

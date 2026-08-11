@@ -24,7 +24,7 @@
   <view class="option-row">
     <view class="option-label">
       <view class="option-title">展示我的方案</view>
-      <view class="option-desc">无论是否展示小程序二维码，都可以点击分享的链接打开本次结果</view>
+      <view class="option-desc">将把您的方案上传到云端并通过二维码查看。无论是否上传，均可点击生成的分享卡打开本次结果。您分享的数据对于保持数据更新至关重要！。</view>
     </view>
     <switch checked="{{showMyPlan}}" bindchange="onToggleShowMyPlan" color="#007AFF" />
   </view>

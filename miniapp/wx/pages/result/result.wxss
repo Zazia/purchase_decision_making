@@ -450,10 +450,10 @@
 }
 
 .editor-back-btn {
-  font-size: 32rpx;
+  font-size: 48rpx;
   color: #007AFF;
-  padding: 8rpx 0;
-  min-width: 120rpx;
+  padding: 8rpx 16rpx;
+  line-height: 1;
 }
 
 .editor-title {
@@ -463,17 +463,19 @@
 }
 
 .editor-undo-btn {
-  font-size: 28rpx;
+  font-size: 40rpx;
   color: #007AFF;
-  padding: 8rpx 24rpx;
-  border: 2rpx solid #007AFF;
-  border-radius: 999rpx;
-  min-width: 120rpx;
-  text-align: center;
+  padding: 8rpx 16rpx;
+  line-height: 1;
+}
+
+.editor-undo-btn.disabled {
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 .editor-undo-btn:active {
-  background: #E6F2FF;
+  opacity: 0.7;
 }
 
 .editor-header-actions {
@@ -490,17 +492,8 @@
   text-align: center;
 }
 
-.editor-export-btn:active, .editor-upload-btn:active {
+.editor-export-btn:active {
   background: #E6F2FF;
-}
-
-.editor-upload-btn {
-  font-size: 28rpx;
-  color: #007AFF;
-  border: 2rpx solid #007AFF;
-  padding: 8rpx 24rpx;
-  border-radius: 999rpx;
-  text-align: center;
 }
 
 .editor-recompute-btn {
@@ -521,25 +514,101 @@
   padding: 24rpx 32rpx;
 }
 
-/* 批量排除按钮 */
-.editor-batch-actions {
-  display: flex;
-  gap: 16rpx;
+/* 编辑器标题引导 */
+.editor-intro {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1D1D1F;
   margin-bottom: 24rpx;
 }
 
-.batch-btn {
-  flex: 1;
-  text-align: center;
-  padding: 16rpx 0;
-  font-size: 26rpx;
-  color: #86868F;
-  background: #F2F2F7;
-  border-radius: 12rpx;
+/* 条件筛选面板 */
+.filter-panel {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  border: 2rpx solid #E5E5EA;
+  margin-bottom: 24rpx;
+  overflow: hidden;
 }
 
-.batch-btn:active {
-  background: #E5E5EA;
+.filter-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1D1D1F;
+}
+
+.filter-arrow {
+  font-size: 22rpx;
+  color: #86868F;
+}
+
+.filter-body {
+  padding: 0 24rpx 20rpx;
+  border-top: 2rpx solid #F2F2F7;
+}
+
+.filter-group {
+  margin-top: 16rpx;
+}
+
+.filter-group-label {
+  font-size: 24rpx;
+  color: #86868F;
+  margin-bottom: 8rpx;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.filter-chip {
+  padding: 8rpx 20rpx;
+  font-size: 24rpx;
+  border-radius: 999rpx;
+  background: #F2F2F7;
+  color: #1D1D1F;
+  border: 2rpx solid transparent;
+  transition: all 0.15s;
+}
+
+.filter-chip.active {
+  background: #E6F2FF;
+  color: #007AFF;
+  border-color: #007AFF;
+}
+
+.filter-chip:active {
+  opacity: 0.7;
+}
+
+/* 渠道行 (横向排列 picker + 自定义输入) */
+.channel-row {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.custom-channel-input {
+  width: 140rpx;
+  padding: 8rpx 0;
+  font-size: 26rpx;
+  color: #1D1D1F;
+  border-bottom: 2rpx solid #007AFF;
+}
+
+/* 快照价时价格只读 */
+.price-group.readonly {
+  opacity: 0.6;
+}
+
+.price-group.readonly .price-input {
+  color: #86868F;
 }
 
 /* 方案表格 */
@@ -620,27 +689,36 @@
   gap: 8rpx;
 }
 
-.field-label {
-  font-size: 22rpx;
-  color: #86868F;
+.price-group {
+  flex-direction: row;
+  align-items: center;
+  background: #FFFFFF;
+  border: 2rpx solid #E5E5EA;
+  border-radius: 8rpx;
+  padding: 0 16rpx;
+}
+
+.price-prefix {
+  font-size: 28rpx;
+  color: #1D1D1F;
 }
 
 .price-input {
-  width: 200rpx;
-  padding: 12rpx 16rpx;
+  width: 160rpx;
+  padding: 12rpx 0;
   font-size: 28rpx;
-  border: 2rpx solid #E5E5EA;
-  border-radius: 8rpx;
   color: #1D1D1F;
 }
 
 .price-input.error {
-  border-color: #F24B4B;
+  color: #F24B4B;
 }
 
 .field-error {
   font-size: 22rpx;
   color: #F24B4B;
+  position: absolute;
+  bottom: -30rpx;
 }
 
 .picker-text {
@@ -683,10 +761,39 @@
   opacity: 0.7;
 }
 
-.exclude-btn.active {
-  background: #FFD9D9;
+.exclude-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 16rpx;
+  font-size: 26rpx;
+  color: #1D1D1F;
+}
+
+.checkbox-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border: 2rpx solid #C7C7CC;
+  border-radius: 6rpx;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.checkbox-icon.checked {
+  background: #F24B4B;
   border-color: #F24B4B;
-  color: #F24B4B;
+}
+
+.checkbox-icon.checked::after {
+  content: '';
+  position: absolute;
+  top: 4rpx;
+  left: 10rpx;
+  width: 8rpx;
+  height: 16rpx;
+  border: solid white;
+  border-width: 0 4rpx 4rpx 0;
+  transform: rotate(45deg);
 }
 
 .defer-btn {

@@ -17,21 +17,60 @@
     <!-- 编辑模式 (manual-scheme-editor) -->
     <block wx:if="{{editorMode === 'edit'}}">
       <view class="editor-header">
-        <view class="editor-back-btn" bindtap="onExitEditor">‹ 返回</view>
-        <text class="editor-title">手动修改方案</text>
+        <view class="editor-back-btn" bindtap="onExitEditor">‹</view>
         <view class="editor-header-actions">
-          <view class="editor-undo-btn" wx:if="{{canUndo}}" bindtap="onEditorUndo">撤销</view>
+          <view class="editor-recompute-btn" bindtap="onEditorRecompute">重算报告</view>
           <view class="editor-export-btn" bindtap="onEditorExport">导出长图</view>
-          <view class="editor-upload-btn" bindtap="uploadPriceIntake">上传分享</view>
-          <view class="editor-recompute-btn" bindtap="onEditorRecompute">重新生成</view>
         </view>
+        <view class="editor-undo-btn {{!canUndo ? 'disabled' : ''}}" bindtap="onEditorUndo">⮌</view>
       </view>
 
       <view class="editor-content">
-        <!-- 批量排除快捷按钮 -->
-        <view class="editor-batch-actions">
-          <view class="batch-btn" data-action="exclude8G" bindtap="onEditorBatchExclude">排除 8G 内存</view>
-          <view class="batch-btn" data-action="excludeLongHold" bindtap="onEditorBatchExclude">排除持有期 > 3 年</view>
+        <view class="editor-intro">按您自己的调研结果修改方案</view>
+
+        <!-- 条件筛选面板 (折叠) -->
+        <view class="filter-panel">
+          <view class="filter-toggle" bindtap="onToggleFilterPanel">
+            <text>条件筛选</text>
+            <text class="filter-arrow">{{filterExpanded ? '▲' : '▼'}}</text>
+          </view>
+          <view class="filter-body" wx:if="{{filterExpanded}}">
+            <!-- 芯片 -->
+            <view class="filter-group">
+              <view class="filter-group-label">芯片</view>
+              <view class="filter-chips">
+                <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterChips}}" wx:key="value" data-dim="chip" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
+              </view>
+            </view>
+            <!-- 内存 -->
+            <view class="filter-group">
+              <view class="filter-group-label">内存</view>
+              <view class="filter-chips">
+                <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterMemory}}" wx:key="value" data-dim="memory" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
+              </view>
+            </view>
+            <!-- 存储 -->
+            <view class="filter-group">
+              <view class="filter-group-label">存储</view>
+              <view class="filter-chips">
+                <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterStorage}}" wx:key="value" data-dim="storage" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
+              </view>
+            </view>
+            <!-- 持有期 -->
+            <view class="filter-group">
+              <view class="filter-group-label">持有期</view>
+              <view class="filter-chips">
+                <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterHolding}}" wx:key="value" data-dim="holding" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
+              </view>
+            </view>
+            <!-- 新品/二手 -->
+            <view class="filter-group">
+              <view class="filter-group-label">买入时机</view>
+              <view class="filter-chips">
+                <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterTiming}}" wx:key="value" data-dim="timing" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
+              </view>
+            </view>
+          </view>
         </view>
 
         <!-- 主列表方案表格 -->
@@ -50,45 +89,54 @@
             </view>
 
             <view class="editor-row-fields">
-              <!-- 买入价 (可编辑) -->
-              <view class="field-group">
-                <text class="field-label">买入价</text>
+              <!-- 买入价 -->
+              <view class="field-group price-group {{item.channel === undefined ? 'readonly' : ''}}">
+                <text class="price-prefix">￥</text>
                 <input
                   class="price-input {{editorPriceErrors[item.rowId] ? 'error' : ''}}"
                   type="digit"
                   value="{{item.editedBuyPrice || item.buyPrice}}"
                   data-row-id="{{item.rowId}}"
+                  disabled="{{item.channel === undefined}}"
                   bindinput="onEditorPriceChange"
                 />
                 <text class="field-error" wx:if="{{editorPriceErrors[item.rowId]}}">{{editorPriceErrors[item.rowId]}}</text>
               </view>
 
-              <!-- 渠道 picker -->
-              <view class="field-group">
-                <text class="field-label">渠道</text>
+              <!-- 渠道 picker + 自定义输入(横向排列) -->
+              <view class="field-group channel-row">
                 <picker
                   mode="selector"
                   range="{{editorChannels}}"
                   data-row-id="{{item.rowId}}"
                   bindchange="onEditorChannelChange"
                 >
-                  <view class="picker-text">{{item.channel || '快照价'}}</view>
+                  <view class="picker-text">{{item._isCustomChannel ? '其他' : (item.channel || '快照价')}}</view>
                 </picker>
+                <input
+                  wx:if="{{item._isCustomChannel}}"
+                  class="custom-channel-input"
+                  placeholder="输入渠道"
+                  value="{{item.channel}}"
+                  data-row-id="{{item.rowId}}"
+                  bindinput="onEditorCustomChannelInput"
+                />
               </view>
 
-              <!-- 国补勾选 (仅渠道=京东国补时显示) -->
-              <view class="field-group" wx:if="{{item.channel === '京东国补'}}">
+              <!-- 国补勾选 (所有新品方案均可勾选) -->
+              <view class="field-group" wx:if="{{item.buyTiming === 'new'}}">
                 <view class="subsidy-toggle {{item.useSubsidy ? 'active' : ''}}" data-row-id="{{item.rowId}}" bindtap="onEditorSubsidyToggle">
-                  <text>{{item.useSubsidy ? '✓ 使用国补' : '使用国补'}}</text>
+                  <text>{{item.useSubsidy ? '✓ 国补' : '国补'}}</text>
                 </view>
               </view>
             </view>
 
             <view class="editor-row-actions">
-              <view class="action-btn exclude-btn {{item.excluded ? 'active' : ''}}" data-row-id="{{item.rowId}}" bindtap="onEditorExcludeToggle">
-                {{item.excluded ? '✓ 已排除' : '排除'}}
-              </view>
-              <view class="action-btn defer-btn" data-row-id="{{item.rowId}}" bindtap="onEditorDefer">暂不考虑</view>
+              <label class="exclude-checkbox" data-row-id="{{item.rowId}}" bindtap="onEditorExcludeToggle">
+                <view class="checkbox-icon {{item.excluded ? 'checked' : ''}}"></view>
+                <text>排除</text>
+              </label>
+              <view class="action-btn defer-btn" data-row-id="{{item.rowId}}" bindtap="onEditorDefer">移到末尾</view>
               <view class="action-btn delete-btn" wx:if="{{item.source === 'custom'}}" data-row-id="{{item.rowId}}" bindtap="onEditorDeletePlan">删除</view>
             </view>
           </view>
@@ -142,9 +190,9 @@
           </view>
         </view>
 
-        <!-- 暂不考虑分组 -->
+        <!-- 移到末尾分组 -->
         <view class="deferred-group" wx:if="{{editorDeferredPoints.length > 0}}">
-          <view class="deferred-title">暂不考虑 ({{editorDeferredPoints.length}})</view>
+          <view class="deferred-title">移到末尾 ({{editorDeferredPoints.length}})</view>
           <view class="deferred-row" wx:for="{{editorDeferredPoints}}" wx:key="rowId">
             <text class="deferred-model">{{item.model}}</text>
             <view class="action-btn restore-btn" data-row-id="{{item.rowId}}" bindtap="onEditorRestore">恢复</view>
@@ -287,7 +335,7 @@
       <view class="share-btn" bindtap="onGenerateShareCard">保存结果</view>
     </view>
 
-    <!-- 保存用户修改版 (仅 viewMode='userModified') -->
+    <!-- 保存用户修改版 → 进入分享卡 (仅 viewMode='userModified') -->
     <view class="share-btn-wrap" wx:if="{{viewMode === 'userModified' && userModified}}">
       <view class="share-btn" bindtap="onSaveUserModified">保存用户修改版</view>
     </view>
