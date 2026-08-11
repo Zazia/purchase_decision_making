@@ -22,7 +22,9 @@
           <view class="editor-recompute-btn" bindtap="onEditorRecompute">重算报告</view>
           <view class="editor-export-btn" bindtap="onEditorExport">导出长图</view>
         </view>
-        <view class="editor-undo-btn {{!canUndo ? 'disabled' : ''}}" bindtap="onEditorUndo">⮌</view>
+        <view class="editor-undo-btn {{!canUndo ? 'disabled' : ''}}" bindtap="onEditorUndo">
+          <image src="/assets/icons/undo.svg" mode="aspectFit" class="undo-icon" />
+        </view>
       </view>
 
       <view class="editor-content">
@@ -35,6 +37,13 @@
             <text class="filter-arrow">{{filterExpanded ? '▲' : '▼'}}</text>
           </view>
           <view class="filter-body" wx:if="{{filterExpanded}}">
+            <!-- 前沿状态 -->
+            <view class="filter-group">
+              <view class="filter-group-label">前沿状态</view>
+              <view class="filter-chips">
+                <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterFrontierState}}" wx:key="value" data-dim="frontierState" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
+              </view>
+            </view>
             <!-- 芯片 -->
             <view class="filter-group">
               <view class="filter-group-label">芯片</view>

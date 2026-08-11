@@ -463,10 +463,15 @@
 }
 
 .editor-undo-btn {
-  font-size: 40rpx;
-  color: #007AFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 8rpx 16rpx;
-  line-height: 1;
+}
+
+.undo-icon {
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .editor-undo-btn.disabled {

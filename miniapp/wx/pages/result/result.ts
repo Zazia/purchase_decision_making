@@ -142,6 +142,7 @@ Page({
     filterStorage: [] as Array<{value: string; label: string; active: boolean}>,
     filterHolding: [] as Array<{value: string; label: string; active: boolean}>,
     filterTiming: [] as Array<{value: string; label: string; active: boolean}>,
+    filterFrontierState: [] as Array<{value: string; label: string; active: boolean}>,
   },
 
   onLoad(query: Record<string, string>) {
@@ -596,13 +597,60 @@ Page({
       value: v, label: v === 'new' ? '新品' : '二手', active: prevTiming.has(v) ? prevTiming.get(v)! : true,
     }));
 
+    const prevFrontierState = new Map(this.data.filterFrontierState.map((c) => [c.value, c.active]));
+    const filterFrontierState = ['前沿方案', '靠近前沿方案', '其他方案'].map((v) => ({
+      value: v, label: v, active: prevFrontierState.has(v) ? prevFrontierState.get(v)! : true,
+    }));
+
     this.setData({
       editorSnapshot: snapshot,
       editorMainPoints: mainPoints,
       editorDeferredPoints: deferredPoints,
       canUndo: editorState?.canUndo() ?? false,
-      filterChips, filterMemory, filterStorage, filterHolding, filterTiming,
+      filterChips, filterMemory, filterStorage, filterHolding, filterTiming, filterFrontierState,
     });
+  },
+
+  /** 计算方案的前沿状态 (基于原始引擎结果) */
+  computeFrontierState(p: EditedPlanPoint): string {
+    if (p.source === 'custom') return '其他方案';
+    const origFrontier = this.data.original?.frontier || [];
+    
+    // 是否为前沿方案
+    const isFrontier = origFrontier.some(f => 
+      f.model === p.model && f.buyTiming === p.buyTiming && f.holdingYears === p.holdingYears
+    );
+    if (isFrontier) return '前沿方案';
+
+    // 判断是否靠近前沿
+    // 在前沿中找到性能大于等于该方案的最便宜方案，看该方案价格是否不超过其 5%
+    const pPerf = p.avgPerformance;
+    const pCost = p.monthlyCost; // 原始 cost
+    
+    // 或者找到成本小于等于该方案的最大性能，看该方案性能是否差距在 5 绝对百分点内
+    // avgPerformance 在 PlanPoint 中是 0~1 的小数 (例如 0.85)
+    
+    let isNear = false;
+    
+    // 条件1: 成本接近 (性能达标的前提下，成本不超出 5%)
+    const betterOrEqPerfFrontiers = origFrontier.filter(f => f.avgPerformance >= pPerf);
+    if (betterOrEqPerfFrontiers.length > 0) {
+      const minCostFrontier = betterOrEqPerfFrontiers.reduce((min, f) => f.monthlyCost < min.monthlyCost ? f : min);
+      if (pCost <= minCostFrontier.monthlyCost * 1.05) {
+        isNear = true;
+      }
+    }
+
+    // 条件2: 性能接近 (成本达标的前提下，性能落后不超过 0.05)
+    const cheaperOrEqCostFrontiers = origFrontier.filter(f => f.monthlyCost <= pCost);
+    if (cheaperOrEqCostFrontiers.length > 0) {
+      const maxPerfFrontier = cheaperOrEqCostFrontiers.reduce((max, f) => f.avgPerformance > max.avgPerformance ? f : max);
+      if (pPerf >= maxPerfFrontier.avgPerformance - 0.05) {
+        isNear = true;
+      }
+    }
+
+    return isNear ? '靠近前沿方案' : '其他方案';
   },
 
   /** 从 model 解析内存 GB (用于批量排除) */
@@ -632,12 +680,9 @@ Page({
     if (!snap) return;
 
     // 更新 filter state
-    const filterKey = `filter${dim.charAt(0).toUpperCase() + dim.slice(1)}` as
-      'filterChips' | 'filterMemory' | 'filterStorage' | 'filterHolding' | 'filterTiming';
-    // Actually filterChips → dim='chip', key = 'filterChips'. Let's map properly:
     const keyMap: Record<string, string> = {
       chip: 'filterChips', memory: 'filterMemory', storage: 'filterStorage',
-      holding: 'filterHolding', timing: 'filterTiming',
+      holding: 'filterHolding', timing: 'filterTiming', frontierState: 'filterFrontierState'
     };
     const dataKey = keyMap[dim];
     if (!dataKey) return;
@@ -676,6 +721,7 @@ Page({
     if (dim === 'storage') return String(p.storageGb ?? this.extractStorageGbFromModel(p.model)) === val;
     if (dim === 'holding') return String(p.holdingYears) === val;
     if (dim === 'timing') return p.buyTiming === val;
+    if (dim === 'frontierState') return this.computeFrontierState(p) === val;
     return false;
   },
 
