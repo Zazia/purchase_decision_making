@@ -404,7 +404,7 @@ Component({
 
       ctx.font = '22px -apple-system, "PingFang SC", sans-serif';
       ctx.fillStyle = '#B9B9C1';
-      ctx.fillText('个人主体 · 非商业 · CC BY-NC 4.0 · github.com/Zazia/purchase_decision_making', 60, 1430);
+      ctx.fillText('个人主体 · 非商业 · CC BY-NC 4.0 · github.com/Zazia/apple-value-analysis', 60, 1430);
     },
 
     /** 绘制帕累托缩略图 (含点位极简标注) */

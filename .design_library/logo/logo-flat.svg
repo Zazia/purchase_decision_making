@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logo SVG（扁平版 / App 图标用）
+  ──────────────────────────────────────────────
+  无 squircle 圆角、无投影、无裁剪。
+  白色满铺背景，内容填满整个正方形。
+  iOS / Android 提交时平台自动套用圆角蒙版。
+
+  viewBox: -4 -4 108 108（内容 0~100，四周 4px 留白给 8px 描边）
+  结构 ID 与 logo.svg 完全一致，方便动画复用。
+-->
+<svg viewBox="-4 -4 108 108" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="flat-title flat-desc">
+  <title id="flat-title">Logo (Flat)</title>
+  <desc id="flat-desc">扁平版 Logo，无圆角裁剪，适用于 App 图标提交。</desc>
+
+  <defs>
+    <linearGradient id="grad-blue-f" x1="15" y1="5" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5AC8FA"/>
+      <stop offset="50%" stop-color="#2B8CF7"/>
+      <stop offset="100%" stop-color="#007AFF"/>
+    </linearGradient>
+    <linearGradient id="grad-hl-f" x1="4.96" y1="100" x2="103.93" y2="4.04" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.87"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.47"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 满铺白色背景（App 图标要求不透明） -->
+  <rect x="0" y="0" width="100" height="100" fill="#FFFFFF"/>
+
+  <g id="logo-content">
+    <g id="curve">
+      <path id="curve-fill"
+            d="M70,0 H100 V100 H0 V70 C0,51.4348 7.37498,33.6301 20.5025,20.5025 C33.6301,7.375 51.4348,0 70,0 Z"
+            fill="url(#grad-blue-f)"/>
+      <path id="curve-highlight"
+            d="M100,0 H71.2 C53.3775,0 36.2849,7.375 23.6824,20.5025 C11.08,33.6301 4,51.4348 4,70 V100"
+            fill="none" stroke="url(#grad-hl-f)" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    <g id="dots" fill="#FFFFFF">
+      <circle id="dot-01" cx="87"   cy="20"   r="3"/>
+      <circle id="dot-02" cx="29"   cy="31"   r="3"/>
+      <circle id="dot-03" cx="26.5" cy="43.5" r="5.5"/>
+      <circle id="dot-04" cx="84"   cy="45"   r="4"   opacity="0.8"/>
+      <circle id="dot-05" cx="69.5" cy="29.5" r="6.5" opacity="0.85"/>
+      <circle id="dot-06" cx="39.5" cy="61.5" r="4.5" opacity="0.9"/>
+      <circle id="dot-07" cx="60"   cy="54"   r="5"   opacity="0.85"/>
+      <circle id="dot-08" cx="49"   cy="33"   r="5"   opacity="0.9"/>
+      <circle id="dot-09" cx="44"   cy="80"   r="4"   opacity="0.6"/>
+      <circle id="dot-10" cx="20.5" cy="66.5" r="3.5"/>
+      <circle id="dot-11" cx="81"   cy="60"   r="3"   opacity="0.6"/>
+      <circle id="dot-12" cx="51"   cy="16"   r="5"/>
+    </g>
+  </g>
+</svg>

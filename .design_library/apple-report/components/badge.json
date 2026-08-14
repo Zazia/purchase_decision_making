@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 2,
+  "slug": "badge",
+  "name": "Badge",
+  "category": "status",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [
+    {
+      "candidate": "status",
+      "evidence": "small label indicating state"
+    }
+  ],
+  "variantDimensions": [
+    {
+      "name": "tone",
+      "values": [
+        "default",
+        "success",
+        "warning",
+        "error"
+      ]
+    }
+  ],
+  "representativeVariants": [
+    {
+      "name": "success",
+      "whySelected": "positive metric indicator",
+      "traits": {
+        "background": "var(--color-success-soft)",
+        "color": "var(--color-success)"
+      },
+      "childrenDigest": "text label"
+    },
+    {
+      "name": "default",
+      "whySelected": "neutral tag",
+      "traits": {
+        "background": "var(--color-muted)",
+        "color": "var(--color-muted-foreground)"
+      },
+      "childrenDigest": "text label"
+    }
+  ],
+  "anatomy": [
+    "container",
+    "label"
+  ],
+  "structurePatterns": [
+    "inline flex",
+    "pill or rounded rectangle"
+  ],
+  "usageHints": {
+    "priorityHint": "Use badges for status, tags, or KPI deltas."
+  },
+  "doNotInvent": [
+    "no dismiss button",
+    "no icon variants"
+  ],
+  "unknowns": [],
+  "keyInsightSeed": "small, soft, pill-shaped"
+}

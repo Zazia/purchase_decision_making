@@ -1728,7 +1728,7 @@ Page({
   /** 打开 GitHub 链接(复制到剪贴板) */
   onOpenGitHub() {
     wx.setClipboardData({
-      data: 'https://github.com/Zazia/purchase_decision_making',
+      data: 'https://github.com/Zazia/apple-value-analysis',
       success: () => {
         wx.showToast({ title: '链接已复制', icon: 'success' });
       },

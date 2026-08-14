@@ -1,0 +1,64 @@
+{
+  "components": [
+    {
+      "slug": "button",
+      "name": "Button",
+      "category": "action",
+      "sourceKind": "from-scratch",
+      "confidence": "medium",
+      "variantCount": 12,
+      "priorityHint": "Use solid primary for main actions; ghost for low-priority actions on cards.",
+      "keyInsightSeed": "rounded, medium weight, generous padding"
+    },
+    {
+      "slug": "card",
+      "name": "Card",
+      "category": "surface",
+      "sourceKind": "from-scratch",
+      "confidence": "medium",
+      "variantCount": 2,
+      "priorityHint": "Use cards to group related metrics or report sections.",
+      "keyInsightSeed": "large radius, subtle shadow, warm white surface"
+    },
+    {
+      "slug": "table",
+      "name": "Table",
+      "category": "data",
+      "sourceKind": "from-scratch",
+      "confidence": "medium",
+      "variantCount": 2,
+      "priorityHint": "Use for structured report data; keep headers muted.",
+      "keyInsightSeed": "clean rows, light dividers, rounded container"
+    },
+    {
+      "slug": "chart",
+      "name": "Chart",
+      "category": "data",
+      "sourceKind": "from-scratch",
+      "confidence": "low",
+      "variantCount": 3,
+      "priorityHint": "Use chart cards to surface trends; keep color palette minimal.",
+      "keyInsightSeed": "muted grid, brand-colored data marks"
+    },
+    {
+      "slug": "navigation",
+      "name": "Navigation",
+      "category": "navigation",
+      "sourceKind": "from-scratch",
+      "confidence": "medium",
+      "variantCount": 2,
+      "priorityHint": "Keep nav minimal; highlight active section with subtle background.",
+      "keyInsightSeed": "light header, muted active state"
+    },
+    {
+      "slug": "badge",
+      "name": "Badge",
+      "category": "status",
+      "sourceKind": "from-scratch",
+      "confidence": "medium",
+      "variantCount": 4,
+      "priorityHint": "Use badges for status, tags, or KPI deltas.",
+      "keyInsightSeed": "small, soft, pill-shaped"
+    }
+  ]
+}

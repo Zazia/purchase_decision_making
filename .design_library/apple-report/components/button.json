@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 2,
+  "slug": "button",
+  "name": "Button",
+  "category": "action",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [
+    {
+      "candidate": "action",
+      "evidence": "click-to-act control"
+    }
+  ],
+  "variantDimensions": [
+    {
+      "name": "variant",
+      "values": [
+        "solid",
+        "soft",
+        "ghost",
+        "outline"
+      ]
+    },
+    {
+      "name": "size",
+      "values": [
+        "sm",
+        "md",
+        "lg"
+      ]
+    }
+  ],
+  "representativeVariants": [
+    {
+      "name": "solid-primary",
+      "whySelected": "default CTA",
+      "traits": {
+        "background": "var(--color-primary)",
+        "color": "var(--color-primary-foreground)",
+        "radius": "var(--radius-md)"
+      },
+      "childrenDigest": "text label"
+    },
+    {
+      "name": "soft-secondary",
+      "whySelected": "secondary action",
+      "traits": {
+        "background": "var(--color-secondary)",
+        "color": "var(--color-secondary-foreground)",
+        "radius": "var(--radius-md)"
+      },
+      "childrenDigest": "text label"
+    }
+  ],
+  "anatomy": [
+    "container",
+    "label",
+    "optional icon"
+  ],
+  "structurePatterns": [
+    "single-line flex row",
+    "centered content"
+  ],
+  "usageHints": {
+    "priorityHint": "Use solid primary for main actions; ghost for low-priority actions on cards."
+  },
+  "doNotInvent": [
+    "no loading spinner animation",
+    "no split button"
+  ],
+  "unknowns": [],
+  "keyInsightSeed": "rounded, medium weight, generous padding"
+}

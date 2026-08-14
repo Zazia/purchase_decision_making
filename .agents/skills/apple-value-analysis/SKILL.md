@@ -1,5 +1,6 @@
 ---
 name: apple-value-analysis
+license: MIT
 description: 量化分析苹果产品保值率与持有成本,用帕累托前沿筛选最优(机型×持有期)购买方案。当用户想买苹果设备、对比各代/二手/新品性价比、决定持有多久划算、或做苹果产品购买决策时调用。
 ---
 
@@ -74,7 +75,7 @@ description: 量化分析苹果产品保值率与持有成本,用帕累托前沿
 
 **数据维护**:constants.json 的更新(保值率曲线年度更新、芯片跑分更新、市场价快照回写等)统一在远程仓库进行,**更新节奏约为每周一次**(主要为市场价快照回写,大版本含保值率/跑分更新频率更低)。分析过程中本地回写的市场价快照仅用于本次分析,不自动推送至远程——远程仓库的 constants.json 由维护者定期合并各分析节点的快照更新。用户本地 SKILL.md 的 SOP 版本不需要跟随 constants.json 版本升级,只要 SOP 定义的字段结构在 constants.json 中存在即可正常工作。**Gitee 与 GitHub 两个仓库内容保持同步**(同步策略见仓库 README.md "双仓库同步"章节)。
 
-**许可证**:SKILL.md 与 constants.json 均采用 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) 许可证(署名-非商业性使用 4.0 国际),详见仓库根目录 LICENSE 文件。任何人可自由复制、分发、修改本技能,但不得用于商业目的,且必须保留原作者署名。
+**许可证**(两文件独立):SKILL.md 采用 [MIT 许可证](https://opensource.org/licenses/MIT),可自由使用、复制、修改、分发,含商业用途;constants.json 采用 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) 许可证(署名-非商业性使用 4.0 国际),存放于数据仓库 `purchase_decision_making`,任何人可自由复制、审查,但不得用于商业目的且须保留原作者署名。
 
 ---
 
@@ -637,6 +638,6 @@ r 取值(按芯片系列):
   - 主源(Gitee,国内推荐):`https://gitee.com/zezia/purchase_decision_making`
   - 备份源(GitHub):`https://github.com/Zazia/purchase_decision_making`
   - constants.json 的权威源,获取与更新机制见"依赖文件"章节
-- **许可证**:CC BY-NC 4.0(署名-非商业性使用 4.0 国际),详见仓库根目录 LICENSE 文件
+- **许可证**:SKILL.md 采用 MIT 许可证;constants.json 采用 CC BY-NC 4.0(署名-非商业性使用 4.0 国际)。详见各自仓库根目录 LICENSE 文件
 
 **版本演进规则**:SOP(方法论)与 constants.json(数据)版本号**独立演进**。SOP 版本仅在流程/公式/规则变更时升级;constants.json 版本随数据更新(约每周一次)递增,版本号可能高于 SOP 版本。SKILL.md 可独立分发,执行时自动从远程仓库获取最新 constants.json(依据 `last_updated` 日期判断过期,不依赖版本号比对)。只要 SOP 定义的字段结构在 constants.json 中存在,两者即可正常协同工作。

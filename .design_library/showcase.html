@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设计系统总览 — Apple 产品购买决策工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============ 基础重置 ============ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* 中性色 */
+    --gray-50: #F5F5F7;
+    --gray-100: #E8E8ED;
+    --gray-200: #D2D2D8;
+    --gray-300: #B9B9C1;
+    --gray-400: #9E9EA8;
+    --gray-500: #86868F;
+    --gray-600: #6E6E78;
+    --gray-700: #575760;
+    --gray-800: #3F3F46;
+    --gray-900: #1D1D1F;
+
+    /* 品牌蓝 */
+    --blue-50: #E6F2FF;
+    --blue-100: #CCE4FF;
+    --blue-200: #99C9FF;
+    --blue-300: #66ADFF;
+    --blue-400: #3392FF;
+    --blue-500: #007AFF;
+    --blue-600: #0063D4;
+    --blue-700: #004FAF;
+    --blue-800: #003B85;
+    --blue-900: #00285C;
+
+    /* 语义色 */
+    --green-600: #2A8A61;
+    --green-100: #D9F0E3;
+    --amber-600: #E09500;
+    --amber-100: #FFF0C2;
+    --red-500: #F24B4B;
+    --red-100: #FFD9D9;
+    --cyan-600: #2BA3A6;
+    --cyan-100: #D7F5F5;
+
+    /* 项目专属 */
+    --used-bg: #FFD9D9;
+    --used-text: #9F1239;
+    --wait-bg: #FFE9D1;
+    --wait-text: #C25E00;
+    --hold-bg: #F5F5F7;
+    --hold-text: #86868F;
+
+    /* 间距 */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+
+    /* 圆角 */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    /* 阴影 */
+    --shadow-1: 0 1px 2px rgba(29,29,31,0.06), 0 1px 1px rgba(29,29,31,0.04);
+    --shadow-2: 0 4px 8px -2px rgba(29,29,31,0.08);
+    --shadow-3: 0 8px 24px -8px rgba(29,29,31,0.14);
+    --shadow-4: 0 16px 40px -12px rgba(29,29,31,0.20);
+    --shadow-5: 0 24px 60px -20px rgba(29,29,31,0.26);
+
+    /* 字体 */
+    --font-display: 'DM Sans', -apple-system, SF Pro Display, PingFang SC, sans-serif;
+    --font-body: 'Inter', -apple-system, SF Pro Text, PingFang SC, Microsoft YaHei, sans-serif;
+    --font-mono: 'JetBrains Mono', SF Mono, Consolas, monospace;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--gray-50);
+    color: var(--gray-900);
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ 布局 ============ */
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+
+  .section {
+    margin-bottom: 80px;
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1.25;
+  }
+
+  .section-subtitle {
+    font-size: 16px;
+    color: var(--gray-500);
+    margin-top: 8px;
+    line-height: 1.7;
+  }
+
+  /* ============ Hero ============ */
+  .hero {
+    text-align: center;
+    padding: 80px 32px 64px;
+    background: var(--blue-500);
+    border-radius: var(--radius-xl);
+    margin-bottom: 80px;
+    color: #FFFFFF;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero p {
+    font-size: 18px;
+    line-height: 1.7;
+    opacity: 0.85;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-top: 48px;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat-value {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .hero-stat-label {
+    font-size: 14px;
+    opacity: 0.7;
+    margin-top: 8px;
+  }
+
+  /* ============ 颜色展示 ============ */
+  .color-group {
+    margin-bottom: 40px;
+  }
+
+  .color-group-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .color-swatch {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-1);
+    transition: filter 0.15s ease, transform 0.15s ease;
+    cursor: default;
+  }
+
+  .color-swatch:hover {
+    filter: brightness(0.97);
+    transform: translateY(-2px);
+  }
+
+  .color-block {
+    height: 80px;
+    position: relative;
+  }
+
+  .color-info {
+    padding: 8px 12px;
+    background: #FFFFFF;
+  }
+
+  .color-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-900);
+    font-family: var(--font-mono);
+  }
+
+  .color-hex {
+    font-size: 11px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+
+  .color-use {
+    font-size: 10px;
+    color: var(--gray-400);
+    margin-top: 2px;
+  }
+
+  /* ============ 对比表 ============ */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #FFFFFF;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-1);
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 14px;
+  }
+
+  .comparison-table th {
+    background: var(--gray-50);
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 13px;
+  }
+
+  .comparison-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .color-dot {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.06);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .old-color {
+    color: var(--red-500);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .new-color {
+    color: var(--green-600);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .arrow {
+    color: var(--gray-400);
+    margin: 0 8px;
+  }
+
+  /* ============ 字体展示 ============ */
+  .type-row {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .type-row:last-child {
+    border-bottom: none;
+  }
+
+  .type-label {
+    flex-shrink: 0;
+    width: 120px;
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+
+  .type-spec {
+    flex-shrink: 0;
+    width: 140px;
+    font-size: 12px;
+    color: var(--gray-400);
+    font-family: var(--font-mono);
+  }
+
+  .type-sample {
+    flex: 1;
+    color: var(--gray-900);
+  }
+
+  .type-display { font-family: var(--font-display); font-size: 56px; font-weight: 700; line-height: 1.1; }
+  .type-h1 { font-family: var(--font-display); font-size: 40px; font-weight: 700; line-height: 1.2; }
+  .type-h2 { font-family: var(--font-display); font-size: 32px; font-weight: 600; line-height: 1.25; }
+  .type-h3 { font-family: var(--font-display); font-size: 24px; font-weight: 600; line-height: 1.3; }
+  .type-h4 { font-family: var(--font-display); font-size: 20px; font-weight: 600; line-height: 1.4; }
+  .type-lead { font-family: var(--font-body); font-size: 18px; font-weight: 400; line-height: 1.7; }
+  .type-body { font-family: var(--font-body); font-size: 16px; font-weight: 400; line-height: 1.6; }
+  .type-caption { font-family: var(--font-body); font-size: 12px; font-weight: 400; line-height: 1.5; color: var(--gray-500); }
+  .type-mono { font-family: var(--font-mono); font-size: 14px; font-weight: 400; line-height: 1.6; }
+
+  /* ============ 间距展示 ============ */
+  .spacing-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .spacing-row:last-child {
+    border-bottom: none;
+  }
+
+  .spacing-label {
+    flex-shrink: 0;
+    width: 100px;
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+
+  .spacing-bar {
+    height: 24px;
+    background: var(--blue-500);
+    border-radius: 4px;
+  }
+
+  .spacing-value {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-family: var(--font-mono);
+  }
+
+  /* ============ 圆角展示 ============ */
+  .radius-grid {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .radius-item {
+    text-align: center;
+  }
+
+  .radius-box {
+    width: 80px;
+    height: 80px;
+    background: var(--blue-50);
+    border: 2px solid var(--blue-500);
+    margin-bottom: 8px;
+  }
+
+  .radius-label {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+
+  /* ============ 阴影展示 ============ */
+  .shadow-grid {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .shadow-item {
+    text-align: center;
+  }
+
+  .shadow-box {
+    width: 120px;
+    height: 80px;
+    background: #FFFFFF;
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+  }
+
+  .shadow-label {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+
+  /* ============ 组件 mockup ============ */
+  .mockup-section {
+    display: grid;
+    grid-template-columns: 375px;
+    gap: 24px;
+    justify-content: center;
+  }
+
+  .phone-frame {
+    width: 375px;
+    background: var(--gray-50);
+    border-radius: var(--radius-xl);
+    padding: 24px 16px 48px;
+    box-shadow: var(--shadow-3);
+    overflow: hidden;
+  }
+
+  .phone-label {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+    text-align: center;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  /* 卡片 */
+  .mock-card {
+    background: #FFFFFF;
+    border-radius: var(--radius-xl);
+    padding: 16px 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-1);
+  }
+
+  .mock-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 12px;
+  }
+
+  /* 方案卡片 */
+  .mock-plan-card {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 12px 10px;
+    border: 2px solid transparent;
+    transition: all 0.15s ease;
+    margin-bottom: 10px;
+  }
+
+  .mock-plan-card.active {
+    background: var(--blue-50);
+    border-color: var(--blue-500);
+  }
+
+  .mock-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .mock-plan-model {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gray-900);
+    flex: 1;
+  }
+
+  .mock-badges {
+    display: flex;
+    gap: 4px;
+  }
+
+  .mock-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .mock-badge-new { background: var(--green-100); color: var(--green-600); }
+  .mock-badge-used { background: var(--used-bg); color: var(--used-text); }
+  .mock-badge-hold { background: var(--hold-bg); color: var(--hold-text); }
+  .mock-badge-wait { background: var(--wait-bg); color: var(--wait-text); }
+
+  .mock-metrics {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .mock-metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--blue-500);
+    font-family: var(--font-display);
+  }
+
+  .mock-metric-unit {
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+
+  .mock-metric-label {
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+
+  /* 按钮 */
+  .mock-btn-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .mock-btn-primary {
+    background: var(--blue-500);
+    color: #FFFFFF;
+    font-size: 15px;
+    border-radius: var(--radius-full);
+    padding: 10px 32px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .mock-btn-primary:hover {
+    background: var(--blue-600);
+  }
+
+  .mock-btn-ghost {
+    background: transparent;
+    color: var(--blue-500);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 8px 20px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .mock-btn-dark {
+    background: var(--gray-900);
+    color: #FFFFFF;
+    border-radius: var(--radius-full);
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    flex: 1;
+  }
+
+  .mock-btn-dark:hover {
+    opacity: 0.85;
+  }
+
+  .mock-btn-secondary {
+    background: #FFFFFF;
+    color: var(--gray-900);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-full);
+    padding: 14px;
+    font-size: 16px;
+    text-align: center;
+    flex: 1;
+    cursor: pointer;
+  }
+
+  /* 筛选 chip */
+  .mock-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .mock-chip {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: var(--radius-full);
+    background: var(--gray-100);
+    color: var(--gray-900);
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .mock-chip.active {
+    background: var(--blue-50);
+    color: var(--blue-500);
+    border-color: var(--blue-500);
+  }
+
+  .mock-chip.partial {
+    background: var(--blue-50);
+    color: var(--blue-500);
+    border-color: var(--blue-500);
+    opacity: 0.7;
+  }
+
+  /* 空态卡片 */
+  .mock-empty-card {
+    background: var(--amber-100);
+    border-radius: var(--radius-xl);
+    padding: 20px 16px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .mock-empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+  }
+
+  .mock-empty-desc {
+    font-size: 14px;
+    color: var(--amber-600);
+    margin-bottom: 4px;
+  }
+
+  .mock-empty-suggestion {
+    font-size: 13px;
+    color: var(--gray-500);
+  }
+
+  /* Tab 切换 */
+  .mock-tabs {
+    display: flex;
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    padding: 3px;
+    margin-bottom: 12px;
+  }
+
+  .mock-tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px 0;
+    font-size: 14px;
+    color: var(--gray-500);
+    border-radius: var(--radius-full);
+    transition: all 0.2s;
+  }
+
+  .mock-tab.active {
+    background: #FFFFFF;
+    color: var(--gray-900);
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(29,29,31,0.08);
+  }
+
+  /* 指标大卡 */
+  .mock-metrics-card {
+    background: linear-gradient(135deg, var(--blue-500), var(--blue-600));
+    border-radius: var(--radius-xl);
+    padding: 18px 14px;
+    margin-bottom: 12px;
+  }
+
+  .mock-metrics-card .metric-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #FFFFFF;
+    font-family: var(--font-display);
+  }
+
+  .mock-metrics-card .metric-unit {
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .mock-metrics-card .metric-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* 加载动画 */
+  .mock-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  .mock-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--blue-500);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* 等待卡片 */
+  .mock-wait-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--blue-50);
+    border-radius: var(--radius-xl);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .mock-wait-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--blue-500);
+    margin-bottom: 3px;
+  }
+
+  .mock-wait-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  /* 风险卡片 */
+  .mock-risk-card {
+    background: var(--amber-100);
+    border: 2px solid var(--amber-600);
+    border-radius: var(--radius-xl);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .mock-risk-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--wait-text);
+    margin-bottom: 6px;
+  }
+
+  .mock-risk-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.6;
+  }
+
+  /* 前沿分组标题 */
+  .mock-frontier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+    margin-top: 8px;
+  }
+
+  .mock-frontier-label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .mock-frontier-label.frontier { color: var(--blue-500); }
+  .mock-frontier-label.near { color: var(--blue-300); }
+  .mock-frontier-label.other { color: var(--gray-500); }
+
+  .mock-frontier-count {
+    font-size: 12px;
+    color: var(--gray-300);
+    background: var(--gray-100);
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+  }
+
+  /* 编辑器行 */
+  .mock-editor-row {
+    background: #FFFFFF;
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 2px solid var(--gray-200);
+  }
+
+  .mock-editor-row.excluded {
+    opacity: 0.5;
+    background: var(--gray-100);
+  }
+
+  .mock-editor-model {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-900);
+  }
+
+  .mock-editor-tag {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .mock-tag-custom { background: var(--blue-50); color: var(--blue-500); }
+  .mock-tag-excluded { background: var(--red-100); color: var(--red-500); }
+
+  .mock-editor-meta {
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+
+  /* 图表区域占位 */
+  .mock-chart-placeholder {
+    background: #FFFFFF;
+    border-radius: var(--radius-xl);
+    padding: 16px 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-1);
+  }
+
+  .mock-chart-area {
+    height: 120px;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    padding: 12px 8px;
+    margin-top: 8px;
+  }
+
+  .mock-bar {
+    width: 16px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .mock-chart-legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .mock-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+
+  .mock-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ============ 说明卡片 ============ */
+  .note-card {
+    background: var(--blue-50);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.7;
+  }
+
+  .note-card strong {
+    color: var(--gray-900);
+    font-weight: 600;
+  }
+
+  /* ============ 页脚 ============ */
+  .page-footer {
+    text-align: center;
+    padding: 32px 0 0;
+    border-top: 1px solid var(--gray-200);
+    margin-top: 48px;
+  }
+
+  .page-footer p {
+    font-size: 13px;
+    color: var(--gray-500);
+    line-height: 1.6;
+  }
+
+  .page-footer code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--gray-700);
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ============ Hero ============ -->
+  <div class="hero">
+    <h1>设计系统总览</h1>
+    <p>本项目所有视觉产物共享同一套令牌：颜色、字体、间距、圆角、阴影。此页直观展示每个令牌的视觉效果，以及按规范设计出的小程序组件长什么样。</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value">23</div>
+        <div class="hero-stat-label">颜色令牌</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">9</div>
+        <div class="hero-stat-label">字号层级</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">8</div>
+        <div class="hero-stat-label">间距基点</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">5</div>
+        <div class="hero-stat-label">阴影层级</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 核心速览 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">核心速览</h2>
+      <p class="section-subtitle">一眼看完全部核心设计决策。</p>
+    </div>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>维度</th><th>值</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>主色</td><td><span class="color-dot" style="background:#007AFF"></span><code>#007AFF</code></td><td>品牌蓝，承担所有「行动指向」：按钮、链接、图表主色</td></tr>
+        <tr><td>页面背景</td><td><span class="color-dot" style="background:#F5F5F7"></span><code>#F5F5F7</code></td><td>略带暖调的浅灰，不是纯白</td></tr>
+        <tr><td>卡片表面</td><td><span class="color-dot" style="background:#FFFFFF;border:1px solid #D2D2D8"></span><code>#FFFFFF</code></td><td>纯白卡片，通过阴影区分层级</td></tr>
+        <tr><td>主文字</td><td><span class="color-dot" style="background:#1D1D1F"></span><code>#1D1D1F</code></td><td>近黑色，不用纯黑 <code>#000</code></td></tr>
+        <tr><td>次级文字</td><td><span class="color-dot" style="background:#86868F"></span><code>#86868F</code></td><td>说明、状态文字、图例</td></tr>
+        <tr><td>分隔线</td><td><span class="color-dot" style="background:#D2D2D8"></span><code>#D2D2D8</code></td><td>边框、分隔线统一颜色</td></tr>
+        <tr><td>字体栈</td><td>DM Sans / Inter / JetBrains Mono</td><td>标题用 DM Sans，正文用 Inter，数值用 Mono</td></tr>
+        <tr><td>间距基点</td><td><code>4px</code></td><td>序列 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64</td></tr>
+        <tr><td>圆角</td><td>8 / 12 / 16 / 20 / 9999</td><td>控件 → 按钮 → 卡片 → 药丸</td></tr>
+        <tr><td>阴影色</td><td><code>rgba(29,29,31,0.06~0.26)</code></td><td>略带蓝调的深灰，不用纯黑</td></tr>
+        <tr><td>动效</td><td><code>0.15s ease</code></td><td>hover 用 brightness(0.97)，不用渐变动画</td></tr>
+        <tr><td>语调</td><td>中文优先、专业、克制</td><td>不用 emoji，标题 2-4 字名词短语</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 中性色 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">中性色（9 阶）</h2>
+      <p class="section-subtitle">工作面的基础。从页面背景到主文字，9 级灰度覆盖所有界面层次。</p>
+    </div>
+    <div class="color-group">
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-block" style="background:#F5F5F7"></div>
+          <div class="color-info"><div class="color-name">gray-50</div><div class="color-hex">#F5F5F7</div><div class="color-use">页面背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#E8E8ED"></div>
+          <div class="color-info"><div class="color-name">gray-100</div><div class="color-hex">#E8E8ED</div><div class="color-use">次级背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#D2D2D8"></div>
+          <div class="color-info"><div class="color-name">gray-200</div><div class="color-hex">#D2D2D8</div><div class="color-use">边框、分隔线</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#B9B9C1"></div>
+          <div class="color-info"><div class="color-name">gray-300</div><div class="color-hex">#B9B9C1</div><div class="color-use">禁用边框</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#9E9EA8"></div>
+          <div class="color-info"><div class="color-name">gray-400</div><div class="color-hex">#9E9EA8</div><div class="color-use">占位文字</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#86868F"></div>
+          <div class="color-info"><div class="color-name">gray-500</div><div class="color-hex">#86868F</div><div class="color-use">次级文字</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#6E6E78"></div>
+          <div class="color-info"><div class="color-name">gray-600</div><div class="color-hex">#6E6E78</div><div class="color-use">辅助文字</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#575760"></div>
+          <div class="color-info"><div class="color-name">gray-700</div><div class="color-hex">#575760</div><div class="color-use">强调次级</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#3F3F46"></div>
+          <div class="color-info"><div class="color-name">gray-800</div><div class="color-hex">#3F3F46</div><div class="color-use">深色次级</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#1D1D1F"></div>
+          <div class="color-info"><div class="color-name">gray-900</div><div class="color-hex">#1D1D1F</div><div class="color-use">主文字</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 品牌蓝 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">品牌蓝（主色）</h2>
+      <p class="section-subtitle">承担界面中所有「行动指向」：主要按钮、链接、图表主数据线、激活态高亮。10 级蓝色从最浅到最深。</p>
+    </div>
+    <div class="color-group">
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-block" style="background:#E6F2FF"></div>
+          <div class="color-info"><div class="color-name">blue-50</div><div class="color-hex">#E6F2FF</div><div class="color-use">选中态背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#CCE4FF"></div>
+          <div class="color-info"><div class="color-name">blue-100</div><div class="color-hex">#CCE4FF</div><div class="color-use">浅蓝背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#99C9FF"></div>
+          <div class="color-info"><div class="color-name">blue-200</div><div class="color-hex">#99C9FF</div><div class="color-use">图例</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#66ADFF"></div>
+          <div class="color-info"><div class="color-name">blue-300</div><div class="color-hex">#66ADFF</div><div class="color-use">次级链接</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#3392FF"></div>
+          <div class="color-info"><div class="color-name">blue-400</div><div class="color-hex">#3392FF</div><div class="color-use">hover 浅态</div></div>
+        </div>
+        <div class="color-swatch" style="outline: 3px solid var(--blue-500); outline-offset: 2px;">
+          <div class="color-block" style="background:#007AFF"></div>
+          <div class="color-info"><div class="color-name" style="color:#007AFF;font-weight:700">blue-500 ★</div><div class="color-hex">#007AFF</div><div class="color-use">主色 — 按钮、链接</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#0063D4"></div>
+          <div class="color-info"><div class="color-name">blue-600</div><div class="color-hex">#0063D4</div><div class="color-use">hover 态</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#004FAF"></div>
+          <div class="color-info"><div class="color-name">blue-700</div><div class="color-hex">#004FAF</div><div class="color-use">pressed 深态</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#003B85"></div>
+          <div class="color-info"><div class="color-name">blue-800</div><div class="color-hex">#003B85</div><div class="color-use">深色背景主色</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#00285C"></div>
+          <div class="color-info"><div class="color-name">blue-900</div><div class="color-hex">#00285C</div><div class="color-use">极深蓝</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 语义色 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">语义色</h2>
+      <p class="section-subtitle">仅用于徽章、状态标签、数据变化标识，不大面积填充。</p>
+    </div>
+    <div class="color-group">
+      <div class="color-grid">
+        <div class="color-swatch">
+          <div class="color-block" style="background:#D9F0E3"></div>
+          <div class="color-info"><div class="color-name">green-100</div><div class="color-hex">#D9F0E3</div><div class="color-use">成功背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#2A8A61"></div>
+          <div class="color-info"><div class="color-name">green-600</div><div class="color-hex">#2A8A61</div><div class="color-use">成功文字</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#FFF0C2"></div>
+          <div class="color-info"><div class="color-name">amber-100</div><div class="color-hex">#FFF0C2</div><div class="color-use">警告背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#E09500"></div>
+          <div class="color-info"><div class="color-name">amber-600</div><div class="color-hex">#E09500</div><div class="color-use">警告文字</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#FFD9D9"></div>
+          <div class="color-info"><div class="color-name">red-100</div><div class="color-hex">#FFD9D9</div><div class="color-use">错误背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#F24B4B"></div>
+          <div class="color-info"><div class="color-name">red-500</div><div class="color-hex">#F24B4B</div><div class="color-use">错误文字</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#D7F5F5"></div>
+          <div class="color-info"><div class="color-name">cyan-100</div><div class="color-hex">#D7F5F5</div><div class="color-use">信息背景</div></div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-block" style="background:#2BA3A6"></div>
+          <div class="color-info"><div class="color-name">cyan-600</div><div class="color-hex">#2BA3A6</div><div class="color-use">信息文字</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 项目专属徽章 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">项目专属徽章色</h2>
+      <p class="section-subtitle">购买决策工具特有的状态徽章颜色，在小程序中直接使用。</p>
+    </div>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>徽章类型</th><th>背景</th><th>文字</th><th>效果预览</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>新机 (badge-new)</td>
+          <td><span class="color-dot" style="background:#D9F0E3"></span><code>#D9F0E3</code></td>
+          <td><span class="color-dot" style="background:#2A8A61"></span><code>#2A8A61</code></td>
+          <td><span class="mock-badge mock-badge-new">新机</span></td>
+        </tr>
+        <tr>
+          <td>二手 (badge-used)</td>
+          <td><span class="color-dot" style="background:#FFD9D9"></span><code>#FFD9D9</code></td>
+          <td><span class="color-dot" style="background:#9F1239"></span><code>#9F1239</code></td>
+          <td><span class="mock-badge mock-badge-used">二手</span></td>
+        </tr>
+        <tr>
+          <td>持有期 (badge-hold)</td>
+          <td><span class="color-dot" style="background:#F5F5F7;border:1px solid #D2D2D8"></span><code>#F5F5F7</code></td>
+          <td><span class="color-dot" style="background:#86868F"></span><code>#86868F</code></td>
+          <td><span class="mock-badge mock-badge-hold">12 月</span></td>
+        </tr>
+        <tr>
+          <td>等待候选 (badge-wait)</td>
+          <td><span class="color-dot" style="background:#FFE9D1"></span><code>#FFE9D1</code></td>
+          <td><span class="color-dot" style="background:#C25E00"></span><code>#C25E00</code></td>
+          <td><span class="mock-badge mock-badge-wait">等待</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 字体层级 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">字体层级</h2>
+      <p class="section-subtitle">9 级字号，覆盖从首屏大标题到注解的完整范围。标题用 DM Sans，正文用 Inter，数值用 JetBrains Mono。</p>
+    </div>
+    <div class="mock-card">
+      <div class="type-row">
+        <div class="type-label">display</div>
+        <div class="type-spec">56px / 700 / 1.1</div>
+        <div class="type-sample type-display">月度销售报告</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">h1</div>
+        <div class="type-spec">40px / 700 / 1.2</div>
+        <div class="type-sample type-h1">购买决策分析</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">h2</div>
+        <div class="type-spec">32px / 600 / 1.25</div>
+        <div class="type-sample type-h2">关键指标</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">h3</div>
+        <div class="type-spec">24px / 600 / 1.3</div>
+        <div class="type-sample type-h3">iPhone 15 Pro Max</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">h4</div>
+        <div class="type-spec">20px / 600 / 1.4</div>
+        <div class="type-sample type-h4">持有期性价比</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">lead</div>
+        <div class="type-spec">18px / 400 / 1.7</div>
+        <div class="type-sample type-lead">基于帕累托前沿分析，以下方案在当前预算范围内不可被支配。</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">body</div>
+        <div class="type-spec">16px / 400 / 1.6</div>
+        <div class="type-sample type-body">本月共 12 个方案进入前沿，其中 3 个为新机方案，9 个为二手方案。</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">caption</div>
+        <div class="type-spec">12px / 400 / 1.5</div>
+        <div class="type-sample type-caption">数据更新于 2026-08-13，价格仅供参考</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">mono</div>
+        <div class="type-spec">14px / 400 / 1.6</div>
+        <div class="type-sample type-mono">¥3,800 → ¥2,100 / 12 月 = ¥175/月</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 间距 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">间距</h2>
+      <p class="section-subtitle">以 4px 为基点，8 级间距覆盖从图标内间距到首屏留白。小程序中 rpx = px × 2。</p>
+    </div>
+    <div class="mock-card">
+      <div class="spacing-row"><div class="spacing-label">space-1</div><div class="spacing-bar" style="width:4px"></div><div class="spacing-value">4px / 8rpx — 图标与文字间距</div></div>
+      <div class="spacing-row"><div class="spacing-label">space-2</div><div class="spacing-bar" style="width:8px"></div><div class="spacing-value">8px / 16rpx — 组件内紧凑间隙</div></div>
+      <div class="spacing-row"><div class="spacing-label">space-3</div><div class="spacing-bar" style="width:12px"></div><div class="spacing-value">12px / 24rpx — 卡片内元素间距</div></div>
+      <div class="spacing-row"><div class="spacing-label">space-4</div><div class="spacing-bar" style="width:16px"></div><div class="spacing-value">16px / 32rpx — 常规内边距、卡片间距</div></div>
+      <div class="spacing-row"><div class="spacing-label">space-5</div><div class="spacing-bar" style="width:24px"></div><div class="spacing-value">24px / 48rpx — 模块间距</div></div>
+      <div class="spacing-row"><div class="spacing-label">space-6</div><div class="spacing-bar" style="width:32px"></div><div class="spacing-value">32px / 64rpx — 页面级分区</div></div>
+      <div class="spacing-row"><div class="spacing-label">space-7</div><div class="spacing-bar" style="width:48px"></div><div class="spacing-value">48px / 96rpx — 大区域留白</div></div>
+      <div class="spacing-row"><div class="spacing-label">space-8</div><div class="spacing-bar" style="width:64px"></div><div class="spacing-value">64px / 128rpx — 首屏留白</div></div>
+    </div>
+  </div>
+
+  <!-- ============ 圆角 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">圆角</h2>
+      <p class="section-subtitle">越大的容器拥有越柔和的圆角，形成从控件到页面的自然层级。</p>
+    </div>
+    <div class="mock-card">
+      <div class="radius-grid">
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:8px"></div>
+          <div class="radius-label">radius-sm<br>8px / 16rpx<br>控件、柱条</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:12px"></div>
+          <div class="radius-label">radius-md<br>12px / 24rpx<br>按钮、导航项</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:16px"></div>
+          <div class="radius-label">radius-lg<br>16px / 32rpx<br>表格、中等容器</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:20px"></div>
+          <div class="radius-label">radius-xl<br>20px / 40rpx<br>标准卡片</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:9999px"></div>
+          <div class="radius-label">radius-full<br>9999px<br>徽章、药丸</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 阴影 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">阴影 / 层级</h2>
+      <p class="section-subtitle">全部使用略带蓝调的深灰 rgba(29,29,31) 作为投影色，几乎感觉不到但能区分层级。</p>
+    </div>
+    <div class="mock-card" style="background:#F5F5F7;padding:32px">
+      <div class="shadow-grid">
+        <div class="shadow-item">
+          <div class="shadow-box" style="box-shadow:0 1px 2px rgba(29,29,31,0.06), 0 1px 1px rgba(29,29,31,0.04)"></div>
+          <div class="shadow-label">shadow-1<br>卡片静息态</div>
+        </div>
+        <div class="shadow-item">
+          <div class="shadow-box" style="box-shadow:0 4px 8px -2px rgba(29,29,31,0.08)"></div>
+          <div class="shadow-label">shadow-2<br>卡片 hover</div>
+        </div>
+        <div class="shadow-item">
+          <div class="shadow-box" style="box-shadow:0 8px 24px -8px rgba(29,29,31,0.14)"></div>
+          <div class="shadow-label">shadow-3<br>浮层、下拉</div>
+        </div>
+        <div class="shadow-item">
+          <div class="shadow-box" style="box-shadow:0 16px 40px -12px rgba(29,29,31,0.20)"></div>
+          <div class="shadow-label">shadow-4<br>模态框</div>
+        </div>
+        <div class="shadow-item">
+          <div class="shadow-box" style="box-shadow:0 24px 60px -20px rgba(29,29,31,0.26)"></div>
+          <div class="shadow-label">shadow-5<br>全屏遮罩</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 色板外颜色对比 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">色板外颜色 → 系统内替换</h2>
+      <p class="section-subtitle">当前小程序中存在的「色板外」颜色，以及它们在系统中的等价替换。替换后视觉效果差异极小，但确保了色彩规范的一致性。</p>
+    </div>
+    <div class="note-card">
+      <strong>说明：</strong>左侧为当前代码中使用的色板外颜色，右侧为设计系统中语义等价的颜色。大多数差异肉眼难以区分（如 <code>#E5E5EA</code> vs <code>#D2D2D8</code>），但替换后色彩管理更加统一。
+    </div>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>当前色（板外）</th><th>替换色（系统内）</th><th>差异说明</th><th>使用位置</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="color-dot" style="background:#E5E5EA"></span><span class="old-color">#E5E5EA</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#D2D2D8"></span><span class="new-color">#D2D2D8</span></td>
+          <td>灰色略深，视觉差异极小</td>
+          <td>边框、分隔线（filter-panel、editor-row 等）</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#F2F2F7"></span><span class="old-color">#F2F2F7</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#F5F5F7;border:1px solid #D2D2D8"></span><span class="new-color">#F5F5F7</span></td>
+          <td>几乎无差异，统一为页面背景色</td>
+          <td>tab 背景、filter-chip 背景、deferred-group</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#AEAEB2"></span><span class="old-color">#AEAEB2</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#B9B9C1"></span><span class="new-color">#B9B9C1</span></td>
+          <td>灰色微调，视觉无差异</td>
+          <td>页脚文字、chart-note</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#FF9500"></span><span class="old-color">#FF9500</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#E09500"></span><span class="new-color">#E09500</span></td>
+          <td>橙色略暗，更沉稳</td>
+          <td>图例 budget 色、legend-budget</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#FF3B30"></span><span class="old-color">#FF3B30</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#F24B4B"></span><span class="new-color">#F24B4B</span></td>
+          <td>红色微调，更柔和</td>
+          <td>错误提示文字（如未使用则无影响）</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#5AC8FA"></span><span class="old-color">#5AC8FA</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#66ADFF"></span><span class="new-color">#66ADFF</span></td>
+          <td>浅蓝微调，更接近系统蓝</td>
+          <td>legend-wait、label-near</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#C7C7CC"></span><span class="old-color">#C7C7CC</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#B9B9C1"></span><span class="new-color">#B9B9C1</span></td>
+          <td>灰色统一</td>
+          <td>chart-note、legend-dominated、checkbox-border</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#FFF8E1"></span><span class="old-color">#FFF8E1</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#FFF0C2"></span><span class="new-color">#FFF0C2</span></td>
+          <td>黄色背景统一</td>
+          <td>user-modified-banner、tag-edited</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#FFC107"></span><span class="old-color">#FFC107</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#E09500"></span><span class="new-color">#E09500</span></td>
+          <td>黄色边框统一为琥珀色</td>
+          <td>user-modified-banner border</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#E65100"></span><span class="old-color">#E65100</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#C25E00"></span><span class="new-color">#C25E00</span></td>
+          <td>深橙统一为等待色</td>
+          <td>user-modified-banner text、tag-edited</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:#515154"></span><span class="old-color">#515154</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:#3F3F46"></span><span class="new-color">#3F3F46</span></td>
+          <td>深灰统一</td>
+          <td>saved-list meta-budget</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:rgba(0,0,0,0.04)"></span><span class="old-color">rgba(0,0,0,0.04)</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:rgba(29,29,31,0.04)"></span><span class="new-color">rgba(29,29,31,0.04)</span></td>
+          <td>阴影色统一为蓝调深灰</td>
+          <td>saved-list card shadow</td>
+        </tr>
+        <tr>
+          <td><span class="color-dot" style="background:rgba(0,0,0,0.08)"></span><span class="old-color">rgba(0,0,0,0.08)</span></td>
+          <td><span class="arrow">→</span><span class="color-dot" style="background:rgba(29,29,31,0.08)"></span><span class="new-color">rgba(29,29,31,0.08)</span></td>
+          <td>阴影色统一</td>
+          <td>view-mode-tab active shadow</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 小程序组件 mockup ============ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">小程序组件预览</h2>
+      <p class="section-subtitle">按设计系统渲染的小程序组件效果。375px 宽度模拟真实手机屏幕。</p>
+    </div>
+
+    <!-- 结果页 mockup -->
+    <div class="mockup-section">
+      <div>
+        <div class="phone-label">结果页 — 方案列表与筛选</div>
+        <div class="phone-frame">
+
+          <!-- 结论卡片 -->
+          <div class="mock-card">
+            <div class="mock-card-title">购买决策分析</div>
+            <div style="font-size:14px;color:var(--gray-600);line-height:1.7">
+              预算 ¥4,000 内，共 5 个方案进入前沿。推荐 iPhone 13 二手 + 24 月持有，月均成本最低。
+            </div>
+          </div>
+
+          <!-- 筛选 chip -->
+          <div class="mock-filter-row">
+            <span class="mock-chip active">全部</span>
+            <span class="mock-chip">新机</span>
+            <span class="mock-chip">二手</span>
+            <span class="mock-chip partial">部分选中</span>
+          </div>
+
+          <!-- 前沿分组标题 -->
+          <div class="mock-frontier-header">
+            <span class="mock-frontier-label frontier">前沿方案</span>
+            <span class="mock-frontier-count">3</span>
+          </div>
+
+          <!-- 方案卡片 - 选中态 -->
+          <div class="mock-plan-card active">
+            <div class="mock-plan-header">
+              <span class="mock-plan-model">iPhone 13</span>
+              <div class="mock-badges">
+                <span class="mock-badge mock-badge-used">二手</span>
+                <span class="mock-badge mock-badge-hold">24 月</span>
+              </div>
+            </div>
+            <div class="mock-metrics">
+              <div>
+                <span class="mock-metric-value">175</span>
+                <span class="mock-metric-unit">元/月</span>
+              </div>
+              <div>
+                <div class="mock-metric-label">总成本 ¥4,200</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 方案卡片 - 未选中 -->
+          <div class="mock-plan-card">
+            <div class="mock-plan-header">
+              <span class="mock-plan-model">iPhone 14</span>
+              <div class="mock-badges">
+                <span class="mock-badge mock-badge-used">二手</span>
+                <span class="mock-badge mock-badge-hold">18 月</span>
+              </div>
+            </div>
+            <div class="mock-metrics">
+              <div>
+                <span class="mock-metric-value">210</span>
+                <span class="mock-metric-unit">元/月</span>
+              </div>
+              <div>
+                <div class="mock-metric-label">总成本 ¥3,780</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 靠近前沿 -->
+          <div class="mock-frontier-header">
+            <span class="mock-frontier-label near">靠近前沿</span>
+            <span class="mock-frontier-count">2</span>
+          </div>
+
+          <div class="mock-plan-card">
+            <div class="mock-plan-header">
+              <span class="mock-plan-model">iPhone 12 Pro</span>
+              <div class="mock-badges">
+                <span class="mock-badge mock-badge-wait">等待</span>
+                <span class="mock-badge mock-badge-hold">36 月</span>
+              </div>
+            </div>
+            <div class="mock-metrics">
+              <div>
+                <span class="mock-metric-value" style="color:var(--blue-300)">195</span>
+                <span class="mock-metric-unit">元/月</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分享按钮 -->
+          <div style="display:flex;gap:12px;margin-top:16px">
+            <div class="mock-btn-dark">分享方案</div>
+            <div class="mock-btn-secondary">报告</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 详情页 mockup -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">详情页组件</h2>
+      <p class="section-subtitle">方案详情页的标题卡片、等待提示、风险卡片和指标大卡。</p>
+    </div>
+    <div class="mockup-section">
+      <div>
+        <div class="phone-label">详情页 — iPhone 13 二手 24 月</div>
+        <div class="phone-frame">
+
+          <!-- 标题卡片 -->
+          <div class="mock-card" style="padding:18px 14px">
+            <div style="font-size:18px;font-weight:600;color:var(--gray-900);margin-bottom:8px;line-height:1.4">
+              iPhone 13
+            </div>
+            <div class="mock-badges">
+              <span class="mock-badge mock-badge-used">二手</span>
+              <span class="mock-badge mock-badge-hold">24 月持有</span>
+            </div>
+          </div>
+
+          <!-- 等待卡片 -->
+          <div class="mock-wait-card">
+            <div style="font-size:22px;flex-shrink:0">⏱</div>
+            <div>
+              <div class="mock-wait-title">建议等待 3 个月</div>
+              <div class="mock-wait-desc">新品发布后二手价预计下降 ¥300-500</div>
+            </div>
+          </div>
+
+          <!-- 风险卡片 -->
+          <div class="mock-risk-card">
+            <div class="mock-risk-title">系统支持期风险</div>
+            <div class="mock-risk-desc">预计 2027 年 9 月停止系统更新，持有期结束时尚余 12 个月支持期。</div>
+          </div>
+
+          <!-- 指标大卡 -->
+          <div class="mock-metrics-card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div class="metric-value">175<span class="metric-unit"> 元/月</span></div>
+                <div class="metric-label">月均持有成本</div>
+              </div>
+              <div style="text-align:right">
+                <div class="metric-value" style="font-size:18px">¥4,200</div>
+                <div class="metric-label">总成本</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分解卡片 -->
+          <div class="mock-card">
+            <div class="mock-card-title">成本分解</div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-200)">
+              <span style="font-size:14px;color:var(--gray-500)">买入价</span>
+              <span style="font-size:14px;font-weight:500;color:var(--gray-900)">¥2,100</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-200)">
+              <span style="font-size:14px;color:var(--gray-500)">预计卖出</span>
+              <span style="font-size:14px;font-weight:500;color:var(--gray-900)">¥1,200</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0">
+              <span style="font-size:14px;color:var(--gray-900);font-weight:500">净支出</span>
+              <span style="font-size:16px;font-weight:600;color:var(--blue-500)">¥4,200</span>
+            </div>
+          </div>
+
+          <!-- 图表卡片 -->
+          <div class="mock-chart-placeholder">
+            <div class="mock-card-title">帕累托前沿</div>
+            <div class="mock-chart-legend">
+              <div class="mock-legend-item"><span class="mock-legend-dot" style="background:var(--blue-500)"></span>前沿方案</div>
+              <div class="mock-legend-item"><span class="mock-legend-dot" style="background:var(--gray-300);opacity:0.5"></span>被支配</div>
+              <div class="mock-legend-item"><span class="mock-legend-dot" style="background:var(--green-600)"></span>性能地板</div>
+            </div>
+            <div class="mock-chart-area">
+              <div class="mock-bar" style="height:80%;background:var(--blue-500)"></div>
+              <div class="mock-bar" style="height:65%;background:var(--blue-300)"></div>
+              <div class="mock-bar" style="height:50%;background:var(--gray-300);opacity:0.5"></div>
+              <div class="mock-bar" style="height:40%;background:var(--gray-300);opacity:0.5"></div>
+              <div class="mock-bar" style="height:30%;background:var(--gray-300);opacity:0.5"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑器 mockup -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">方案编辑器组件</h2>
+      <p class="section-subtitle">编辑模式下的筛选面板、方案行和操作按钮。</p>
+    </div>
+    <div class="mockup-section">
+      <div>
+        <div class="phone-label">编辑器 — 筛选与方案行</div>
+        <div class="phone-frame">
+
+          <!-- Tab 切换 -->
+          <div class="mock-tabs">
+            <div class="mock-tab active">方案编辑</div>
+            <div class="mock-tab">系统推荐</div>
+          </div>
+
+          <!-- 筛选面板 -->
+          <div style="background:#FFFFFF;border-radius:var(--radius-lg);border:2px solid var(--gray-200);margin-bottom:12px;overflow:hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:14px;font-weight:500;color:var(--gray-900)">
+              条件筛选
+              <span style="font-size:11px;color:var(--gray-500)">▼</span>
+            </div>
+            <div style="padding:0 12px 10px;border-top:1px solid var(--gray-100)">
+              <div style="font-size:12px;color:var(--gray-500);margin:8px 0 4px">型号</div>
+              <div class="mock-filter-row" style="margin-bottom:0">
+                <span class="mock-chip active">12</span>
+                <span class="mock-chip">13</span>
+                <span class="mock-chip active">14</span>
+                <span class="mock-chip">15</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 前沿标题 -->
+          <div class="mock-frontier-header">
+            <span class="mock-frontier-label frontier">前沿方案</span>
+            <span class="mock-frontier-count">2</span>
+          </div>
+
+          <!-- 编辑器行 - 正常 -->
+          <div class="mock-editor-row">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+                <span class="mock-editor-model">iPhone 14</span>
+                <span class="mock-editor-tag mock-tag-custom">自定义</span>
+              </div>
+            </div>
+            <div class="mock-editor-meta">二手 · 18 月 · ¥3,780</div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <span style="padding:5px 12px;font-size:13px;border-radius:var(--radius-full);border:1px solid var(--amber-600);color:var(--amber-600)">暂不考虑</span>
+              <span style="padding:5px 12px;font-size:13px;border-radius:var(--radius-full);border:1px solid var(--red-500);color:var(--red-500)">删除</span>
+            </div>
+          </div>
+
+          <!-- 编辑器行 - 排除态 -->
+          <div class="mock-editor-row excluded">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+                <span class="mock-editor-model" style="color:var(--gray-500)">iPhone 12</span>
+                <span class="mock-editor-tag mock-tag-excluded">已排除</span>
+              </div>
+            </div>
+            <div class="mock-editor-meta">二手 · 36 月 · ¥4,500</div>
+          </div>
+
+          <!-- 新增方案入口 -->
+          <div style="text-align:center;padding:12px;font-size:14px;color:var(--blue-500);border:2px dashed var(--blue-500);border-radius:var(--radius-lg);margin-top:8px">
+            + 添加方案
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 按钮汇总 -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">按钮样式</h2>
+      <p class="section-subtitle">所有按钮类型一览。药丸形为主，hover 用 brightness(0.97)。</p>
+    </div>
+    <div class="mock-card">
+      <div class="mock-btn-row">
+        <button class="mock-btn-primary">主按钮</button>
+        <button class="mock-btn-ghost">次级按钮</button>
+        <button class="mock-btn-primary" style="background:var(--gray-900)">深色按钮</button>
+      </div>
+      <div class="mock-btn-row" style="width:375px">
+        <button class="mock-btn-dark">分享方案</button>
+        <button class="mock-btn-secondary">查看报告</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 空态与加载 -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">空态与加载</h2>
+      <p class="section-subtitle">空结果卡片使用警告背景色，加载动画使用品牌蓝旋转。</p>
+    </div>
+    <div class="mockup-section">
+      <div>
+        <div class="phone-label">空态与加载</div>
+        <div class="phone-frame">
+
+          <!-- 空态卡片 -->
+          <div class="mock-empty-card">
+            <div style="font-size:28px;margin-bottom:8px">📦</div>
+            <div class="mock-empty-title">暂无匹配方案</div>
+            <div class="mock-empty-desc">当前预算范围内没有找到合适的方案</div>
+            <div class="mock-empty-suggestion">尝试调整预算或持有期</div>
+          </div>
+
+          <!-- 加载动画 -->
+          <div class="mock-loading">
+            <div class="mock-spinner"></div>
+          </div>
+          <div style="text-align:center;font-size:15px;color:var(--gray-500);margin-top:-20px;margin-bottom:12px">
+            正在计算方案...
+          </div>
+
+          <!-- 页脚 -->
+          <div style="text-align:center;padding:16px 12px 28px">
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px">数据更新于 2026-08-13</div>
+            <div style="font-size:12px;color:var(--amber-600)">建议刷新以获取最新价格</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 页脚 ============ -->
+  <div class="page-footer">
+    <p>
+      设计令牌源：<code>.design_library/tokens.md</code> ｜ 
+      小程序适配：<code>.design_library/platforms/miniprogram.md</code> ｜ 
+      入口文档：<code>design.md</code>
+    </p>
+    <p style="margin-top:8px;opacity:0.6">
+      Apple 产品购买决策工具 · 设计系统 v1.0 · 2026-08-13
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>

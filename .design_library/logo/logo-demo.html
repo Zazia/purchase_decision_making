@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo SVG — 可拆分动画矢量 Logo</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#08080a;--bg-card:#141418;--bg-code:#1a1a20;
+      --border:#2a2a32;--text:#f5f5f7;--muted:#86868b;
+      --accent:#0a84ff;--radius:16px;
+    }
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+      line-height:1.6;-webkit-font-smoothing:antialiased;
+    }
+
+    /* ── Hero ── */
+    .hero{
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:20px;
+      background:radial-gradient(ellipse at center,#14142a 0%,var(--bg) 70%);
+      padding:40px 20px;
+    }
+    .hero-logo{width:256px;height:256px}
+    .hero h1{font-size:2.5rem;font-weight:700;letter-spacing:-.02em}
+    .hero p{color:var(--muted);font-size:1.05rem;text-align:center}
+    #replay-btn{
+      margin-top:12px;padding:10px 28px;background:var(--accent);color:#fff;
+      border:none;border-radius:9999px;font-size:.95rem;font-weight:600;
+      cursor:pointer;transition:filter .2s,transform .2s;
+    }
+    #replay-btn:hover{filter:brightness(1.1);transform:scale(1.03)}
+    #replay-btn:active{transform:scale(.98)}
+
+    /* ── Section ── */
+    .section{max-width:1100px;margin:0 auto;padding:80px 24px}
+    .section-header{margin-bottom:36px;text-align:center}
+    .section-header .label{
+      display:block;font-size:.72rem;font-weight:700;
+      letter-spacing:.15em;color:var(--accent);margin-bottom:8px;
+    }
+    .section-header h2{font-size:1.7rem;font-weight:700;letter-spacing:-.01em;margin-bottom:6px}
+    .section-header p{color:var(--muted);font-size:.92rem}
+
+    /* ── Sizes ── */
+    .sizes-wrap{
+      display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;
+      gap:28px;padding:36px;background:var(--bg-card);
+      border:1px solid var(--border);border-radius:var(--radius);
+    }
+    .size-card{display:flex;flex-direction:column;align-items:center;gap:8px}
+    .size-card img{display:block}
+    .size-card span{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+    /* ── Contexts ── */
+    .ctx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+    .ctx-card{
+      display:flex;flex-direction:column;align-items:center;gap:12px;
+      padding:36px 20px;border-radius:var(--radius);border:1px solid var(--border);
+    }
+    .ctx-card img{width:72px;height:72px}
+    .ctx-card span{font-size:.78rem}
+    .ctx-white{background:#fff}.ctx-white span{color:#86868b}
+    .ctx-gray{background:#F5F5F7}.ctx-gray span{color:#86868b}
+    .ctx-dark{background:#1a1a1e}.ctx-dark span{color:#86868b}
+    .ctx-blue{background:#007AFF}.ctx-blue span{color:rgba(255,255,255,.75)}
+
+    /* ── Parts Explorer ── */
+    .parts-box{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:36px;
+      display:flex;flex-direction:column;align-items:center;gap:24px;
+    }
+    .parts-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .parts-btns button{
+      padding:8px 18px;background:transparent;color:var(--muted);
+      border:1px solid var(--border);border-radius:9999px;
+      font-size:.85rem;cursor:pointer;transition:all .2s;
+    }
+    .parts-btns button:hover{color:var(--text);border-color:var(--accent)}
+    .parts-btns button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .parts-preview{width:200px;height:200px}
+    .parts-preview svg{width:100%;height:100%}
+    .parts-svg #squircle,.parts-svg #curve,.parts-svg #dots{transition:opacity .4s ease}
+    .parts-svg.show-squircle-only #curve,.parts-svg.show-squircle-only #dots{opacity:.12}
+    .parts-svg.show-curve-only #squircle,.parts-svg.show-curve-only #dots{opacity:.12}
+    .parts-svg.show-dots-only #squircle,.parts-svg.show-dots-only #curve{opacity:.12}
+    .parts-info{
+      font-size:.85rem;color:var(--muted);text-align:center;
+      max-width:460px;line-height:1.7;
+    }
+    .parts-info code{
+      background:var(--bg-code);padding:2px 7px;border-radius:4px;
+      font-size:.8rem;color:var(--accent);font-family:'SF Mono',Monaco,Consolas,monospace;
+    }
+
+    /* ── Code ── */
+    .code-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px}
+    .code-card{background:var(--bg-code);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .code-card-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border)}
+    .code-card-hd h3{font-size:.82rem;font-weight:600}
+    .code-card-hd .tag{font-size:.68rem;color:var(--muted);background:var(--bg-card);padding:2px 8px;border-radius:4px}
+    .code-card pre{padding:16px;overflow-x:auto;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:.8rem;line-height:1.55;color:#d4d4d8}
+    .code-card pre .k{color:#569cd6}.code-card pre .a{color:#9cdcfe}
+    .code-card pre .s{color:#ce9178}.code-card pre .c{color:#6a9955;font-style:italic}
+
+    /* ── Footer ── */
+    footer{text-align:center;padding:40px 20px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border)}
+    footer code{background:var(--bg-card);padding:2px 8px;border-radius:4px;font-family:monospace;color:var(--text)}
+
+    /* ════ SVG 动画 ════ */
+    .logo-anim #squircle,
+    .logo-anim #curve,
+    .logo-anim #dots circle{
+      transform-box:fill-box;transform-origin:center;
+    }
+    .logo-anim.entrance #squircle,
+    .logo-anim.entrance #curve,
+    .logo-anim.entrance #dots circle{opacity:0}
+
+    /* 每个圆点的最终透明度（CSS 变量，用于动画终态） */
+    .logo-anim #dot-01{--op:1}
+    .logo-anim #dot-02{--op:1}
+    .logo-anim #dot-03{--op:1}
+    .logo-anim #dot-04{--op:.8}
+    .logo-anim #dot-05{--op:.85}
+    .logo-anim #dot-06{--op:.9}
+    .logo-anim #dot-07{--op:.85}
+    .logo-anim #dot-08{--op:.9}
+    .logo-anim #dot-09{--op:.6}
+    .logo-anim #dot-10{--op:1}
+    .logo-anim #dot-11{--op:.6}
+    .logo-anim #dot-12{--op:1}
+
+    @keyframes enter-squircle{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+    @keyframes enter-curve{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+    @keyframes enter-dot{
+      0%{opacity:0;transform:scale(0)}
+      70%{opacity:var(--op,1);transform:scale(1.15)}
+      100%{opacity:var(--op,1);transform:scale(1)}
+    }
+    @keyframes idle-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+    @keyframes idle-glow{0%,100%{opacity:.5}50%{opacity:1}}
+
+    .logo-anim.entrance #squircle{animation:enter-squircle .5s cubic-bezier(.22,1,.36,1) forwards}
+    .logo-anim.entrance #curve{animation:enter-curve .5s .15s cubic-bezier(.22,1,.36,1) forwards}
+    .logo-anim.entrance #dots circle{animation:enter-dot .4s cubic-bezier(.34,1.56,.64,1) forwards}
+    .logo-anim.entrance #dot-01{animation-delay:.45s}
+    .logo-anim.entrance #dot-02{animation-delay:.52s}
+    .logo-anim.entrance #dot-03{animation-delay:.59s}
+    .logo-anim.entrance #dot-04{animation-delay:.66s}
+    .logo-anim.entrance #dot-05{animation-delay:.73s}
+    .logo-anim.entrance #dot-06{animation-delay:.80s}
+    .logo-anim.entrance #dot-07{animation-delay:.87s}
+    .logo-anim.entrance #dot-08{animation-delay:.94s}
+    .logo-anim.entrance #dot-09{animation-delay:1.01s}
+    .logo-anim.entrance #dot-10{animation-delay:1.08s}
+    .logo-anim.entrance #dot-11{animation-delay:1.15s}
+    .logo-anim.entrance #dot-12{animation-delay:1.22s}
+
+    .logo-anim.idle #dots circle{opacity:var(--op,1)}
+    .logo-anim.idle #dot-01{animation:idle-float 2.8s 0s ease-in-out infinite}
+    .logo-anim.idle #dot-02{animation:idle-float 3.2s .3s ease-in-out infinite}
+    .logo-anim.idle #dot-03{animation:idle-float 2.6s .6s ease-in-out infinite}
+    .logo-anim.idle #dot-04{animation:idle-float 3.5s .2s ease-in-out infinite}
+    .logo-anim.idle #dot-05{animation:idle-float 2.9s .5s ease-in-out infinite}
+    .logo-anim.idle #dot-06{animation:idle-float 3.1s .8s ease-in-out infinite}
+    .logo-anim.idle #dot-07{animation:idle-float 2.7s .1s ease-in-out infinite}
+    .logo-anim.idle #dot-08{animation:idle-float 3.3s .4s ease-in-out infinite}
+    .logo-anim.idle #dot-09{animation:idle-float 3.0s .7s ease-in-out infinite}
+    .logo-anim.idle #dot-10{animation:idle-float 2.5s .2s ease-in-out infinite}
+    .logo-anim.idle #dot-11{animation:idle-float 3.4s .5s ease-in-out infinite}
+    .logo-anim.idle #dot-12{animation:idle-float 2.8s .3s ease-in-out infinite}
+    .logo-anim.idle #curve-highlight{animation:idle-glow 3s ease-in-out infinite}
+
+    @media(prefers-reduced-motion:reduce){
+      .logo-anim.entrance *,.logo-anim.idle *{animation:none!important;opacity:1!important;transform:none!important}
+      .logo-anim.idle #dot-04{opacity:.8!important}
+      .logo-anim.idle #dot-05{opacity:.85!important}
+      .logo-anim.idle #dot-06{opacity:.9!important}
+      .logo-anim.idle #dot-07{opacity:.85!important}
+      .logo-anim.idle #dot-08{opacity:.9!important}
+      .logo-anim.idle #dot-09{opacity:.6!important}
+      .logo-anim.idle #dot-11{opacity:.6!important}
+    }
+    @media(max-width:768px){
+      .hero h1{font-size:1.6rem}.hero p{font-size:.9rem}
+      .hero-logo{width:192px;height:192px}
+      .code-grid{grid-template-columns:1fr}
+      .section{padding:48px 16px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════ Hero ════ -->
+<section class="hero">
+  <div class="hero-logo">
+    <svg class="logo-anim" viewBox="-8 -8 116 116" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo">
+      <defs>
+        <linearGradient id="grad-blue" x1="15" y1="5" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#5AC8FA"/>
+          <stop offset="50%" stop-color="#2B8CF7"/>
+          <stop offset="100%" stop-color="#007AFF"/>
+        </linearGradient>
+        <linearGradient id="grad-hl" x1="4.96" y1="100" x2="103.93" y2="4.04" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.87"/>
+          <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.47"/>
+          <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="clip-sq"><rect x="0" y="0" width="100" height="100" rx="22" ry="22"/></clipPath>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1D1D1F" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <g id="squircle">
+        <rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="#FFFFFF" filter="url(#shadow)"/>
+      </g>
+      <g id="logo-content" clip-path="url(#clip-sq)">
+        <g id="curve">
+          <path id="curve-fill" d="M70,0 H100 V100 H0 V70 C0,51.4348 7.37498,33.6301 20.5025,20.5025 C33.6301,7.375 51.4348,0 70,0 Z" fill="url(#grad-blue)"/>
+          <path id="curve-highlight" d="M100,0 H71.2 C53.3775,0 36.2849,7.375 23.6824,20.5025 C11.08,33.6301 4,51.4348 4,70 V100" fill="none" stroke="url(#grad-hl)" stroke-width="8" stroke-linecap="round"/>
+        </g>
+        <g id="dots" fill="#FFFFFF">
+          <circle id="dot-01" cx="87" cy="20" r="3"/>
+          <circle id="dot-02" cx="29" cy="31" r="3"/>
+          <circle id="dot-03" cx="26.5" cy="43.5" r="5.5"/>
+          <circle id="dot-04" cx="84" cy="45" r="4" opacity="0.8"/>
+          <circle id="dot-05" cx="69.5" cy="29.5" r="6.5" opacity="0.85"/>
+          <circle id="dot-06" cx="39.5" cy="61.5" r="4.5" opacity="0.9"/>
+          <circle id="dot-07" cx="60" cy="54" r="5" opacity="0.85"/>
+          <circle id="dot-08" cx="49" cy="33" r="5" opacity="0.9"/>
+          <circle id="dot-09" cx="44" cy="80" r="4" opacity="0.6"/>
+          <circle id="dot-10" cx="20.5" cy="66.5" r="3.5"/>
+          <circle id="dot-11" cx="81" cy="60" r="3" opacity="0.6"/>
+          <circle id="dot-12" cx="51" cy="16" r="5"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <h1>Logo SVG</h1>
+  <p>可拆分动画的矢量 Logo · 适用 App 图标 / 网页 HTML / favicon</p>
+  <button id="replay-btn">重播入场动画</button>
+</section>
+
+<!-- ════ Sizes ════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="label">SHOWCASE</span>
+    <h2>多尺寸适配</h2>
+    <p>SVG 矢量格式，从 16px favicon 到 256px 大图，任意尺寸清晰锐利</p>
+  </div>
+  <div class="sizes-wrap">
+    <div class="size-card"><img src="logo.svg" width="16" height="16"><span>16px</span></div>
+    <div class="size-card"><img src="logo.svg" width="24" height="24"><span>24px</span></div>
+    <div class="size-card"><img src="logo.svg" width="32" height="32"><span>32px</span></div>
+    <div class="size-card"><img src="logo.svg" width="48" height="48"><span>48px</span></div>
+    <div class="size-card"><img src="logo.svg" width="64" height="64"><span>64px</span></div>
+    <div class="size-card"><img src="logo.svg" width="96" height="96"><span>96px</span></div>
+    <div class="size-card"><img src="logo.svg" width="128" height="128"><span>128px</span></div>
+    <div class="size-card"><img src="logo.svg" width="256" height="256"><span>256px</span></div>
+  </div>
+</section>
+
+<!-- ════ Contexts ════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="label">CONTEXT</span>
+    <h2>背景适配</h2>
+    <p>白色 squircle 在任意背景下均可使用，投影保持自然层次</p>
+  </div>
+  <div class="ctx-grid">
+    <div class="ctx-card ctx-white"><img src="logo.svg" width="72" height="72"><span>白色背景</span></div>
+    <div class="ctx-card ctx-gray"><img src="logo.svg" width="72" height="72"><span>浅灰 #F5F5F7</span></div>
+    <div class="ctx-card ctx-dark"><img src="logo.svg" width="72" height="72"><span>深色背景</span></div>
+    <div class="ctx-card ctx-blue"><img src="logo.svg" width="72" height="72"><span>品牌蓝 #007AFF</span></div>
+  </div>
+</section>
+
+<!-- ════ Parts Explorer ════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="label">STRUCTURE</span>
+    <h2>部件拆分</h2>
+    <p>每个部件有独立 ID，可分别动画。点击按钮切换查看</p>
+  </div>
+  <div class="parts-box">
+    <div class="parts-btns">
+      <button data-part="all" class="active">全部</button>
+      <button data-part="squircle">Squircle 背景</button>
+      <button data-part="curve">蓝色弧形</button>
+      <button data-part="dots">白色圆点</button>
+    </div>
+    <div class="parts-preview">
+      <svg class="parts-svg" viewBox="-8 -8 116 116" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo parts">
+        <defs>
+          <linearGradient id="grad-blue-2" x1="15" y1="5" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#5AC8FA"/>
+            <stop offset="50%" stop-color="#2B8CF7"/>
+            <stop offset="100%" stop-color="#007AFF"/>
+          </linearGradient>
+          <linearGradient id="grad-hl-2" x1="4.96" y1="100" x2="103.93" y2="4.04" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.87"/>
+            <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.47"/>
+            <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+          </linearGradient>
+          <clipPath id="clip-sq-2"><rect x="0" y="0" width="100" height="100" rx="22" ry="22"/></clipPath>
+          <filter id="shadow-2" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1D1D1F" flood-opacity="0.12"/>
+          </filter>
+        </defs>
+        <g id="squircle">
+          <rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="#FFFFFF" filter="url(#shadow-2)"/>
+        </g>
+        <g id="logo-content" clip-path="url(#clip-sq-2)">
+          <g id="curve">
+            <path id="curve-fill" d="M70,0 H100 V100 H0 V70 C0,51.4348 7.37498,33.6301 20.5025,20.5025 C33.6301,7.375 51.4348,0 70,0 Z" fill="url(#grad-blue-2)"/>
+            <path id="curve-highlight" d="M100,0 H71.2 C53.3775,0 36.2849,7.375 23.6824,20.5025 C11.08,33.6301 4,51.4348 4,70 V100" fill="none" stroke="url(#grad-hl-2)" stroke-width="8" stroke-linecap="round"/>
+          </g>
+          <g id="dots" fill="#FFFFFF">
+            <circle id="dot-01" cx="87" cy="20" r="3"/>
+            <circle id="dot-02" cx="29" cy="31" r="3"/>
+            <circle id="dot-03" cx="26.5" cy="43.5" r="5.5"/>
+            <circle id="dot-04" cx="84" cy="45" r="4" opacity="0.8"/>
+            <circle id="dot-05" cx="69.5" cy="29.5" r="6.5" opacity="0.85"/>
+            <circle id="dot-06" cx="39.5" cy="61.5" r="4.5" opacity="0.9"/>
+            <circle id="dot-07" cx="60" cy="54" r="5" opacity="0.85"/>
+            <circle id="dot-08" cx="49" cy="33" r="5" opacity="0.9"/>
+            <circle id="dot-09" cx="44" cy="80" r="4" opacity="0.6"/>
+            <circle id="dot-10" cx="20.5" cy="66.5" r="3.5"/>
+            <circle id="dot-11" cx="81" cy="60" r="3" opacity="0.6"/>
+            <circle id="dot-12" cx="51" cy="16" r="5"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="parts-info" id="parts-info">
+      完整 Logo — 所有部件可见。<code>#squircle</code> + <code>#curve</code> + <code>#dots</code>
+    </div>
+  </div>
+</section>
+
+<!-- ════ Usage ════ -->
+<section class="section">
+  <div class="section-header">
+    <span class="label">USAGE</span>
+    <h2>使用方式</h2>
+    <p>多种场景的引用方法与动画接入</p>
+  </div>
+  <div class="code-grid">
+    <div class="code-card">
+      <div class="code-card-hd"><h3>HTML 引用</h3><span class="tag">&lt;img&gt;</span></div>
+      <pre><span class="c">&lt;!-- 静态引用，不可动画 --&gt;</span>
+&lt;<span class="k">img</span> <span class="a">src</span>=<span class="s">"logo.svg"</span>
+     <span class="a">alt</span>=<span class="s">"Logo"</span>
+     <span class="a">width</span>=<span class="s">"128"</span> <span class="a">height</span>=<span class="s">"128"</span>&gt;</pre>
+    </div>
+    <div class="code-card">
+      <div class="code-card-hd"><h3>CSS 背景</h3><span class="tag">background</span></div>
+      <pre><span class="k">.logo</span> {
+  <span class="a">width</span>: <span class="s">128px</span>;
+  <span class="a">height</span>: <span class="s">128px</span>;
+  <span class="a">background</span>: <span class="k">url</span>(<span class="s">'logo.svg'</span>)
+              <span class="k">no-repeat</span> center / contain;
+}</pre>
+    </div>
+    <div class="code-card">
+      <div class="code-card-hd"><h3>Favicon</h3><span class="tag">&lt;link&gt;</span></div>
+      <pre><span class="c">&lt;!-- SVG favicon，支持高分辨率 --&gt;</span>
+&lt;<span class="k">link</span> <span class="a">rel</span>=<span class="s">"icon"</span>
+      <span class="a">type</span>=<span class="s">"image/svg+xml"</span>
+      <span class="a">href</span>=<span class="s">"logo.svg"</span>&gt;</pre>
+    </div>
+    <div class="code-card">
+      <div class="code-card-hd"><h3>内联 SVG + 动画</h3><span class="tag">animate</span></div>
+      <pre><span class="c">&lt;!-- 内联到 HTML 后可用 CSS 定位每个部件 --&gt;</span>
+&lt;<span class="k">svg</span> <span class="a">viewBox</span>=<span class="s">"-8 -8 116 116"</span>&gt;
+  <span class="c">&lt;!-- 粘贴 logo.svg 内容 --&gt;</span>
+&lt;/<span class="k">svg</span>&gt;
+&lt;<span class="k">style</span>&gt;
+  <span class="c">/* 圆点从中心缩放弹出 */</span>
+  <span class="k">#dot-01</span> {
+    <span class="a">transform-box</span>: fill-box;
+    <span class="a">transform-origin</span>: center;
+    <span class="a">animation</span>: pop <span class="s">.4s .5s</span> ease-out;
+  }
+  <span class="c">/* 12 个圆点逐个设置 delay */</span>
+&lt;/<span class="k">style</span>&gt;</pre>
+    </div>
+    <div class="code-card">
+      <div class="code-card-hd"><h3>App 图标</h3><span class="tag">logo-flat.svg</span></div>
+      <pre><span class="c">// logo-flat.svg 无 squircle 圆角与投影
+// 白色满铺背景，内容填满整个正方形
+// 平台自动套用圆角蒙版</span>
+
+iOS:   导出 1024×1024 PNG 提交
+Android: adaptive icon foreground layer
+Web:   PWA manifest icon</pre>
+    </div>
+    <div class="code-card">
+      <div class="code-card-hd"><h3>SVG 结构 ID 速查</h3><span class="tag">structure</span></div>
+      <pre><span class="k">#squircle</span>          白色圆角背景 + 投影
+<span class="k">#logo-content</span>      内容容器（裁剪到 squircle）
+  <span class="k">#curve</span>           蓝色弧形（三次贝塞尔）
+    <span class="k">#curve-fill</span>     渐变填充
+    <span class="k">#curve-highlight</span> 8px 高光描边
+  <span class="k">#dots</span>            圆点组（12 个）
+    <span class="k">#dot-01</span>~<span class="k">#dot-12</span> 独立圆点（不同透明度）
+
+<span class="c">/* 动画关键 CSS */</span>
+<span class="a">transform-box</span>: fill-box;
+<span class="a">transform-origin</span>: center;
+<span class="c">/* 透明度通过 --op 变量传递 */</span>
+<span class="k">#dot-04</span> { <span class="a">--op</span>: <span class="s">.8</span>; }</pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  文件: <code>logo.svg</code> · <code>logo-flat.svg</code> · <code>logo-demo.html</code>
+</footer>
+
+<script>
+  // ── 入场动画 ──
+  function playEntrance(){
+    const logo = document.querySelector('.hero .logo-anim');
+    if(!logo) return;
+    logo.classList.remove('idle','entrance');
+    void logo.offsetWidth;
+    logo.classList.add('entrance');
+    setTimeout(()=>{
+      logo.classList.remove('entrance');
+      logo.classList.add('idle');
+    }, 1800);
+  }
+  window.addEventListener('load', ()=> setTimeout(playEntrance, 200));
+  document.getElementById('replay-btn').addEventListener('click', playEntrance);
+
+  // ── 部件切换 ──
+  const partsInfo = {
+    all: '完整 Logo — 所有部件可见。<code>#squircle</code> + <code>#curve</code> + <code>#dots</code>',
+    squircle: 'Squircle 背景 — 白色圆角方块含投影。<code>#squircle</code> · App 图标提交时移除此组',
+    curve: '蓝色弧形 — 三次贝塞尔曲线渐变填充 + 8px 高光描边。<code>#curve</code> → <code>#curve-fill</code> + <code>#curve-highlight</code>',
+    dots: '白色圆点 — 12 个独立圆点，各有唯一 ID 和不同透明度（0.6~1.0）。<code>#dots</code> → <code>#dot-01</code> ~ <code>#dot-12</code>'
+  };
+  document.querySelectorAll('.parts-btns button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.parts-btns button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const svg = document.querySelector('.parts-svg');
+      svg.classList.remove('show-squircle-only','show-curve-only','show-dots-only');
+      const part = btn.dataset.part;
+      if(part !== 'all') svg.classList.add(`show-${part}-only`);
+      document.getElementById('parts-info').innerHTML = partsInfo[part] || '';
+    });
+  });
+</script>
+
+</body>
+</html>

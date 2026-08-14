@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 2,
+  "slug": "table",
+  "name": "Table",
+  "category": "data",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [
+    {
+      "candidate": "data-grid",
+      "evidence": "tabular data display"
+    }
+  ],
+  "variantDimensions": [
+    {
+      "name": "density",
+      "values": [
+        "default",
+        "compact"
+      ]
+    }
+  ],
+  "representativeVariants": [
+    {
+      "name": "default",
+      "whySelected": "report data table",
+      "traits": {
+        "background": "var(--color-card)",
+        "border": "var(--color-border)",
+        "radius": "var(--radius-lg)"
+      },
+      "childrenDigest": "header row, data rows"
+    },
+    {
+      "name": "compact",
+      "whySelected": "dense numbers view",
+      "traits": {
+        "padding": "var(--space-2)",
+        "fontSize": "var(--font-size-sm)"
+      },
+      "childrenDigest": "header row, data rows"
+    }
+  ],
+  "anatomy": [
+    "header",
+    "row",
+    "cell"
+  ],
+  "structurePatterns": [
+    "horizontal columns",
+    "zebra or hover row states"
+  ],
+  "usageHints": {
+    "priorityHint": "Use for structured report data; keep headers muted."
+  },
+  "doNotInvent": [
+    "no pagination controls",
+    "no column resizing"
+  ],
+  "unknowns": [],
+  "keyInsightSeed": "clean rows, light dividers, rounded container"
+}

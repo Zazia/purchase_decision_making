@@ -1,0 +1,27 @@
+{
+  "name": "apple-report",
+  "kitType": "dashboard",
+  "description": "Apple 风格月度数据报告 Design Library 的推荐消费顺序。",
+  "tokenSource": "css.json",
+  "runtimeCss": "colors_and_type.css",
+  "componentResolution": [
+    "preview/component-{slug}.html",
+    "components/{slug}.json",
+    "components/_evidence/{slug}.json"
+  ],
+  "readOrder": [
+    "SKILL.md",
+    "README.md",
+    "css.json",
+    "colors_and_type.css",
+    "components/index.json",
+    "components.css",
+    "preview/component-button.html",
+    "preview/component-card.html",
+    "preview/component-table.html",
+    "preview/component-chart.html",
+    "preview/component-navigation.html",
+    "preview/component-badge.html",
+    "ui_kits/dashboard/index.html"
+  ]
+}

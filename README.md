@@ -4,9 +4,9 @@
 
 A quantitative Apple-product analysis skill based on the **Pareto frontier**. It filters non-inferior purchase options on the *monthly cost × average holding-period performance* plane, helping you answer: which model, new vs. used, and how many years to hold.
 
-> **方法论见 [METHOD.md](METHOD.md)（中文）/ [METHOD_EN.md](METHOD_EN.md)（English）。** 这是一篇独立文章，讲清楚为什么耐用品购买应该用帕累托框架，而不是「最佳推荐清单」。两个文件内容相同、语言不同，顶部互相链接可在 GitHub 页面点击切换。本 README 只描述技能的工程实现。
+> **方法论见 [METHOD.md](METHOD.md)（中文 + English，同文件内可点击切换）。** 这是一篇独立文章，讲清楚为什么耐用品购买应该用帕累托框架，而不是「最佳推荐清单」。本 README 只描述技能的工程实现。
 >
-> **The methodology lives in [METHOD.md](METHOD.md) (中文) / [METHOD_EN.md](METHOD_EN.md) (English).** It is a standalone essay explaining why durable-goods purchases should use the Pareto framework rather than a "best-buy list." The two files contain the same content in different languages, with cross-links at the top for switching on the GitHub page. This README describes only the engineering implementation of the skill.
+> **The methodology lives in [METHOD.md](METHOD.md) (Chinese + English, switchable within the same file).** It is a standalone essay explaining why durable-goods purchases should use the Pareto framework rather than a "best-buy list." This README describes only the engineering implementation of the skill.
 
 ---
 
@@ -79,8 +79,7 @@ purchase_decision_making/
 ├── LICENSE                        # CC BY-NC 4.0
 ├── README.md                      # 本文件 / this file
 ├── STANCE.md                      # 独立性声明 / Independence stance
-├── METHOD.md                      # 方法论文章（中文）/ Methodology essay (Chinese)
-├── METHOD_EN.md                   # 方法论文章（英文）/ Methodology essay (English)
+├── METHOD.md                      # 方法论文章（中文 + English 双语）/ Methodology essay (bilingual)
 ├── .agents/skills/apple-value-analysis/
 │   ├── SKILL.md                   # 标准操作流程 SOP v3.8（可独立分发）/ SOP v3.8 (independently distributable)
 │   └── constants.json             # 常量数据库 ~155KB v3.8（可远程获取）/ Constants DB ~155KB v3.8 (remote-fetchable)
@@ -293,6 +292,10 @@ Current SOP is **v3.8** (2026-08-02). SOP (methodology) and constants.json (data
 
 ## License
 
-[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)（署名-非商业性使用 4.0 国际 / Attribution-NonCommercial 4.0 International）。任何人可自由复制、分发、修改本项目，但不得用于商业目的，且必须保留原作者署名。详见 [LICENSE](LICENSE) 文件。
+仓库整体（含 constants.json 数据、小程序、引擎源码、设计系统）采用 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)（署名-非商业性使用 4.0 国际 / Attribution-NonCommercial 4.0 International）。任何人可自由复制、分发、修改本项目，但不得用于商业目的，且必须保留原作者署名。详见 [LICENSE](LICENSE) 文件。
 
-Anyone may freely copy, distribute, and modify this project, but not for commercial purposes, and original attribution must be retained. See the [LICENSE](LICENSE) file for details.
+`.agents/skills/apple-value-analysis/SKILL.md` 本身采用 [MIT](https://opensource.org/licenses/MIT)，可经瘦仓库 [Zazia/apple-value-analysis](https://github.com/Zazia/apple-value-analysis) 独立分发（含商业用途）。
+
+The repository as a whole (constants.json data, mini-program, engine source, design system) is licensed under CC BY-NC 4.0. Anyone may freely copy, distribute, and modify this project, but not for commercial purposes, with original attribution retained. See the [LICENSE](LICENSE) file for details.
+
+The file `.agents/skills/apple-value-analysis/SKILL.md` itself is MIT-licensed and independently distributable via the thin repo [Zazia/apple-value-analysis](https://github.com/Zazia/apple-value-analysis) (including commercial use).

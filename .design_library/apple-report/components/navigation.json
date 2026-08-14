@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 2,
+  "slug": "navigation",
+  "name": "Navigation",
+  "category": "navigation",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [
+    {
+      "candidate": "top-nav",
+      "evidence": "primary wayfinding"
+    }
+  ],
+  "variantDimensions": [
+    {
+      "name": "position",
+      "values": [
+        "top",
+        "side"
+      ]
+    }
+  ],
+  "representativeVariants": [
+    {
+      "name": "top-nav",
+      "whySelected": "report dashboard header",
+      "traits": {
+        "background": "var(--color-background)",
+        "borderBottom": "var(--color-border)",
+        "height": "var(--size-14)"
+      },
+      "childrenDigest": "logo, links, actions"
+    },
+    {
+      "name": "side-nav",
+      "whySelected": "dashboard sidebar",
+      "traits": {
+        "background": "var(--color-surface)",
+        "width": "240px"
+      },
+      "childrenDigest": "logo, nav items"
+    }
+  ],
+  "anatomy": [
+    "container",
+    "brand",
+    "links",
+    "actions"
+  ],
+  "structurePatterns": [
+    "horizontal flex",
+    "vertical stack"
+  ],
+  "usageHints": {
+    "priorityHint": "Keep nav minimal; highlight active section with subtle background."
+  },
+  "doNotInvent": [
+    "no mega-menu",
+    "no search autocomplete"
+  ],
+  "unknowns": [],
+  "keyInsightSeed": "light header, muted active state"
+}

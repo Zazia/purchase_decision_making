@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 2,
+  "slug": "card",
+  "name": "Card",
+  "category": "surface",
+  "sourceKind": "from-scratch",
+  "confidence": "medium",
+  "semanticTypeCandidates": [
+    {
+      "candidate": "surface",
+      "evidence": "content container"
+    }
+  ],
+  "variantDimensions": [
+    {
+      "name": "elevation",
+      "values": [
+        "default",
+        "raised"
+      ]
+    }
+  ],
+  "representativeVariants": [
+    {
+      "name": "default",
+      "whySelected": "report metric card",
+      "traits": {
+        "background": "var(--color-card)",
+        "radius": "var(--radius-xl)",
+        "shadow": "var(--shadow-1)"
+      },
+      "childrenDigest": "header, body, footer"
+    },
+    {
+      "name": "raised",
+      "whySelected": "featured insight card",
+      "traits": {
+        "background": "var(--color-card)",
+        "radius": "var(--radius-xl)",
+        "shadow": "var(--shadow-2)"
+      },
+      "childrenDigest": "header, body"
+    }
+  ],
+  "anatomy": [
+    "container",
+    "header",
+    "body",
+    "footer"
+  ],
+  "structurePatterns": [
+    "vertical stack",
+    "consistent internal spacing"
+  ],
+  "usageHints": {
+    "priorityHint": "Use cards to group related metrics or report sections."
+  },
+  "doNotInvent": [
+    "no flip animation",
+    "no tabs inside card"
+  ],
+  "unknowns": [],
+  "keyInsightSeed": "large radius, subtle shadow, warm white surface"
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 2,
+  "slug": "chart",
+  "name": "Chart",
+  "category": "data",
+  "sourceKind": "from-scratch",
+  "confidence": "low",
+  "semanticTypeCandidates": [
+    {
+      "candidate": "data-visualization",
+      "evidence": "graphical metric representation"
+    }
+  ],
+  "variantDimensions": [
+    {
+      "name": "type",
+      "values": [
+        "bar",
+        "line",
+        "donut"
+      ]
+    }
+  ],
+  "representativeVariants": [
+    {
+      "name": "bar-chart",
+      "whySelected": "common report chart",
+      "traits": {
+        "color": "var(--color-primary)",
+        "radius": "var(--radius-sm)"
+      },
+      "childrenDigest": "bars, axis labels"
+    },
+    {
+      "name": "line-chart",
+      "whySelected": "trend over time",
+      "traits": {
+        "stroke": "var(--color-accent)",
+        "fill": "var(--color-primary-50)"
+      },
+      "childrenDigest": "line path, grid"
+    }
+  ],
+  "anatomy": [
+    "container",
+    "plot area",
+    "axis",
+    "legend"
+  ],
+  "structurePatterns": [
+    "svg or canvas rendering",
+    "responsive container"
+  ],
+  "usageHints": {
+    "priorityHint": "Use chart cards to surface trends; keep color palette minimal."
+  },
+  "doNotInvent": [
+    "no interactive tooltips",
+    "no real-time data updates"
+  ],
+  "unknowns": [
+    "exact charting library"
+  ],
+  "keyInsightSeed": "muted grid, brand-colored data marks"
+}

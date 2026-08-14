@@ -1,0 +1,99 @@
+/* ═══════════════════════════════════════════════════════════════
+   components.css — Design System Component Definitions
+   Auto-extracted from preview/component-*.html
+   DO NOT EDIT MANUALLY — regenerate via extract-components-css.mjs
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Badge ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">状态标签</span> <span class="badge badge-default" data-evidence-sample="default">进行中</span> <span class="badge badge-success" data-evidence-sample="success">已完成</span> <span class="badge badge-warning">需注意</span> <span class="badge badge-error">已取消</span>
+*/
+/* Component definitions — extracted to components.css by deterministic script */
+    .badge { display: inline-flex; align-items: center; flex-shrink: 0; height: 24px; min-width: 24px; padding: 0 var(--space-2); border-radius: var(--radius-full); font-size: var(--font-size-caption); font-weight: var(--font-weight-caption); line-height: 1; white-space: nowrap; }
+    .badge-default { background: var(--report-gray-100); color: var(--report-gray-600); }
+    .badge-success { background: var(--report-green-100); color: var(--color-success); }
+    .badge-warning { background: var(--report-amber-100); color: var(--color-warning); }
+    .badge-error { background: var(--report-red-100); color: var(--color-error); }
+
+/* ── Button ────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">主要操作</span><button class="btn btn-md btn-primary">保存</button>
+*/
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1); border: none; cursor: pointer; font-family: var(--font-family-base); font-size: var(--font-size-body); font-weight: 500; line-height: 1; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; transition: background .15s, border-color .15s; flex-shrink: 0; }
+  .btn:disabled { cursor: not-allowed; opacity: 0.5; }
+  .btn-sm { height: var(--size-button-sm); min-width: var(--size-button-sm); padding: 0 var(--space-2); border-radius: var(--radius-md); }
+  .btn-md { height: var(--size-button-md); min-width: var(--size-button-md); padding: 0 var(--space-3); border-radius: var(--radius-md); }
+  .btn-lg { height: var(--size-button-lg); min-width: var(--size-button-lg); padding: 0 var(--space-4); border-radius: var(--radius-md); }
+  .btn-primary { background: var(--color-primary); color: var(--color-surface); }
+  .btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+  .btn-soft { background: var(--color-background); color: var(--color-foreground); }
+  .btn-soft:hover:not(:disabled) { background: var(--color-border); }
+  .btn-ghost { background: transparent; color: var(--color-primary); }
+  .btn-ghost:hover:not(:disabled) { background: var(--color-background); }
+  .btn-outline { background: transparent; color: var(--color-primary); border: 1px solid var(--color-border); }
+  .btn-outline:hover:not(:disabled) { background: var(--color-background); border-color: var(--color-primary); }
+
+/* ── Card ──────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">Default</span> <article class="card" data-evidence-sample="default"> <div class="card-header"> <h4 class="card-title">活跃用户</h4> <span class="card-caption">本月</span>
+*/
+/* Component definitions — extracted to components.css by deterministic script */
+  .card { width: 100%; background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-1); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); transition: filter .15s; }
+  .card:hover { filter: brightness(0.97); }
+  .card-header { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
+  .card-title { font-family: var(--font-display); font-size: var(--font-size-h4); font-weight: var(--font-weight-h4); line-height: var(--line-height-h4); color: var(--color-foreground); margin: 0; }
+  .card-caption { font-size: var(--font-size-caption); color: var(--muted); white-space: nowrap; }
+  .card-body { display: flex; align-items: baseline; gap: var(--space-2); }
+  .card-metric { font-family: var(--font-display); font-size: var(--font-size-h2); font-weight: var(--font-weight-h2); line-height: var(--line-height-h2); color: var(--color-foreground); margin: 0; }
+  .card-change { font-size: var(--font-size-body); font-weight: 600; color: var(--color-success); }
+  .card-footer { font-size: var(--font-size-caption); color: var(--accent); }
+  .card-raised { box-shadow: var(--shadow-2); }
+  .card-desc { font-size: var(--font-size-body); line-height: var(--line-height-body); color: var(--color-foreground); margin: 0; }
+
+/* ── Chart ─────────────────────────────────────────────────── */
+/* @anatomy
+   <div class="specimen"> <div class="story"> <span class="story-label">柱状图</span> <div class="stage"> <div class="chart" data-evidence-sample="bar-chart"> <div class="chart-header"> <h3 class="chart-title">季度销售额</h3> <div class="chart-legend"><span class="legend-item"><span class="legend-dot"></span>实际</span></div>
+*/
+.chart { width: 100%; }
+  .chart-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-2); }
+  .chart-title { font-family: var(--font-display); font-size: var(--font-size-body); font-weight: var(--font-weight-h4); color: var(--color-foreground); margin: 0; }
+  .chart-legend { display: flex; gap: var(--space-3); font-size: var(--font-size-caption); color: var(--muted); }
+  .legend-item { display: inline-flex; align-items: center; gap: var(--space-1); }
+  .legend-dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-primary); flex-shrink: 0; }
+  .chart-svg { width: 100%; height: 160px; display: block; }
+  .chart-bar { fill: var(--color-primary); rx: var(--radius-sm); }
+  .chart-line { fill: none; stroke: var(--color-primary); stroke-width: 2; }
+  .chart-area { fill: var(--color-primary); fill-opacity: 0.12; }
+  .chart-grid { stroke: var(--color-border); stroke-width: 1; }
+  .chart-axis { stroke: var(--color-border); stroke-width: 1; }
+  .chart-axis-text { fill: var(--muted); font-size: var(--font-size-caption); font-family: var(--font-family-base); }
+
+/* ── Navigation ────────────────────────────────────────────── */
+/* @anatomy
+   <nav class="top-nav" aria-label="主导航"> <div class="brand">Apple Report
+*/
+/* Component definitions — extracted to components.css by deterministic script */
+  .top-nav { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 56px; padding: 0 var(--space-4); background: var(--color-background); border-bottom: 1px solid var(--color-border); }
+  .top-nav .brand { font-family: var(--font-display); font-size: var(--font-size-h4); font-weight: var(--font-weight-h4); color: var(--color-foreground); white-space: nowrap; flex-shrink: 0; }
+  .top-nav .links { display: flex; align-items: center; gap: var(--space-1); flex: 1; justify-content: center; }
+  .top-nav .actions { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+  .side-nav { display: flex; flex-direction: column; gap: var(--space-2); width: 240px; padding: var(--space-3); background: var(--color-surface); border-right: 1px solid var(--color-border); }
+  .side-nav .brand { font-family: var(--font-display); font-size: var(--font-size-h4); font-weight: var(--font-weight-h4); color: var(--color-foreground); margin-bottom: var(--space-2); white-space: nowrap; flex-shrink: 0; }
+  .side-nav .stack { display: flex; flex-direction: column; gap: var(--space-1); }
+  .nav-item { display: inline-flex; align-items: center; height: var(--size-button-sm); min-width: var(--size-button-sm); padding: 0 var(--space-3); color: var(--color-foreground); font-size: var(--font-size-body); text-decoration: none; white-space: nowrap; flex-shrink: 0; transition: background .15s, filter .15s; }
+  .nav-item:hover { background: var(--color-border); }
+  .nav-item.active { background: var(--color-border); color: var(--color-primary); }
+  .nav-item.disabled { color: var(--muted); pointer-events: none; }
+
+/* ── Table ─────────────────────────────────────────────────── */
+/* @anatomy
+   <span class="label">默认表格</span>
+*/
+/* Component definitions — extracted to components.css by deterministic script */
+    .report-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+    .report-table th, .report-table td { padding: var(--space-3) var(--space-4); text-align: left; border-bottom: 1px solid var(--color-border); font-weight: var(--font-weight-body); }
+    .report-table thead th { color: var(--muted); font-size: var(--font-size-caption); line-height: var(--line-height-caption); font-weight: var(--font-weight-h4); white-space: nowrap; }
+    .report-table tbody tr:last-child td { border-bottom: none; }
+    .report-table tbody tr:hover { filter: brightness(0.97); transition: filter .15s; }
+    .report-table tbody tr.is-disabled { color: var(--muted); }
+    .report-table--compact th, .report-table--compact td { padding: var(--space-2) var(--space-3); font-size: var(--font-size-caption); line-height: var(--line-height-caption); }

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Report Dashboard UI Kit</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="../../components.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+  <style>
+    body { margin: 0; background: var(--color-background); color: var(--color-foreground); font-family: var(--font-body); }
+    .uikit-shell { width: 100%; max-width: 1184px; margin: 0 auto; overflow: hidden; display: grid; grid-template-columns: var(--uikit-sidebar-w, 220px) minmax(0, 1fr); gap: var(--space-4); min-height: 100vh; }
+    .uikit-sidebar, .uikit-main, .uikit-toolbar { min-width: 0; }
+    .uikit-sidebar { overflow: hidden; max-width: 100%; padding: var(--space-4) 0; }
+    .uikit-main { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4) var(--space-4) var(--space-4) 0; }
+    [data-component] { min-width: 0; max-width: 100%; overflow: hidden; }
+    .uikit-toolbar { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+    .uikit-responsive-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .uikit-table-wrap { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+    .uikit-truncate { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .uikit-nowrap { white-space: nowrap; flex-shrink: 0; }
+    .uikit-action-cell { display: flex; align-items: center; gap: 8px; min-width: 0; max-width: 160px; overflow: hidden; }
+    .uikit-action { min-width: 0; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .uikit-section-title { font-family: var(--font-display); font-size: var(--font-size-h3); font-weight: var(--font-weight-h3); line-height: var(--line-height-h3); color: var(--color-foreground); margin: 0; }
+    .uikit-page-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+    .uikit-kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+    .uikit-kpi-grid .card { min-width: 0; }
+    .uikit-change-negative { color: var(--color-error); }
+    .uikit-tab-list { display: flex; gap: var(--space-1); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-4); }
+    .uikit-tab { height: var(--size-button-sm); padding: 0 var(--space-3); border: none; background: transparent; color: var(--muted); font-family: var(--font-family-base); font-size: var(--font-size-body); cursor: pointer; white-space: nowrap; transition: color .15s; }
+    .uikit-tab.active { color: var(--color-primary); border-bottom: 2px solid var(--color-primary); }
+    .uikit-toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); }
+    .uikit-toggle:last-child { border-bottom: none; }
+    .uikit-toggle-track { width: 44px; height: 24px; border-radius: var(--radius-full); background: var(--color-border); position: relative; flex-shrink: 0; transition: background .15s; }
+    .uikit-toggle-thumb { width: 20px; height: 20px; border-radius: var(--radius-full); background: var(--color-surface); position: absolute; top: 2px; left: 2px; transition: transform .15s; box-shadow: var(--shadow-1); }
+    .uikit-toggle.is-active .uikit-toggle-track { background: var(--color-primary); }
+    .uikit-toggle.is-active .uikit-toggle-thumb { transform: translateX(20px); }
+    .uikit-settings-stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .uikit-avatar { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--report-blue-50); display: inline-flex; align-items: center; justify-content: center; color: var(--color-primary); flex-shrink: 0; }
+    @media (max-width: 900px) { .uikit-shell { grid-template-columns: minmax(0, 1fr); } .uikit-sidebar { display: none; } .uikit-main { padding: var(--space-4); } .uikit-responsive-grid, .uikit-kpi-grid, .uikit-settings-stack { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 640px) { .uikit-toolbar { flex-direction: column; align-items: stretch; } .uikit-page-header { flex-direction: column; align-items: flex-start; } .uikit-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const Icon = ({ name, size = 16 }) => (
+      <i data-lucide={name} style={{ width: size, height: size, display: "inline-block" }}></i>
+    );
+
+    function Sidebar({ active, onChange }) {
+      const items = [
+        { key: "overview", label: "概览", icon: "home" },
+        { key: "analytics", label: "分析", icon: "bar-chart-2" },
+        { key: "settings", label: "设置", icon: "settings" },
+        { key: "help", label: "帮助", icon: "help-circle", disabled: true }
+      ];
+      return (
+        <nav className="side-nav" data-component="navigation">
+          <div className="brand">Apple Report</div>
+          <div className="stack">
+            {items.map((item) => (
+              <a
+                key={item.key}
+                href="#"
+                className={"nav-item " + (active === item.key ? "active " : "") + (item.disabled ? "disabled" : "")}
+                onClick={(e) => { e.preventDefault(); if (!item.disabled) onChange(item.key); }}
+              >
+                <span style={{ marginRight: 8, display: "inline-flex" }}><Icon name={item.icon} size={16} /></span>
+                <span className="uikit-truncate">{item.label}</span>
+              </a>
+            ))}
+          </div>
+        </nav>
+      );
+    }
+
+    function TopNav() {
+      return (
+        <header className="top-nav" data-component="navigation">
+          <div className="brand uikit-truncate">Apple Report</div>
+          <div className="links uikit-truncate" style={{ justifyContent: "flex-start", paddingLeft: 16 }}>
+            <span className="report-caption" style={{ color: "var(--muted)" }}>月度数据报告</span>
+          </div>
+          <div className="actions">
+            <button className="btn btn-ghost btn-sm" aria-label="搜索"><Icon name="search" size={18} /></button>
+            <button className="btn btn-ghost btn-sm" aria-label="通知"><Icon name="bell" size={18} /></button>
+            <button className="btn btn-ghost btn-sm" aria-label="账户"><Icon name="user" size={18} /></button>
+          </div>
+        </header>
+      );
+    }
+
+    const kpiData = [
+      { title: "总营收", value: "¥128.4万", change: "+12.5%", positive: true, caption: "本月" },
+      { title: "订单量", value: "3,842", change: "+8.2%", positive: true, caption: "本月" },
+      { title: "客单价", value: "¥334", change: "-2.1%", positive: false, caption: "较上月" },
+      { title: "转化率", value: "4.8%", change: "+0.6%", positive: true, caption: "本月" }
+    ];
+
+    const orders = [
+      { id: "ORD-2026-001", customer: "林氏科技", amount: "¥12,800", status: "已完成", tone: "success" },
+      { id: "ORD-2026-002", customer: "云帆贸易", amount: "¥8,450", status: "进行中", tone: "default" },
+      { id: "ORD-2026-003", customer: "东海物流", amount: "¥21,300", status: "已完成", tone: "success" },
+      { id: "ORD-2026-004", customer: "星河创投", amount: "¥5,200", status: "需注意", tone: "warning" },
+      { id: "ORD-2026-005", customer: "北境工坊", amount: "¥16,750", status: "已完成", tone: "success" },
+      { id: "ORD-2026-006", customer: "清泉生活", amount: "¥3,900", status: "已取消", tone: "error" }
+    ];
+
+    function KpiCards() {
+      return (
+        <div className="uikit-kpi-grid">
+          {kpiData.map((k, i) => (
+            <article className="card" key={i} data-component="card">
+              <div className="card-header">
+                <h4 className="card-title uikit-truncate">{k.title}</h4>
+                <span className="card-caption">{k.caption}</span>
+              </div>
+              <div className="card-body">
+                <p className="card-metric uikit-truncate">{k.value}</p>
+                <span className={"card-change " + (k.positive ? "" : "uikit-change-negative")}>{k.change}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    }
+
+    function BarChart() {
+      const data = [45, 52, 48, 61, 55, 68, 72, 66, 74, 81, 77, 85];
+      const labels = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+      const n = data.length;
+      const gap = 12;
+      const viewW = 600;
+      const viewH = 160;
+      const barW = (viewW - (n - 1) * gap) / n;
+      const max = Math.max(...data);
+      return (
+        <div className="card" data-component="chart">
+          <div className="chart-header">
+            <h3 className="chart-title uikit-truncate">营收趋势</h3>
+            <div className="chart-legend"><span className="legend-item"><span className="legend-dot"></span>实际营收</span></div>
+          </div>
+          <svg className="chart-svg" viewBox={`0 0 ${viewW} ${viewH}`} preserveAspectRatio="none">
+            {[0, 0.5, 1].map((r, i) => (
+              <line key={i} x1="0" y1={viewH * r} x2={viewW} y2={viewH * r} className="chart-grid" />
+            ))}
+            {data.map((d, i) => {
+              const h = (d / max) * (viewH - 20);
+              const x = i * (barW + gap);
+              const y = viewH - h;
+              return <rect key={i} x={x} y={y} width={barW} height={h} className="chart-bar" />;
+            })}
+          </svg>
+          <div className="uikit-toolbar" style={{ justifyContent: "space-between", marginTop: 8 }}>
+            {labels.map((l, i) => <span key={i} className="report-caption uikit-truncate" style={{ flex: 1, textAlign: "center", color: "var(--muted)" }}>{l}</span>)}
+          </div>
+        </div>
+      );
+    }
+
+    function OrderTable() {
+      return (
+        <div className="uikit-table-wrap" data-component="table">
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th>订单编号</th>
+                <th>客户</th>
+                <th>金额</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((o, i) => (
+                <tr key={i} className={o.tone === "error" ? "is-disabled" : ""}>
+                  <td className="report-mono uikit-nowrap">{o.id}</td>
+                  <td className="uikit-truncate">{o.customer}</td>
+                  <td className="uikit-nowrap">{o.amount}</td>
+                  <td><span className={"badge badge-" + o.tone} data-component="badge">{o.status}</span></td>
+                  <td>
+                    <div className="uikit-action-cell">
+                      <button className="btn btn-ghost btn-sm uikit-action">查看</button>
+                      <button className="btn btn-ghost btn-sm" aria-label="详情"><Icon name="eye" size={16} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    function Overview() {
+      return (
+        <div className="uikit-main">
+          <TopNav />
+          <div className="uikit-page-header">
+            <div>
+              <h1 className="uikit-section-title uikit-truncate">月度销售报告</h1>
+              <p className="report-caption" style={{ color: "var(--muted)", marginTop: 4 }}>2026 年 7 月 · 数据已更新</p>
+            </div>
+            <div className="uikit-toolbar" style={{ marginLeft: "auto" }}>
+              <span className="badge badge-default" data-component="badge">本月</span>
+              <button className="btn btn-ghost btn-sm">查看详情</button>
+              <button className="btn btn-md btn-primary" data-component="button"><Icon name="download" size={16} /> 导出报告</button>
+            </div>
+          </div>
+          <KpiCards />
+          <div className="uikit-responsive-grid">
+            <BarChart />
+            <div className="card" data-component="card">
+              <div className="card-header">
+                <h4 className="card-title uikit-truncate">渠道占比</h4>
+                <span className="card-caption">按成交额</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {[{l:"线上商城",v:58},{l:"线下门店",v:27},{l:"分销合作",v:15}].map((r,i) => (
+                  <div key={i}>
+                    <div className="uikit-toolbar" style={{ justifyContent: "space-between" }}>
+                      <span className="uikit-truncate">{r.l}</span>
+                      <span className="report-mono uikit-nowrap" style={{ color: "var(--muted)" }}>{r.v}%</span>
+                    </div>
+                    <div style={{ height: 8, background: "var(--color-border)", borderRadius: "var(--radius-full)", overflow: "hidden", marginTop: 6 }}>
+                      <div style={{ width: r.v + "%", height: "100%", background: i === 0 ? "var(--color-primary)" : i === 1 ? "var(--color-info)" : "var(--color-success)", borderRadius: "var(--radius-full)" }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <OrderTable />
+        </div>
+      );
+    }
+
+    const products = [
+      { name: "AirPods Pro 2", sales: "¥342,000", units: 680, growth: "+14%", tone: "success" },
+      { name: "iPhone 16", sales: "¥1,020,000", units: 850, growth: "+9%", tone: "success" },
+      { name: "MacBook Air", sales: "¥560,000", units: 280, growth: "+5%", tone: "success" },
+      { name: "iPad Mini", sales: "¥184,000", units: 320, growth: "-3%", tone: "warning" },
+      { name: "Apple Watch", sales: "¥268,000", units: 536, growth: "+7%", tone: "success" },
+      { name: "HomePod mini", sales: "¥76,000", units: 380, growth: "+1%", tone: "default" }
+    ];
+
+    function LineChart() {
+      const data = [120, 135, 128, 145, 152, 148, 160, 175, 168, 182, 190, 205];
+      const labels = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+      const viewW = 600;
+      const viewH = 160;
+      const pad = 20;
+      const max = Math.max(...data);
+      const min = Math.min(...data);
+      const range = max - min || 1;
+      const points = data.map((d, i) => {
+        const x = (i / (data.length - 1)) * (viewW - pad * 2) + pad;
+        const y = viewH - ((d - min) / range) * (viewH - pad * 2) - pad;
+        return `${x},${y}`;
+      }).join(" ");
+      const areaD = `M ${pad},${viewH} L ${points.split(" ").join(" L ")} L ${viewW - pad},${viewH} Z`;
+      const lineD = `M ${points.split(" ").join(" L ")}`;
+      return (
+        <div className="card" data-component="chart">
+          <div className="chart-header">
+            <h3 className="chart-title uikit-truncate">销售额走势</h3>
+            <div className="chart-legend"><span className="legend-item"><span className="legend-dot"></span>销售额</span></div>
+          </div>
+          <svg className="chart-svg" viewBox={`0 0 ${viewW} ${viewH}`} preserveAspectRatio="none">
+            {[0, 0.33, 0.66, 1].map((r, i) => (
+              <line key={i} x1="0" y1={viewH * r} x2={viewW} y2={viewH * r} className="chart-grid" />
+            ))}
+            <path d={areaD} className="chart-area" />
+            <path d={lineD} className="chart-line" />
+          </svg>
+          <div className="uikit-toolbar" style={{ justifyContent: "space-between", marginTop: 8 }}>
+            {labels.map((l, i) => <span key={i} className="report-caption uikit-truncate" style={{ flex: 1, textAlign: "center", color: "var(--muted)" }}>{l}</span>)}
+          </div>
+        </div>
+      );
+    }
+
+    function Analytics() {
+      return (
+        <div className="uikit-main">
+          <TopNav />
+          <div className="uikit-page-header">
+            <div>
+              <h1 className="uikit-section-title uikit-truncate">商品分析</h1>
+              <p className="report-caption" style={{ color: "var(--muted)", marginTop: 4 }}>按 SKU 汇总 · 2026 上半年</p>
+            </div>
+            <div className="uikit-toolbar" style={{ marginLeft: "auto" }}>
+              <button className="btn btn-ghost btn-sm"><Icon name="filter" size={16} /> 筛选</button>
+              <button className="btn btn-md btn-primary" data-component="button"><Icon name="file-text" size={16} /> 生成分析</button>
+            </div>
+          </div>
+          <div className="uikit-responsive-grid">
+            <article className="card" data-component="card">
+              <div className="card-header">
+                <h4 className="card-title uikit-truncate">TOP 商品</h4>
+                <span className="card-caption">按销售额</span>
+              </div>
+              <div className="card-body">
+                <p className="card-metric uikit-truncate">iPhone 16</p>
+              </div>
+              <p className="card-footer uikit-truncate">占整体 34%</p>
+            </article>
+            <article className="card" data-component="card">
+              <div className="card-header">
+                <h4 className="card-title uikit-truncate">增长最快</h4>
+                <span className="card-caption">环比</span>
+              </div>
+              <div className="card-body">
+                <p className="card-metric uikit-truncate">AirPods Pro 2</p>
+                <span className="card-change">+14%</span>
+              </div>
+              <p className="card-footer uikit-truncate">连续 3 周上升</p>
+            </article>
+          </div>
+          <LineChart />
+          <div className="uikit-table-wrap" data-component="table">
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>商品名称</th>
+                  <th>销售额</th>
+                  <th>销量</th>
+                  <th>环比</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p, i) => (
+                  <tr key={i}>
+                    <td className="uikit-truncate">{p.name}</td>
+                    <td className="report-mono uikit-nowrap">{p.sales}</td>
+                    <td className="report-mono uikit-nowrap">{p.units}</td>
+                    <td><span className={"badge badge-" + p.tone} data-component="badge">{p.growth}</span></td>
+                    <td>
+                      <div className="uikit-action-cell">
+                        <button className="btn btn-ghost btn-sm uikit-action">详情</button>
+                        <button className="btn btn-ghost btn-sm" aria-label="趋势"><Icon name="bar-chart-2" size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    function Settings() {
+      const [tab, setTab] = useState("notify");
+      const [toggles, setToggles] = useState({ report: true, alert: true, weekly: false, dark: false });
+      const tabs = [
+        { key: "notify", label: "通知" },
+        { key: "display", label: "显示" },
+        { key: "account", label: "账户" }
+      ];
+      return (
+        <div className="uikit-main">
+          <TopNav />
+          <div className="uikit-page-header">
+            <div>
+              <h1 className="uikit-section-title uikit-truncate">报告设置</h1>
+              <p className="report-caption" style={{ color: "var(--muted)", marginTop: 4 }}>自定义报告生成与推送偏好</p>
+            </div>
+            <button className="btn btn-md btn-primary" data-component="button"><Icon name="check" size={16} /> 保存设置</button>
+          </div>
+          <div className="uikit-tab-list">
+            {tabs.map((t) => (
+              <button key={t.key} className={"uikit-tab " + (tab === t.key ? "active" : "")} onClick={() => setTab(t.key)}>{t.label}</button>
+            ))}
+          </div>
+          {tab === "notify" && (
+            <div className="uikit-settings-stack">
+              <article className="card" data-component="card">
+                <div className="card-header">
+                  <h4 className="card-title uikit-truncate">通知偏好</h4>
+                  <span className="badge badge-success" data-component="badge">运行中</span>
+                </div>
+                <div>
+                  {[
+                    { key: "report", label: "报告生成完成", desc: "每月 1 日自动推送" },
+                    { key: "alert", label: "异常数据提醒", desc: "关键指标波动时通知" },
+                    { key: "weekly", label: "周报摘要", desc: "每周一上午发送" }
+                  ].map((item) => (
+                    <div key={item.key} className={"uikit-toggle " + (toggles[item.key] ? "is-active" : "")} onClick={() => setToggles({ ...toggles, [item.key]: !toggles[item.key] })}>
+                      <div style={{ minWidth: 0 }}>
+                        <div className="uikit-truncate" style={{ fontWeight: 500 }}>{item.label}</div>
+                        <div className="report-caption uikit-truncate" style={{ color: "var(--muted)", marginTop: 2 }}>{item.desc}</div>
+                      </div>
+                      <div className="uikit-toggle-track"><div className="uikit-toggle-thumb"></div></div>
+                    </div>
+                  ))}
+                </div>
+              </article>
+              <article className="card" data-component="card">
+                <div className="card-header">
+                  <h4 className="card-title uikit-truncate">推送渠道</h4>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div className="uikit-toolbar" style={{ justifyContent: "space-between" }}>
+                    <span className="uikit-truncate"><Icon name="mail" size={16} /> 邮件</span>
+                    <span className="badge badge-success" data-component="badge">已启用</span>
+                  </div>
+                  <div className="uikit-toolbar" style={{ justifyContent: "space-between" }}>
+                    <span className="uikit-truncate"><Icon name="bell" size={16} /> 应用内</span>
+                    <span className="badge badge-default" data-component="badge">已关闭</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          )}
+          {tab === "display" && (
+            <div className="uikit-settings-stack">
+              <article className="card" data-component="card">
+                <div className="card-header">
+                  <h4 className="card-title uikit-truncate">显示选项</h4>
+                </div>
+                <div className="uikit-toggle is-active">
+                  <span className="uikit-truncate" style={{ fontWeight: 500 }}>深色模式</span>
+                  <div className="uikit-toggle-track"><div className="uikit-toggle-thumb"></div></div>
+                </div>
+                <p className="card-desc" style={{ color: "var(--muted)", marginTop: 8 }}>当前主题由系统设置决定。</p>
+              </article>
+              <article className="card" data-component="card">
+                <div className="card-header">
+                  <h4 className="card-title uikit-truncate">数字格式</h4>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div className="uikit-toolbar" style={{ justifyContent: "space-between" }}>
+                    <span className="uikit-truncate">千分位分隔符</span>
+                    <span className="badge badge-success" data-component="badge">开启</span>
+                  </div>
+                  <div className="uikit-toolbar" style={{ justifyContent: "space-between" }}>
+                    <span className="uikit-truncate">货币符号</span>
+                    <span className="report-mono uikit-nowrap">¥</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          )}
+          {tab === "account" && (
+            <div className="uikit-settings-stack">
+              <article className="card" data-component="card">
+                <div className="card-header">
+                  <h4 className="card-title uikit-truncate">账户信息</h4>
+                </div>
+                <div className="uikit-toolbar" style={{ gap: 16 }}>
+                  <div className="uikit-avatar"><Icon name="user" size={24} /></div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="uikit-truncate" style={{ fontWeight: 500 }}>张明 · 数据分析师</div>
+                    <div className="report-caption uikit-truncate" style={{ color: "var(--muted)" }}>zhangming@apple-report.com</div>
+                  </div>
+                </div>
+              </article>
+              <article className="card" data-component="card">
+                <div className="card-header">
+                  <h4 className="card-title uikit-truncate">危险操作</h4>
+                </div>
+                <p className="card-desc">删除账户将清除所有自定义报告模板，此操作无法撤销。</p>
+                <button className="btn btn-md btn-primary" disabled data-component="button"><Icon name="trash-2" size={16} /> 删除账户</button>
+              </article>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function App() {
+      const [view, setView] = useState("overview");
+      useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [view]);
+      return (
+        <div className="uikit-shell" data-layout-guard="uikit-v1" style={{ "--uikit-sidebar-w": "240px" }}>
+          <aside className="uikit-sidebar">
+            <Sidebar active={view} onChange={setView} />
+          </aside>
+          {view === "overview" && <Overview />}
+          {view === "analytics" && <Analytics />}
+          {view === "settings" && <Settings />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
