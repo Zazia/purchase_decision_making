@@ -34,7 +34,7 @@ const C_SURFACE = '#FFFFFF';
 const C_FG = '#1D1D1F';
 const C_MUTED = '#86868F';
 const C_BORDER = '#D2D2D8';
-const C_GRAY = '#C7C7CC';
+const C_GRAY = '#B9B9C1';
 const C_SUCCESS = '#2A8A61';
 
 // 底部码区布局 (左对齐: 圆角矩形码框 + 右侧说明文字)
@@ -403,7 +403,7 @@ Component({
       ctx.fillText(`数据更新于 ${this.properties.lastUpdated || '未知'}`, 60, 1400);
 
       ctx.font = '22px -apple-system, "PingFang SC", sans-serif';
-      ctx.fillStyle = '#C7C7CC';
+      ctx.fillStyle = '#B9B9C1';
       ctx.fillText('个人主体 · 非商业 · CC BY-NC 4.0 · github.com/Zazia/purchase_decision_making', 60, 1430);
     },
 

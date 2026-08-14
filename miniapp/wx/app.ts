@@ -35,6 +35,11 @@ App({
     },
     // 详情页方案数据, 从 result 页传递到 detail 页
     detailPlan: null as unknown as Record<string, unknown> | null,
+    // 详情页「价格不对？去修改」跳转编辑器时的定位标记
+    pendingEditorFocus: null as null | {
+      baseModel: string;
+      buyTiming: 'new' | 'used';
+    },
     // 分享卡数据, 从 result 页传递到 share-card 页
     shareCardData: null as unknown as Record<string, unknown> | null,
     // 端内报告页数据, 从 result 页传递到 report 页

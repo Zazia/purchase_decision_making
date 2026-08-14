@@ -24,9 +24,9 @@ const C_SURFACE = '#FFFFFF';
 const C_PRIMARY = '#007AFF';
 const C_TEXT = '#1D1D1F';
 const C_MUTED = '#86868F';
-const C_BORDER = '#E5E5EA';
+const C_BORDER = '#D2D2D8';
 const C_RED = '#F24B4B';
-const C_ORANGE = '#E65100';
+const C_ORANGE = '#C25E00';
 
 export async function exportLongImage(options: LongImageExportOptions): Promise<string> {
   const totalH = HEADER_H + FOOTER_H + options.points.length * ROW_H;
@@ -177,7 +177,7 @@ function drawRow(ctx: any, p: EditedPlanPoint, y: number) {
     drawTag(ctx, '自添加', tagX, y + 90, '#E6F2FF', C_PRIMARY);
     tagX += 100;
   } else if (p.source === 'edited') {
-    drawTag(ctx, '已改价', tagX, y + 90, '#FFF8E1', C_ORANGE);
+    drawTag(ctx, '已改价', tagX, y + 90, '#FFF0C2', C_ORANGE);
     tagX += 100;
   }
   if (p.excluded) {

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>苹果购买决策分析 - Product Tour</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face { font-family: 'Noto Sans SC'; src: local('Noto Sans SC'), local('Noto Sans CJK SC'); }
+      @font-face { font-family: 'Microsoft YaHei'; src: local('Microsoft YaHei'); }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #F5F5F7;
+        font-family: "Inter", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      }
+      .scene {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .caption-text-wrapper {
+        position: absolute;
+        bottom: 80px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+        overflow: hidden;
+        padding: 10px 0;
+      }
+      .caption-line {
+        color: #1D1D1F;
+        font-size: 44px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 14px 36px;
+        border-radius: 100px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 4px 20px rgba(29, 29, 31, 0.08);
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="21"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Scene 1: Logo Intro (0-2s) -->
+      <div
+        id="scene-1"
+        class="scene"
+        data-composition-id="scene1-logo-intro"
+        data-composition-src="compositions/scene1-logo-intro.html"
+        data-start="0"
+        data-duration="2"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- Scene 2-5: Product Tour (2-16s) -->
+      <div
+        id="scene-2-5"
+        class="scene"
+        data-composition-id="scene2-5-product-tour"
+        data-composition-src="compositions/scene2-5-product-tour.html"
+        data-start="2"
+        data-duration="14"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- Scene 6: Logo Outro (16-21s) -->
+      <div
+        id="scene-6"
+        class="scene"
+        data-composition-id="scene6-logo-outro"
+        data-composition-src="compositions/scene6-logo-outro.html"
+        data-start="16"
+        data-duration="5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- Captions (2-16s) -->
+      <div
+        id="captions-comp"
+        data-composition-id="captions"
+        data-start="2"
+        data-duration="14"
+        data-track-index="2"
+        data-width="1920"
+        data-height="1080"
+      >
+        <div class="caption-text-wrapper">
+          <div id="caption-text" class="caption-line">选择品类，设定预算</div>
+        </div>
+
+        <script>
+          (function () {
+            const tl = gsap.timeline({ paused: true });
+            const text = document.querySelector("#caption-text");
+
+            // Caption 1: 选择品类 (0-3.5s)
+            tl.to(text, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.2);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 3.2);
+
+            // Caption 2: 帕累托前沿 (3.5-7s)
+            tl.set(text, { innerText: "帕累托前沿分析，最优方案一目了然", y: 30 }, 3.5);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 3.5);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 6.7);
+
+            // Caption 3: 数据驱动 (7-10.5s)
+            tl.set(text, { innerText: "数据驱动，理性消费", y: 30 }, 7.0);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 7.0);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 10.2);
+
+            // Caption 4: 一键分享 (10.5-14s)
+            tl.set(text, { innerText: "一键分享，决策留存", y: 30 }, 10.5);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 10.5);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.4, ease: "power3.in" }, 13.4);
+
+            window.__timelines = window.__timelines || {};
+            window.__timelines["captions"] = tl;
+          })();
+        </script>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const mainTl = gsap.timeline({ paused: true });
+
+      // Scene 2-5 starts clean
+      mainTl.set("#scene-2-5", { scale: 1, filter: "blur(0px)", opacity: 1 }, 2);
+
+      // Transition: Scene 2-5 → Scene 6 (blur + scale down at end)
+      mainTl.to(
+        "#scene-2-5",
+        { duration: 0.3, scale: 0.96, filter: "blur(8px)", opacity: 0, ease: "power2.in" },
+        15.5,
+      );
+
+      window.__timelines["main"] = mainTl;
+    </script>
+  </body>
+</html>

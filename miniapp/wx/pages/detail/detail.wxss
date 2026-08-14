@@ -119,8 +119,8 @@
 
 /* ============ 系统支持期风险卡片 ============ */
 .risk-card {
-  background: #FFF4E5;
-  border: 2rpx solid #FF9500;
+  background: #FFF0C2;
+  border: 2rpx solid #E09500;
   border-radius: 20rpx;
   padding: 28rpx;
   margin-bottom: 24rpx;
@@ -225,6 +225,19 @@
   font-size: 28rpx;
   font-weight: 500;
   color: #1D1D1F;
+}
+
+/* 买入价单元格: 数值 + 「去修改」入口 */
+.buy-price-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+}
+
+.price-edit-entry {
+  font-size: 22rpx;
+  color: #B9B9C1;
 }
 
 .breakdown-value.highlight {

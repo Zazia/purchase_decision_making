@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "renderBlockingErrorCount": 0,
+  "softWarningCount": 0,
+  "errors": [],
+  "warnings": [],
+  "projectFileHashes": {
+    "pareto-logo.design": "e40047e7dd4acb985626a4a1b40d0f29ff94d72338690591c35e5ede4b3df17d",
+    "runtime-orchestration-summary.json": "1ee27bb4715958a64ea10fb101e7f5ffa35c4ca374611ac2d8dba5cf7f75797d",
+    "assets/pareto-logo-color-block.jpg": "fd0b8b2202b5c1933bea646d68fd6d153c186e16dbe666fccd9b133d846eb852",
+    "assets/pareto-logo-gradient.jpg": "c48575d90790475734aafe00ff9766a6f5249a931d2e2b4b651ee8e0d3d55c1a",
+    "assets/pareto-logo.jpg": "42cc2a66d8b62a528bedd225790eee9133dce1565b90f0184663a23cd8c1ca9c"
+  },
+  "designDir": "d:\\_Projects\\1-small-tools\\purchase_decision_making\\pareto-logo",
+  "checkedAt": "2026-08-14T01:20:55.715Z"
+}

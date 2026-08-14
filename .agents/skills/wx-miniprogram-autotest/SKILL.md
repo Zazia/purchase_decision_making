@@ -52,6 +52,18 @@ TRAE Sandbox Error: hit restricted
 
 **解决**：由用户在沙箱外手动放行该目录（或直接在原生 PowerShell 运行 `cli.bat`）。
 
+### ⚠️ PATH 缺 System32 / node 导致 chcp 报错
+
+TRAE 终端 `$env:PATH` 缺 `C:\Windows\System32` 和 `C:\Program Files\nodejs`，`cli.bat` / `wechatide.cmd` 会报 `'chcp' is not recognized` 或 `'node' is not recognized`。跑任何开发者工具命令前先补 PATH：
+
+```powershell
+$env:PATH = "C:\Windows\System32;C:\Windows;C:\Program Files\nodejs;" + $env:PATH
+```
+
+### ⚠️ 服务端口未开启：直接跑 cli.bat 看错误，别扫端口
+
+`wechatide auth` 报 `CONNECT_ERROR` 超时、automator 连不上、`.ide` 里写的端口不监听，根因几乎都是**服务端口未开启**（`localstorage_*.json` 里 `enableServicePort:true` 只是残留值，不代表真的监听）。最快诊断：直接跑 `cli.bat auto`，它会给出明确中文提示「工具的服务端口已关闭，请手动打开工具 → 设置 → 安全设置，将服务端口开启」。让用户手动开启后立即生效，无需重启。**不要逆向源码、扫端口、查配置文件绕远路。**
+
 ---
 
 ## 二、启动自动化模式

@@ -44,7 +44,10 @@
       <view class="breakdown-list">
         <view class="breakdown-row">
           <text class="breakdown-label">买入价<text class="predict-tag" wx:if="{{predictedPrice}}">预测值</text></text>
-          <text class="breakdown-value">{{plan.buyPrice}} 元</text>
+          <view class="buy-price-cell">
+            <text class="breakdown-value">{{plan.buyPrice}} 元</text>
+            <text class="price-edit-entry" bindtap="onEditPrice">价格不对？去修改 ›</text>
+          </view>
         </view>
         <view class="breakdown-row">
           <text class="breakdown-label">预期卖出残值</text>

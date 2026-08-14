@@ -39,10 +39,10 @@ interface RecommendationRange {
 const C_PRIMARY = '#007AFF';
 const C_MUTED = '#86868F';
 const C_BORDER = '#D2D2D8';
-const C_GRAY = '#C7C7CC';
+const C_GRAY = '#B9B9C1';
 const C_SUCCESS = '#2A8A61';
-const C_WAIT = '#5AC8FA'; // 次级品牌色: 等新品方案 (类型 B/C)
-const C_WARN = '#FF9500'; // 预算线
+const C_WAIT = '#66ADFF'; // 次级品牌色: 等新品方案 (类型 B/C)
+const C_WARN = '#E09500'; // 预算线
 const C_REC_BAND = '#007AFF'; // 推荐区间色带(主品牌色, 半透明)
 
 Component({
@@ -167,7 +167,7 @@ Component({
             value: [p.monthlyCost, p.avgPerformance * 100, p.buyPrice, p],
           };
           if (p.source === 'edited' || p.source === 'custom') {
-            item.itemStyle = { color: C_PRIMARY, borderColor: '#FF9500', borderWidth: 2 };
+            item.itemStyle = { color: C_PRIMARY, borderColor: '#E09500', borderWidth: 2 };
           }
           return item;
         });
@@ -181,7 +181,7 @@ Component({
             symbol: p.candidateType === 'B' ? 'triangle' : 'diamond',
           };
           if (p.source === 'edited' || p.source === 'custom') {
-            item.itemStyle = { color: C_WAIT, opacity: 0.7, borderColor: '#FF9500', borderWidth: 2 };
+            item.itemStyle = { color: C_WAIT, opacity: 0.7, borderColor: '#E09500', borderWidth: 2 };
           }
           return item;
         });

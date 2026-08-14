@@ -6,7 +6,7 @@
 
 .repo-footer-text {
   font-size: 22rpx;
-  color: #AEAEB2;
+  color: #B9B9C1;
   line-height: 1.6;
 }
 

@@ -65,7 +65,7 @@
 
 /* ============ 结论卡 (品牌蓝渐变) ============ */
 .conclusion-card {
-  background: linear-gradient(135deg, #007AFF, #0056CC);
+  background: linear-gradient(135deg, #007AFF, #0063D4);
   border-radius: 20rpx;
   padding: 36rpx 28rpx;
   margin-bottom: 24rpx;
@@ -138,18 +138,18 @@
 }
 
 .alert-warning {
-  background: #FFF4E5;
-  border: 2rpx solid #FF9500;
+  background: #FFF0C2;
+  border: 2rpx solid #E09500;
 }
 
 .alert-info {
-  background: #E8F0FE;
+  background: #E6F2FF;
   border: 2rpx solid #007AFF;
 }
 
 .alert-error {
   background: #FFD9D9;
-  border: 2rpx solid #FF3B30;
+  border: 2rpx solid #F24B4B;
 }
 
 .alert-title {
@@ -160,8 +160,8 @@
 }
 
 .alert-warning .alert-title { color: #C25E00; }
-.alert-info .alert-title { color: #1A56DB; }
-.alert-error .alert-title { color: #991B1B; }
+.alert-info .alert-title { color: #0063D4; }
+.alert-error .alert-title { color: #912020; }
 
 .alert-desc {
   font-size: 24rpx;
@@ -217,7 +217,7 @@
 .table-row {
   display: flex;
   align-items: center;
-  border-bottom: 2rpx solid #E5E7EB;
+  border-bottom: 2rpx solid #D2D2D8;
   min-width: 100%;
 }
 
@@ -270,7 +270,7 @@
 .conf-desc { width: 320rpx; flex-grow: 2; font-size: 22rpx; color: #86868F; }
 
 .row-highlight {
-  background: #E8F0FE;
+  background: #E6F2FF;
 }
 
 .row-highlight .cell {
@@ -367,9 +367,9 @@
   flex-shrink: 0;
 }
 
-.macro-dot-warning { background: #FF9500; }
+.macro-dot-warning { background: #E09500; }
 .macro-dot-info { background: #007AFF; }
-.macro-dot-error { background: #FF3B30; }
+.macro-dot-error { background: #F24B4B; }
 
 .macro-content {
   flex: 1;

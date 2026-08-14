@@ -1,0 +1,265 @@
+<template id="scene1-logo-intro-template">
+  <div
+    data-composition-id="scene1-logo-intro"
+    data-width="1920"
+    data-height="1080"
+    data-duration="2"
+  >
+    <div class="canvas">
+      <!-- Background decoratives -->
+      <div class="bg-glow" data-layout-allow-overflow></div>
+      <div class="ghost-text" data-layout-ignore>DECISION</div>
+
+      <!-- Logo Container -->
+      <div class="logo-container">
+        <!-- 4 quadrant pieces forming a rounded square -->
+        <div class="logo-piece piece-tl"></div>
+        <div class="logo-piece piece-tr"></div>
+        <div class="logo-piece piece-bl"></div>
+        <div class="logo-piece piece-br"></div>
+
+        <!-- Pareto curve inside logo (drawn after convergence) -->
+        <svg class="pareto-curve" viewBox="0 0 200 200" width="200" height="200">
+          <path
+            class="curve-path"
+            d="M 50 150 L 50 120 L 90 120 L 90 90 L 130 90 L 130 60 L 160 60"
+            stroke="white"
+            stroke-width="7"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <!-- Dots on the curve -->
+          <circle class="curve-dot" cx="50" cy="120" r="5" fill="white" />
+          <circle class="curve-dot" cx="90" cy="90" r="5" fill="white" />
+          <circle class="curve-dot" cx="130" cy="60" r="5" fill="white" />
+        </svg>
+      </div>
+
+      <!-- Expanding Ring -->
+      <div class="ring-container">
+        <svg viewBox="0 0 400 400" width="400" height="400">
+          <circle
+            class="ring"
+            cx="200"
+            cy="200"
+            r="80"
+            fill="none"
+            stroke="#007AFF"
+            stroke-width="4"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <style>
+      @font-face { font-family: 'Noto Sans SC'; src: local('Noto Sans SC'), local('Noto Sans CJK SC'); }
+      @font-face { font-family: 'Microsoft YaHei'; src: local('Microsoft YaHei'); }
+      [data-composition-id="scene1-logo-intro"] .canvas {
+        width: 1920px;
+        height: 1080px;
+        background-color: #F5F5F7;
+        position: relative;
+        overflow: hidden;
+        font-family: "Inter", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .bg-glow {
+        position: absolute;
+        left: 660px;
+        top: 240px;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, rgba(245, 245, 247, 0) 70%);
+        border-radius: 50%;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .ghost-text {
+        position: absolute;
+        top: 400px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 280px;
+        font-weight: 800;
+        color: rgba(0, 122, 255, 0.04);
+        letter-spacing: -0.04em;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .logo-container {
+        position: absolute;
+        left: 860px;
+        top: 440px;
+        width: 200px;
+        height: 200px;
+        transform-origin: center center;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .logo-piece {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .piece-tl {
+        background: #007AFF;
+        border-radius: 40px 0 0 0;
+        top: 0;
+        left: 0;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .piece-tr {
+        background: #4DA2FF;
+        border-radius: 0 40px 0 0;
+        top: 0;
+        right: 0;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .piece-bl {
+        background: #0051D5;
+        border-radius: 0 0 0 40px;
+        bottom: 0;
+        left: 0;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .piece-br {
+        background: #007AFF;
+        border-radius: 0 0 40px 0;
+        bottom: 0;
+        right: 0;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .pareto-curve {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .curve-path {
+        stroke-dasharray: 400;
+        stroke-dashoffset: 400;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .curve-dot {
+        opacity: 0;
+        transform-origin: center;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .ring-container {
+        position: absolute;
+        left: 760px;
+        top: 340px;
+        width: 400px;
+        height: 400px;
+        pointer-events: none;
+      }
+
+      [data-composition-id="scene1-logo-intro"] .ring {
+        transform-origin: center center;
+        opacity: 0;
+      }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+
+        const sel = (s) => `[data-composition-id="scene1-logo-intro"] ${s}`;
+        const pieces = [".piece-tl", ".piece-tr", ".piece-bl", ".piece-br"];
+        const logoContainer = sel(".logo-container");
+        const ring = sel(".ring");
+        const paretoCurve = sel(".pareto-curve");
+        const curvePath = sel(".curve-path");
+        const curveDots = sel(".curve-dot");
+
+        // Initial positions: 4 corners of the screen
+        tl.set(sel(".piece-tl"), { x: -960, y: -540 });
+        tl.set(sel(".piece-tr"), { x: 960, y: -540 });
+        tl.set(sel(".piece-bl"), { x: -960, y: 540 });
+        tl.set(sel(".piece-br"), { x: 960, y: 540 });
+
+        // 1. Converge to center with stagger
+        const convergeDuration = 0.6;
+        const stagger = 0.06;
+
+        pieces.forEach((piece, i) => {
+          tl.to(
+            sel(piece),
+            {
+              x: 0,
+              y: 0,
+              duration: convergeDuration,
+              ease: "back.out(1.1)",
+            },
+            0.1 + i * stagger
+          );
+        });
+
+        // 2. On collision, ring expands
+        const collisionTime = 0.1 + convergeDuration + (pieces.length - 1) * stagger;
+
+        tl.fromTo(
+          ring,
+          { scale: 0.2, opacity: 1 },
+          {
+            scale: 2.5,
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.out",
+          },
+          collisionTime
+        );
+
+        // 3. Logo pulses
+        tl.to(
+          logoContainer,
+          { scale: 1.06, duration: 0.15, ease: "power2.out" },
+          collisionTime
+        );
+        tl.to(
+          logoContainer,
+          { scale: 1, duration: 0.15, ease: "power2.in" },
+          collisionTime + 0.15
+        );
+
+        // 4. Pareto curve draws in
+        tl.to(paretoCurve, { opacity: 1, duration: 0.1 }, collisionTime + 0.2);
+        tl.to(
+          curvePath,
+          { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" },
+          collisionTime + 0.2
+        );
+
+        // Dots appear sequentially
+        tl.to(curveDots, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.15,
+          stagger: 0.08,
+          ease: "back.out(2)",
+        }, collisionTime + 0.5);
+
+        // 5. Hold briefly, then scale down for transition
+        tl.to(
+          logoContainer,
+          {
+            scale: 0,
+            duration: 0.3,
+            ease: "expo.in",
+          },
+          1.6
+        );
+
+        // Ghost text drifts
+        tl.fromTo(sel(".ghost-text"), { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.3);
+        tl.to(sel(".ghost-text"), { opacity: 0, duration: 0.3, ease: "power2.in" }, 1.4);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines["scene1-logo-intro"] = tl;
+      })();
+    </script>
+  </div>
+</template>

@@ -58,7 +58,28 @@
   },
   "simulatorPluginLibVersion": {},
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "type": "file",
+        "value": "snapshot/constants.json"
+      },
+      {
+        "type": "file",
+        "value": "snapshot/macro-context.json"
+      },
+      {
+        "type": "file",
+        "value": "project.private.config.json"
+      },
+      {
+        "type": "file",
+        "value": "tsconfig.json"
+      },
+      {
+        "type": "file",
+        "value": "tsconfig.check.json"
+      }
+    ],
     "include": [
       {
         "value": "vendor/apple-value-engine",

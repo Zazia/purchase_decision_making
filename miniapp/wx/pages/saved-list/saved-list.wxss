@@ -60,7 +60,7 @@
   border-radius: 20rpx;
   padding: 32rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2rpx 12rpx rgba(29, 29, 31, 0.04);
 }
 
 .result-card:active {
@@ -89,7 +89,7 @@
 
 .meta-budget {
   font-size: 26rpx;
-  color: #515154;
+  color: #3F3F46;
 }
 
 .meta-time {
@@ -100,6 +100,6 @@
 .list-tip {
   text-align: center;
   font-size: 24rpx;
-  color: #AEAEB2;
+  color: #B9B9C1;
   padding: 32rpx 0;
 }

@@ -85,6 +85,21 @@ function genRowId(): string {
 }
 
 /**
+ * 去重: 相同 model + buyTiming + holdingYears + _copyKey 的点只保留第一个。
+ * 用于消除引擎可能生成的重复方案, 同时保留用户通过复制按钮产生的副本 (有不同 _copyKey)。
+ */
+function deduplicatePoints(points: EditedPlanPoint[]): EditedPlanPoint[] {
+  const seen = new Set<string>();
+  return points.filter((p) => {
+    const copyKey = (p as any)._copyKey || '';
+    const key = `${p.model}_${p.buyTiming}_${p.holdingYears}_${copyKey}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/**
  * 编辑器状态管理类
  *
  * 用法:
@@ -181,6 +196,7 @@ export class EditorState {
    * 从引擎原始方案初始化编辑态
    * 把 frontier + dominated 转为 EditedPlanPoint[] (source='original'), 推入初始快照。
    * 已有 draft 时优先返回 draft (不覆盖用户上次编辑)。
+   * 自动去重: 相同 model + buyTiming + holdingYears + _copyKey 的点只保留第一个。
    *
    * @returns 初始化后的 snapshot (来自 draft 或新建)
    */
@@ -195,13 +211,19 @@ export class EditorState {
 
     // 优先加载已有 draft
     const existing = this.loadDraft(resultKey);
-    if (existing) return existing;
+    if (existing) {
+      // 去重 draft 中可能存在的引擎重复点 (保留有 _copyKey 的副本)
+      existing.points = deduplicatePoints(existing.points);
+      return existing;
+    }
 
     // 新建初始 snapshot: 全部方案 source='original', 无排除/暂不考虑
-    const points: EditedPlanPoint[] = [
+    const allPoints: EditedPlanPoint[] = [
       ...frontier.map((p) => ({ ...p, source: 'original' as const, rowId: genRowId() })),
       ...dominated.map((p) => ({ ...p, source: 'original' as const, rowId: genRowId() })),
     ];
+    // 去重: 引擎可能对同一 (model, buyTiming, holdingYears) 生成多条, 只保留第一条
+    const points = deduplicatePoints(allPoints);
     const snapshot: EditorSnapshot = {
       points,
       deferredRowIds: [],

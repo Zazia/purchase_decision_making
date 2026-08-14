@@ -1,0 +1,63 @@
+{
+  "data": [
+    {
+      "id": "image-001",
+      "title": "帕累托前沿项目 Logo",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1786666318000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "naturalSize": {
+          "width": 1920,
+          "height": 1920
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/pareto-logo.jpg"
+      }
+    },
+    {
+      "id": "image-002",
+      "title": "帕累托前沿色块 Logo",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1786666435000,
+      "canvasData": {
+        "x": 620,
+        "y": 0,
+        "naturalSize": {
+          "width": 1920,
+          "height": 1920
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/pareto-logo-color-block.jpg"
+      }
+    },
+    {
+      "id": "image-003",
+      "title": "帕累托前沿色块渐变 Logo",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1786667037000,
+      "canvasData": {
+        "x": 1240,
+        "y": 0,
+        "naturalSize": {
+          "width": 1920,
+          "height": 1920
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/pareto-logo-gradient.jpg"
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "freeSize",
+    "projectName": "帕累托前沿项目 Logo"
+  }
+}

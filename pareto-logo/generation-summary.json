@@ -1,0 +1,34 @@
+{
+  "skillProvenance": {
+    "name": "solo-design",
+    "version": "2026.07.22.00.00.00",
+    "version_source": "skill-release-manifest.json",
+    "runtime_skill_dir": "c:\\Users\\Administrator\\.trae-cn\\builtin\\design\\default\\skills\\solo-design",
+    "recorded_at": "2026-08-14T08:12:00.000+08:00"
+  },
+  "operation": "append-image-assets",
+  "assetCount": 3,
+  "assets": [
+    {
+      "filename": "pareto-logo.jpg",
+      "title": "帕累托前沿项目 Logo",
+      "deliverableType": "logo",
+      "intendedAspect": "square 1:1",
+      "status": "generated"
+    },
+    {
+      "filename": "pareto-logo-color-block.jpg",
+      "title": "帕累托前沿色块 Logo",
+      "deliverableType": "logo",
+      "intendedAspect": "square 1:1",
+      "status": "generated"
+    },
+    {
+      "filename": "pareto-logo-gradient.jpg",
+      "title": "帕累托前沿色块渐变 Logo",
+      "deliverableType": "logo",
+      "intendedAspect": "square 1:1",
+      "status": "generated"
+    }
+  ]
+}

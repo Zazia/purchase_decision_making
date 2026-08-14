@@ -50,6 +50,44 @@ async function checkPort(host, port) {
 }
 ```
 
+### 1.4 PATH 缺 System32 导致 cli.bat / wechatide 报 chcp 错误
+
+**现象**：在 TRAE 的 PowerShell 终端里执行 `cli.bat` 或 `wechatide.cmd`，报：
+```
+wechatide.cmd : 'chcp' is not recognized as an internal or external command
+node : The term 'node' is not recognized
+```
+
+**原因**：TRAE 终端的 `$env:PATH` 只含少数目录（如 agent 的 bin），缺少 `C:\Windows\System32` 和 `C:\Program Files\nodejs`。batch 脚本里的 `chcp`、`node` 都找不到。
+
+**解决**：跑任何微信开发者工具相关命令前，先补齐 PATH：
+
+```powershell
+$env:PATH = "C:\Windows\System32;C:\Windows;C:\Program Files\nodejs;" + $env:PATH
+```
+
+（Node.js 实际路径用 `Get-ChildItem 'C:\Program Files\nodejs' -Filter 'node.exe'` 确认）
+
+### 1.5 服务端口未开启的最快诊断方法
+
+**现象**：`wechatide auth` 一直报 `CONNECT_ERROR / wait WechatIDE authorization timeout`，automator 连接失败，`netstat` 看不到 IDE 服务端口（`.ide` 文件里写的端口不监听）。
+
+**原因**：微信开发者工具的「服务端口」未开启。注意：`AppData\Local\...\WeappLocalData\localstorage_*.json` 里的 `security.enableServicePort: true` 只是残留配置，不代表端口真的在监听。
+
+**解决（最快）**：不要逆向源码、不要扫端口、不要查配置文件。直接跑：
+
+```powershell
+$cli = "C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat"
+& $cli auto --project "D:\...\miniapp\wx" --auto-port 9420
+```
+
+它会直接给出明确中文提示：
+```
+[error] 工具的服务端口已关闭。要使用命令行调用工具，请手动打开工具 -> 设置 -> 安全设置，将服务端口开启。
+```
+
+然后让用户在开发者工具里手动开启：**设置 → 安全设置 → 服务端口（Service Port）**。开启后服务端口立即监听，无需重启。
+
 ## 二、连接与版本兼容
 
 ### 2.1 必须用 wsEndpoint 而非 port

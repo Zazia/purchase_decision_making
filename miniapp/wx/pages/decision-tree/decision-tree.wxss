@@ -132,7 +132,7 @@
 }
 
 .quick-all-card:active {
-  background: #D6EBFF;
+  background: #E6F2FF;
 }
 
 .quick-all-text {
@@ -163,7 +163,7 @@
 }
 
 .multi-next-btn.disabled {
-  background: #C7C7CC;
+  background: #B9B9C1;
   color: #FFFFFF;
 }
 
@@ -202,7 +202,7 @@
 
 .saved-entry-text {
   font-size: 28rpx;
-  color: #515154;
+  color: #3F3F46;
 }
 
 /* 导航栏 */

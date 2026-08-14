@@ -94,4 +94,34 @@ Page({
       supportRiskLevel,
     });
   },
+
+  /** 点击「价格不对？去修改」: 记录目标方案并返回结果页, 由结果页进入编辑器并定位 */
+  onEditPrice() {
+    const plan = this.data.plan;
+    if (!plan) return;
+
+    const app = getApp();
+    // 与 result 页 getGroupKey 同款逻辑: 去掉「 × Ny年」后缀作为分组匹配键
+    const baseModel = plan.model.replace(/\s*×\s*[\d.]+年$/, '');
+    if (app.globalData) {
+      app.globalData.pendingEditorFocus = {
+        baseModel,
+        buyTiming: plan.buyTiming,
+      } as unknown as Record<string, unknown>;
+    }
+    this.backToResult();
+  },
+
+  /** 返回结果页 (detail 可能从 result 或 report 进入, 需定位到栈中的 result 页) */
+  backToResult() {
+    const pages = getCurrentPages();
+    let delta = 1;
+    for (let i = pages.length - 2; i >= 0; i--) {
+      if (pages[i].route === 'pages/result/result') {
+        delta = pages.length - 1 - i;
+        break;
+      }
+    }
+    wx.navigateBack({ delta });
+  },
 });

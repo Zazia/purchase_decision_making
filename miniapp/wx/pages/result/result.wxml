@@ -44,9 +44,9 @@
                 <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterFrontierState}}" wx:key="value" data-dim="frontierState" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
               </view>
             </view>
-            <!-- 芯片 -->
+            <!-- 芯片/型号 -->
             <view class="filter-group">
-              <view class="filter-group-label">芯片</view>
+              <view class="filter-group-label">{{params.category === 'iphone' ? '型号' : '芯片'}}</view>
               <view class="filter-chips">
                 <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterChips}}" wx:key="value" data-dim="chip" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
               </view>
@@ -65,11 +65,11 @@
                 <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterStorage}}" wx:key="value" data-dim="storage" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
               </view>
             </view>
-            <!-- 持有期 -->
+            <!-- 持有期 (三态: all/partial/none) -->
             <view class="filter-group">
               <view class="filter-group-label">持有期</view>
               <view class="filter-chips">
-                <view class="filter-chip {{item.active ? 'active' : ''}}" wx:for="{{filterHolding}}" wx:key="value" data-dim="holding" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
+                <view class="filter-chip {{item.state === 'all' ? 'active' : ''}} {{item.state === 'partial' ? 'partial' : ''}}" wx:for="{{filterHolding}}" wx:key="value" data-dim="holding" data-value="{{item.value}}" bindtap="onFilterToggle">{{item.label}}</view>
               </view>
             </view>
             <!-- 新品/二手 -->
@@ -82,18 +82,37 @@
           </view>
         </view>
 
-        <!-- 主列表方案表格 -->
+        <!-- 主列表方案表格 (按前沿状态分组 → model+buyTiming 分组, 持有期多选) -->
         <view class="editor-table">
-          <view class="editor-row {{item.excluded ? 'excluded' : ''}}" wx:for="{{editorMainPoints}}" wx:key="rowId">
+          <block wx:for="{{editorDisplayGroups}}" wx:for-item="section" wx:key="frontierState">
+          <view class="frontier-section-header">
+            <view class="frontier-section-title">
+              <text class="frontier-section-label {{section.frontierState === '前沿方案' ? 'label-frontier' : section.frontierState === '靠近前沿方案' ? 'label-near' : 'label-other'}}">{{section.frontierState}}</text>
+              <text class="frontier-section-count">{{section.groups.length}}</text>
+            </view>
+          </view>
+          <view class="editor-row {{item.excluded ? 'excluded' : ''}} {{item.groupKey === animateGroupKey ? 'animate-highlight' : ''}}" id="{{item.groupAnchorId}}" wx:for="{{section.groups}}" wx:key="groupKey">
             <view class="editor-row-header">
               <view class="editor-row-info">
-                <text class="editor-model">{{item.model}}</text>
+                <text class="editor-model">{{item.modelBase}}</text>
                 <text class="editor-tag tag-custom" wx:if="{{item.source === 'custom'}}">自添加</text>
                 <text class="editor-tag tag-edited" wx:if="{{item.source === 'edited'}}">已改价</text>
                 <text class="editor-tag tag-excluded" wx:if="{{item.excluded}}">已排除</text>
               </view>
               <view class="editor-row-meta">
-                <text>{{item.buyTiming === 'new' ? '新品' : '二手'}} · {{item.holdingYears}}年</text>
+                <view class="holding-multiselect-btn" data-group-key="{{item.groupKey}}" bindtap="onToggleHoldingMenu">
+                  持有期 {{item.activeCount}}/{{item.totalCount}} ▾
+                </view>
+              </view>
+            </view>
+
+            <!-- 持有期多选弹出菜单 -->
+            <view class="holding-menu" wx:if="{{openHoldingMenuKey === item.groupKey}}">
+              <view class="holding-menu-item" wx:for="{{item.holdingVariants}}" wx:for-item="variant" wx:key="rowId"
+                    data-row-id="{{variant.rowId}}" bindtap="onToggleHoldingVariant">
+                <view class="checkbox-icon {{variant.active ? 'checked' : ''}}"></view>
+                <text>{{variant.years}}年</text>
+                <text class="variant-cost">¥{{variant.monthlyCost}}/月</text>
               </view>
             </view>
 
@@ -102,14 +121,15 @@
               <view class="field-group price-group {{item.channel === undefined ? 'readonly' : ''}}">
                 <text class="price-prefix">￥</text>
                 <input
-                  class="price-input {{editorPriceErrors[item.rowId] ? 'error' : ''}}"
+                  class="price-input {{editorPriceErrors[item.groupKey] ? 'error' : ''}}"
                   type="digit"
                   value="{{item.editedBuyPrice || item.buyPrice}}"
-                  data-row-id="{{item.rowId}}"
+                  data-group-key="{{item.groupKey}}"
                   disabled="{{item.channel === undefined}}"
                   bindinput="onEditorPriceChange"
+                  bindblur="onEditorPriceBlur"
                 />
-                <text class="field-error" wx:if="{{editorPriceErrors[item.rowId]}}">{{editorPriceErrors[item.rowId]}}</text>
+                <text class="field-error" wx:if="{{editorPriceErrors[item.groupKey]}}">{{editorPriceErrors[item.groupKey]}}</text>
               </view>
 
               <!-- 渠道 picker + 自定义输入(横向排列) -->
@@ -117,7 +137,7 @@
                 <picker
                   mode="selector"
                   range="{{editorChannels}}"
-                  data-row-id="{{item.rowId}}"
+                  data-group-key="{{item.groupKey}}"
                   bindchange="onEditorChannelChange"
                 >
                   <view class="picker-text">{{item._isCustomChannel ? '其他' : (item.channel || '快照价')}}</view>
@@ -127,28 +147,32 @@
                   class="custom-channel-input"
                   placeholder="输入渠道"
                   value="{{item.channel}}"
-                  data-row-id="{{item.rowId}}"
+                  data-group-key="{{item.groupKey}}"
                   bindinput="onEditorCustomChannelInput"
                 />
               </view>
 
               <!-- 国补勾选 (所有新品方案均可勾选) -->
               <view class="field-group" wx:if="{{item.buyTiming === 'new'}}">
-                <view class="subsidy-toggle {{item.useSubsidy ? 'active' : ''}}" data-row-id="{{item.rowId}}" bindtap="onEditorSubsidyToggle">
+                <view class="subsidy-toggle {{item.useSubsidy ? 'active' : ''}}" data-group-key="{{item.groupKey}}" bindtap="onEditorSubsidyToggle">
                   <text>{{item.useSubsidy ? '✓ 国补' : '国补'}}</text>
                 </view>
               </view>
             </view>
 
             <view class="editor-row-actions">
-              <label class="exclude-checkbox" data-row-id="{{item.rowId}}" bindtap="onEditorExcludeToggle">
+              <label class="exclude-checkbox" data-group-key="{{item.groupKey}}" bindtap="onEditorExcludeToggle">
                 <view class="checkbox-icon {{item.excluded ? 'checked' : ''}}"></view>
                 <text>排除</text>
               </label>
-              <view class="action-btn defer-btn" data-row-id="{{item.rowId}}" bindtap="onEditorDefer">移到末尾</view>
-              <view class="action-btn delete-btn" wx:if="{{item.source === 'custom'}}" data-row-id="{{item.rowId}}" bindtap="onEditorDeletePlan">删除</view>
+              <view class="action-btn defer-btn" data-group-key="{{item.groupKey}}" bindtap="onEditorDefer">移到末尾</view>
+              <view class="row-icon-actions">
+                <image src="/assets/icons/copy.svg" mode="aspectFit" class="row-icon copy-icon" data-group-key="{{item.groupKey}}" bindtap="onEditorCopyPlan" />
+                <image src="/assets/icons/delete.svg" mode="aspectFit" class="row-icon delete-icon" data-group-key="{{item.groupKey}}" bindtap="onEditorDeletePlan" />
+              </view>
             </view>
           </view>
+          </block>
         </view>
 
         <!-- 新增自定义方案入口 -->
@@ -200,13 +224,18 @@
         </view>
 
         <!-- 移到末尾分组 -->
-        <view class="deferred-group" wx:if="{{editorDeferredPoints.length > 0}}">
-          <view class="deferred-title">移到末尾 ({{editorDeferredPoints.length}})</view>
-          <view class="deferred-row" wx:for="{{editorDeferredPoints}}" wx:key="rowId">
-            <text class="deferred-model">{{item.model}}</text>
-            <view class="action-btn restore-btn" data-row-id="{{item.rowId}}" bindtap="onEditorRestore">恢复</view>
+        <view class="deferred-group" wx:if="{{editorDeferredGroups.length > 0}}">
+          <view class="deferred-title">移到末尾 ({{editorDeferredGroups.length}})</view>
+          <view class="deferred-row" wx:for="{{editorDeferredGroups}}" wx:key="groupKey">
+            <text class="deferred-model">{{item.modelBase}}</text>
+            <view class="action-btn restore-btn" data-group-key="{{item.groupKey}}" bindtap="onEditorRestore">恢复</view>
           </view>
         </view>
+      </view>
+
+      <!-- 自动保存弱提示 (task 3.5) -->
+      <view class="auto-save-tip {{autoSaveTipVisible ? 'visible' : ''}}">
+        <text>已自动保存</text>
       </view>
     </block>
 

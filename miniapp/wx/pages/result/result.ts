@@ -72,6 +72,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 /** 编辑器状态实例 (进入编辑模式时创建, 退出时丢弃; draft 持久化在 storage) */
 let editorState: EditorState | null = null;
 
+/** 自动保存弱提示定时器 */
+let autoSaveTipTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** 复制动画定时器 */
+let animateTipTimer: ReturnType<typeof setTimeout> | null = null;
+
 Page({
   data: {
     loading: true,
@@ -113,10 +119,10 @@ Page({
     editorSnapshot: null as null | EditorSnapshot,
     // 是否可撤销
     canUndo: false,
-    // 编辑器: 主列表方案 (非暂不考虑的, 含已排除)
-    editorMainPoints: [] as EditedPlanPoint[],
-    // 编辑器: 暂不考虑分组方案
-    editorDeferredPoints: [] as EditedPlanPoint[],
+    // 编辑器: 主列表方案分组 (按 model+buyTiming 合并, 持有期多选)
+    editorDisplayGroups: [] as Array<Record<string, unknown>>,
+    // 编辑器: 暂不考虑分组 (整组 deferred)
+    editorDeferredGroups: [] as Array<Record<string, unknown>>,
     // 编辑器: 渠道选项
     editorChannels: ['快照价', '官网', '京东', '拼多多', '淘宝', '闲鱼', '拍拍', '爱回收', '转转', '其他'],
     // 编辑器: 已知芯片列表 (新增自定义方案用)
@@ -140,9 +146,17 @@ Page({
     filterChips: [] as Array<{value: string; label: string; active: boolean}>,
     filterMemory: [] as Array<{value: string; label: string; active: boolean}>,
     filterStorage: [] as Array<{value: string; label: string; active: boolean}>,
-    filterHolding: [] as Array<{value: string; label: string; active: boolean}>,
+    filterHolding: [] as Array<{value: string; label: string; state: string; active: boolean}>,
     filterTiming: [] as Array<{value: string; label: string; active: boolean}>,
     filterFrontierState: [] as Array<{value: string; label: string; active: boolean}>,
+    // 自动保存弱提示 (task 3.5)
+    autoSaveTipVisible: false,
+    // 是否有未提交编辑 (task 3.6 拦截退出用)
+    hasEdits: false,
+    // 当前展开的持有期多选菜单 groupKey ('' = 无)
+    openHoldingMenuKey: '',
+    // 复制后高亮动画的 groupKey ('' = 无动画)
+    animateGroupKey: '',
   },
 
   onLoad(query: Record<string, string>) {
@@ -163,6 +177,18 @@ Page({
     this.setData({ params, performanceFloor: params.performanceFloor, budget: params.budget });
     this.loadResult(params);
     this.loadFreshness();
+  },
+
+  /** 从详情页「价格不对？去修改」返回时, 消费定位标记并进入编辑器定位到目标方案 */
+  onShow() {
+    const app = getApp();
+    const focus = app.globalData?.pendingEditorFocus as
+      | { baseModel: string; buyTiming: 'new' | 'used' }
+      | null
+      | undefined;
+    if (!focus) return;
+    if (app.globalData) app.globalData.pendingEditorFocus = null;
+    this.focusEditorOnPlan(focus.baseModel, focus.buyTiming);
   },
 
   /**
@@ -314,6 +340,14 @@ Page({
           frontier: showFrontier,
           dominated: showDominated,
           recommendationRange: showRecRange,
+          // 保存原始快照供编辑模式初始化 (详情页「去修改」在放宽结果下也能进入编辑器)
+          original: {
+            frontier: showFrontier,
+            dominated: showDominated,
+            recommendationRange: showRecRange,
+          },
+          userModified: null,
+          viewMode: 'original',
         });
         return;
       }
@@ -422,7 +456,7 @@ Page({
   /** 简化机型显示: "M2_16G_256G_二手 × 3年" → "M2 16G 256G · 持有3年" */
   formatModelLabel(model: string): string {
     // 去掉 " × Ny年" 后缀
-    const base = model.replace(/\s*×\s*\d+年$/, '');
+    const base = model.replace(/\s*×\s*[\d.]+年$/, '');
     // 下划线转空格
     return base.replace(/_/g, ' ');
   },
@@ -533,32 +567,210 @@ Page({
       editorKnownChips: knownChips,
       editorShowAddForm: false,
       editorPriceErrors: {},
+      hasEdits: isRestored,
+      openHoldingMenuKey: '',
     });
     this.updateEditorView(snapshot);
   },
 
-  /** 退出编辑模式: 保持 draft 不清 (用户下次进入仍可恢复) */
+  /** 退出编辑模式: 有未提交编辑时弹窗确认是否保留 (task 3.6) */
   onExitEditor() {
+    if (this.data.hasEdits) {
+      wx.showModal({
+        title: '是否保留本次编辑？',
+        content: '保留后下次进入仍可恢复，不保留将清空当前编辑',
+        confirmText: '保留',
+        cancelText: '不保留',
+        success: (res) => {
+          if (res.confirm) {
+            // 保留 draft, 正常退出
+            this.doExitEditor();
+          } else {
+            // 不保留: 清空 draft 后退出
+            editorState?.clearDraft();
+            this.doExitEditor();
+          }
+        },
+      });
+    } else {
+      this.doExitEditor();
+    }
+  },
+
+  /** 实际执行退出编辑模式 */
+  doExitEditor() {
+    if (autoSaveTipTimer) {
+      clearTimeout(autoSaveTipTimer);
+      autoSaveTipTimer = null;
+    }
+    if (animateTipTimer) {
+      clearTimeout(animateTipTimer);
+      animateTipTimer = null;
+    }
     this.setData({
       editorMode: 'view',
       editorSnapshot: null,
       canUndo: false,
-      editorMainPoints: [],
-      editorDeferredPoints: [],
+      editorDisplayGroups: [],
+      editorDeferredGroups: [],
       editorShowAddForm: false,
       editorPriceErrors: {},
+      hasEdits: false,
+      autoSaveTipVisible: false,
+      openHoldingMenuKey: '',
     });
     // 不调用 editorState.reset() 也不 clearDraft, 让 draft 保留供下次恢复
     // editorState 实例丢弃 (模块级变量置 null), draft 已在 storage 中
     editorState = null;
   },
 
-  /** 从 snapshot 更新编辑器视图 (主列表 + 移到末尾分组 + 撤销状态 + 筛选面板) */
-  updateEditorView(snapshot: EditorSnapshot) {
-    const mainPoints = snapshot.points.filter((p) => !p.deferred);
-    const deferredPoints = snapshot.points.filter((p) => p.deferred);
+  /** 锚点 id 清洗: 分组键可能含空格等特殊字符, 转为合法 DOM id */
+  sanitizeAnchor(key: string): string {
+    return key.replace(/[^a-zA-Z0-9_-]/g, '_');
+  },
 
-    // 构建筛选面板维度 (从 mainPoints 中提取唯一值, 全部默认 active=true 表示不筛除)
+  /** 在编辑器分组中按 (baseModel + buyTiming) 定位目标方案卡片 */
+  findEditorGroup(
+    baseModel: string,
+    buyTiming: 'new' | 'used',
+  ): { groupKey: string; anchorId: string } | null {
+    for (const section of this.data.editorDisplayGroups) {
+      const groups = section.groups as Array<Record<string, unknown>>;
+      for (const g of groups) {
+        if (g.baseModelRaw === baseModel && g.buyTiming === buyTiming) {
+          return { groupKey: String(g.groupKey), anchorId: String(g.groupAnchorId || '') };
+        }
+      }
+    }
+    return null;
+  },
+
+  /** 从详情页「去修改」跳转: 进入编辑模式并滚动+高亮定位到目标方案卡片 */
+  async focusEditorOnPlan(baseModel: string, buyTiming: 'new' | 'used') {
+    if (this.data.editorMode !== 'edit') {
+      await this.onEnterEditor();
+    }
+    const target = this.findEditorGroup(baseModel, buyTiming);
+    if (!target) return;
+
+    // 高亮动画 (复用复制动画的 animateGroupKey 机制)
+    if (animateTipTimer) clearTimeout(animateTipTimer);
+    this.setData({ animateGroupKey: target.groupKey });
+    animateTipTimer = setTimeout(() => {
+      this.setData({ animateGroupKey: '' });
+      animateTipTimer = null;
+    }, 1500);
+
+    // 等渲染完成后滚动定位, 让目标卡片出现在页面垂直居中位置
+    setTimeout(() => {
+      this.scrollToCenter(target.anchorId);
+    }, 150);
+  },
+
+  /** 滚动使目标元素出现在页面垂直居中位置 (而非顶到最上方) */
+  scrollToCenter(anchorId: string) {
+    try {
+      wx.createSelectorQuery()
+        .select(`#${anchorId}`)
+        .boundingClientRect()
+        .selectViewport()
+        .scrollOffset()
+        .exec((res) => {
+          const rect = res[0] as { top?: number; height?: number } | null;
+          const scroll = res[1] as { scrollTop?: number } | null;
+          if (!rect || !scroll || typeof scroll.scrollTop !== 'number') {
+            wx.pageScrollTo({ selector: `#${anchorId}`, duration: 300 });
+            return;
+          }
+          const windowHeight = wx.getSystemInfoSync().windowHeight;
+          const targetTop = scroll.scrollTop + rect.top - (windowHeight - rect.height) / 2;
+          wx.pageScrollTo({ scrollTop: Math.max(0, targetTop), duration: 300 });
+        });
+    } catch {
+      wx.pageScrollTo({ selector: `#${anchorId}`, duration: 300 });
+    }
+  },
+
+  /** 计算方案的分组 key: 去掉持有期后缀的 model + buyTiming + 副本标记 */
+  getGroupKey(p: EditedPlanPoint): string {
+    const baseModel = p.model.replace(/\s*×\s*[\d.]+年$/, '');
+    const copyKey = (p as any)._copyKey || '';
+    return `${baseModel}_${p.buyTiming}_${copyKey}`;
+  },
+
+  /** 从 snapshot 更新编辑器视图 (分组主列表 + 暂不考虑 + 撤销状态 + 筛选面板) */
+  updateEditorView(snapshot: EditorSnapshot) {
+    // 按 groupKey 分组所有 points
+    const groupMap = new Map<string, EditedPlanPoint[]>();
+    for (const p of snapshot.points) {
+      const key = this.getGroupKey(p);
+      if (!groupMap.has(key)) groupMap.set(key, []);
+      groupMap.get(key)!.push(p);
+    }
+
+    // 构建展示分组
+    const allDisplayGroups: Array<Record<string, unknown>> = [];
+    const editorDeferredGroups: Array<Record<string, unknown>> = [];
+
+    for (const [groupKey, points] of groupMap) {
+      const first = points[0];
+      const baseModel = first.model.replace(/\s*×\s*[\d.]+年$/, '');
+      const variants = points.map((p) => ({
+        years: p.holdingYears,
+        rowId: p.rowId,
+        active: !p.deferred,
+        monthlyCost: Math.round(p.monthlyCost || 0),
+        avgPerformance: p.avgPerformance,
+      })).sort((a, b) => a.years - b.years);
+
+      const activeCount = variants.filter((v) => v.active).length;
+      const totalCount = variants.length;
+
+      const groupData: Record<string, unknown> = {
+        groupKey,
+        modelBase: this.formatModelLabel(baseModel),
+        // 原始分组键 (与 detail 页「去修改」跳转时的 baseModel 对齐)
+        baseModelRaw: baseModel,
+        // 滚动定位锚点 id (详情页「去修改」跳转定位用)
+        groupAnchorId: `editor-group-${this.sanitizeAnchor(groupKey)}`,
+        chip: first.chip,
+        buyTiming: first.buyTiming,
+        buyPrice: first.buyPrice,
+        editedBuyPrice: first.editedBuyPrice,
+        channel: first.channel,
+        useSubsidy: first.useSubsidy,
+        source: first.source,
+        excluded: first.excluded,
+        _isCustomChannel: (first as any)._isCustomChannel,
+        holdingVariants: variants,
+        activeCount,
+        totalCount,
+        frontierState: this.computeFrontierState(first),
+      };
+
+      if (activeCount === 0) {
+        editorDeferredGroups.push(groupData);
+      } else {
+        allDisplayGroups.push(groupData);
+      }
+    }
+
+    // 组内排序: 按 chip → modelBase
+    const sortFn = (a: Record<string, unknown>, b: Record<string, unknown>) =>
+      String(a.chip).localeCompare(String(b.chip)) || String(a.modelBase).localeCompare(String(b.modelBase));
+    allDisplayGroups.sort(sortFn);
+    editorDeferredGroups.sort(sortFn);
+
+    // 按前沿状态分组: 前沿方案 → 靠近前沿方案 → 其他方案
+    const frontierOrder = ['前沿方案', '靠近前沿方案', '其他方案'];
+    const editorDisplayGroups = frontierOrder
+      .filter((fs) => allDisplayGroups.some((g) => g.frontierState === fs))
+      .map((fs) => ({
+        frontierState: fs,
+        groups: allDisplayGroups.filter((g) => g.frontierState === fs),
+      }));
+
+    // 构建筛选面板维度
     const chipSet = new Set<string>();
     const memSet = new Set<number>();
     const storSet = new Set<number>();
@@ -578,21 +790,38 @@ Page({
     const prevChips = new Map(this.data.filterChips.map((c) => [c.value, c.active]));
     const prevMem = new Map(this.data.filterMemory.map((c) => [c.value, c.active]));
     const prevStor = new Map(this.data.filterStorage.map((c) => [c.value, c.active]));
-    const prevHold = new Map(this.data.filterHolding.map((c) => [c.value, c.active]));
     const prevTiming = new Map(this.data.filterTiming.map((c) => [c.value, c.active]));
+    const prevHoldingActive = new Map(this.data.filterHolding.map((c) => [c.value, c.active ?? true]));
 
-    const filterChips = [...chipSet].sort().map((v) => ({
-      value: v, label: v, active: prevChips.has(v) ? prevChips.get(v)! : true,
-    }));
+    const isIphone = this.data.params?.category === 'iphone';
+    let filterChips: Array<{value: string; label: string; active: boolean}>;
+    if (isIphone) {
+      // iPhone: 按型号名筛选 (如 "12", "12 pro", "12 pro max")
+      const modelSet = new Set<string>();
+      for (const p of snapshot.points) {
+        modelSet.add(this.extractIphoneModelName(p.model));
+      }
+      filterChips = [...modelSet].sort().map((v) => ({
+        value: v, label: v, active: prevChips.has(v) ? !!prevChips.get(v) : true,
+      }));
+    } else {
+      filterChips = [...chipSet].sort().map((v) => ({
+        value: v, label: v, active: prevChips.has(v) ? !!prevChips.get(v) : true,
+      }));
+    }
     const filterMemory = [...memSet].sort((a, b) => a - b).map((v) => ({
       value: String(v), label: `${v}GB`, active: prevMem.has(String(v)) ? prevMem.get(String(v))! : true,
     }));
     const filterStorage = [...storSet].sort((a, b) => a - b).map((v) => ({
       value: String(v), label: v >= 1000 ? `${v / 1000}TB` : `${v}GB`, active: prevStor.has(String(v)) ? prevStor.get(String(v))! : true,
     }));
-    const filterHolding = [...holdSet].sort((a, b) => a - b).map((v) => ({
-      value: String(v), label: `${v}年`, active: prevHold.has(String(v)) ? prevHold.get(String(v))! : true,
-    }));
+    // 持有期: 三态 (all / partial / none), 从 snapshot 实时计算
+    const filterHolding = [...holdSet].sort((a, b) => a - b).map((v) => {
+      const pts = snapshot.points.filter((p) => p.holdingYears === v);
+      const activeCnt = pts.filter((p) => !p.deferred).length;
+      const state = activeCnt === pts.length ? 'all' : activeCnt === 0 ? 'none' : 'partial';
+      return { value: String(v), label: `${v}年`, state, active: prevHoldingActive.has(String(v)) ? prevHoldingActive.get(String(v))! : true };
+    });
     const filterTiming = [...timingSet].sort().map((v) => ({
       value: v, label: v === 'new' ? '新品' : '二手', active: prevTiming.has(v) ? prevTiming.get(v)! : true,
     }));
@@ -604,11 +833,32 @@ Page({
 
     this.setData({
       editorSnapshot: snapshot,
-      editorMainPoints: mainPoints,
-      editorDeferredPoints: deferredPoints,
+      editorDisplayGroups,
+      editorDeferredGroups,
       canUndo: editorState?.canUndo() ?? false,
       filterChips, filterMemory, filterStorage, filterHolding, filterTiming, filterFrontierState,
     });
+  },
+
+  /** 自动保存弱提示: 页面底部浅灰色「已自动保存」非模态提示, 2 秒后消失 (task 3.5) */
+  showAutoSaveTip() {
+    this.setData({ autoSaveTipVisible: true });
+    if (autoSaveTipTimer) clearTimeout(autoSaveTipTimer);
+    autoSaveTipTimer = setTimeout(() => {
+      this.setData({ autoSaveTipVisible: false });
+      autoSaveTipTimer = null;
+    }, 2000);
+  },
+
+  /**
+   * 统一编辑提交: push 到撤销栈 + 标记 hasEdits + 触发自动保存弱提示 + 刷新视图
+   * 所有编辑动作都调此方法, 替代直接 editorState?.push + updateEditorView
+   */
+  commitEdit(snap: EditorSnapshot) {
+    editorState?.push(snap);
+    this.setData({ hasEdits: true });
+    this.showAutoSaveTip();
+    this.updateEditorView(snap);
   },
 
   /** 计算方案的前沿状态 (基于原始引擎结果) */
@@ -653,6 +903,20 @@ Page({
     return isNear ? '靠近前沿方案' : '其他方案';
   },
 
+  /** 从 iPhone model 提取型号名 (如 "iPhone_16_ProMax_256G_二手 × 3年" → "16 pro max") */
+  extractIphoneModelName(model: string): string {
+    const base = model.replace(/\s*×\s*[\d.]+年$/, '');
+    const match = base.match(/iPhone_(\d+)(?:_(ProMax|Pro))?/);
+    if (match) {
+      const gen = match[1];
+      const variant = match[2];
+      if (variant === 'ProMax') return `${gen} pro max`;
+      if (variant === 'Pro') return `${gen} pro`;
+      return gen;
+    }
+    return base.replace(/_/g, ' ');
+  },
+
   /** 从 model 解析内存 GB (用于批量排除) */
   extractMemoryGbFromModel(model: string): number {
     const m = model.match(/(\d+)G_(\d+)G/);
@@ -662,8 +926,17 @@ Page({
 
   /** 从 model 解析存储 GB */
   extractStorageGbFromModel(model: string): number {
+    // Mac 格式: "M4_16G_256G_新品" → \d+G_(\d+)G → 256
     const m = model.match(/\d+G_(\d+)G/);
     if (m) return Number(m[1]);
+    // iPhone/iPad 格式: "iPhone_16_ProMax_512G_二手" → 查找 (\d+)G 段
+    const segs = model.split('_');
+    for (let i = segs.length - 1; i >= 0; i--) {
+      const gm = segs[i].match(/^(\d+)G$/i);
+      if (gm) return Number(gm[1]);
+      const tm = segs[i].match(/^(\d+)T$/i);
+      if (tm) return Number(tm[1]) * 1024;
+    }
     return 256;
   },
 
@@ -679,10 +952,39 @@ Page({
     const snap = this.cloneSnapshot();
     if (!snap) return;
 
-    // 更新 filter state
+    // 持有期维度: 三态切换 (all → defer all; partial/none → restore)
+    if (dim === 'holding') {
+      const filterArr = [...this.data.filterHolding];
+      const target = filterArr.find((f) => f.value === val);
+      if (!target) return;
+      const shouldDefer = target.state === 'all'; // all → defer all; partial/none → restore
+
+      // 更新 active 字段: defer 时 active=false, restore 时 active=true
+      target.active = !shouldDefer;
+
+      for (const p of snap.points) {
+        if (String(p.holdingYears) === val) {
+          if (shouldDefer) {
+            p.deferred = true;
+            if (!snap.deferredRowIds.includes(p.rowId)) snap.deferredRowIds.push(p.rowId);
+          } else {
+            // 恢复时: 仅当未被其他 inactive 筛选维度匹配时才取消 deferred
+            if (!this.isPointDeferredByOtherFilters(p, 'holding')) {
+              p.deferred = false;
+              snap.deferredRowIds = snap.deferredRowIds.filter((id) => id !== p.rowId);
+            }
+          }
+        }
+      }
+
+      this.commitEdit(snap);
+      return;
+    }
+
+    // 其他维度: 二态切换
     const keyMap: Record<string, string> = {
       chip: 'filterChips', memory: 'filterMemory', storage: 'filterStorage',
-      holding: 'filterHolding', timing: 'filterTiming', frontierState: 'filterFrontierState'
+      timing: 'filterTiming', frontierState: 'filterFrontierState'
     };
     const dataKey = keyMap[dim];
     if (!dataKey) return;
@@ -693,35 +995,95 @@ Page({
     target.active = !target.active;
     const nowActive = target.active;
 
-    // 应用到 snapshot: 根据维度判定匹配的 point
     for (const p of snap.points) {
       const match = this.pointMatchesDim(p, dim, val);
       if (match) {
         if (!nowActive) {
-          // 取消勾选 → 移到末尾
+          // 取消勾选: 对应方案 deferred=true
           p.deferred = true;
           if (!snap.deferredRowIds.includes(p.rowId)) snap.deferredRowIds.push(p.rowId);
         } else {
-          // 恢复勾选 → 取消移到末尾
-          p.deferred = false;
-          snap.deferredRowIds = snap.deferredRowIds.filter((id) => id !== p.rowId);
+          // 重新勾选: 仅当未被其他 inactive 筛选维度匹配时才取消 deferred
+          if (!this.isPointDeferredByOtherFilters(p, dim)) {
+            p.deferred = false;
+            snap.deferredRowIds = snap.deferredRowIds.filter((id) => id !== p.rowId);
+          }
         }
       }
     }
 
     editorState?.push(snap);
     (this as any).setData({ [dataKey]: filterArr });
+    this.showAutoSaveTip();
     this.updateEditorView(snap);
+    this.setData({ hasEdits: true });
   },
 
   /** 判断方案是否匹配筛选维度 */
   pointMatchesDim(p: EditedPlanPoint, dim: string, val: string): boolean {
-    if (dim === 'chip') return p.chip === val;
+    if (dim === 'chip') {
+      if (this.data.params?.category === 'iphone') {
+        return this.extractIphoneModelName(p.model) === val;
+      }
+      return p.chip === val;
+    }
     if (dim === 'memory') return String(p.memoryGb ?? this.extractMemoryGbFromModel(p.model)) === val;
     if (dim === 'storage') return String(p.storageGb ?? this.extractStorageGbFromModel(p.model)) === val;
     if (dim === 'holding') return String(p.holdingYears) === val;
     if (dim === 'timing') return p.buyTiming === val;
     if (dim === 'frontierState') return this.computeFrontierState(p) === val;
+    return false;
+  },
+
+  /**
+   * 检查 point 是否被「其他」inactive 筛选维度匹配 (即应保持 deferred)。
+   * 排除当前正在切换的维度 (excludeDim)，仅检查其余维度。
+   *
+   * 解决多维度筛选交叉问题: 恢复某维度筛选时，被其他 inactive 维度 deferred
+   * 的 point 不应被一并恢复。
+   */
+  isPointDeferredByOtherFilters(p: EditedPlanPoint, excludeDim: string): boolean {
+    const isIphone = this.data.params?.category === 'iphone';
+
+    if (excludeDim !== 'chip') {
+      if (isIphone) {
+        const modelName = this.extractIphoneModelName(p.model);
+        const f = this.data.filterChips.find((c) => c.value === modelName);
+        if (f && !f.active) return true;
+      } else {
+        const f = this.data.filterChips.find((c) => c.value === p.chip);
+        if (f && !f.active) return true;
+      }
+    }
+
+    if (excludeDim !== 'memory') {
+      const mem = String(p.memoryGb ?? this.extractMemoryGbFromModel(p.model));
+      const f = this.data.filterMemory.find((c) => c.value === mem);
+      if (f && !f.active) return true;
+    }
+
+    if (excludeDim !== 'storage') {
+      const stor = String(p.storageGb ?? this.extractStorageGbFromModel(p.model));
+      const f = this.data.filterStorage.find((c) => c.value === stor);
+      if (f && !f.active) return true;
+    }
+
+    if (excludeDim !== 'holding') {
+      const f = this.data.filterHolding.find((c) => c.value === String(p.holdingYears));
+      if (f && f.active === false) return true;
+    }
+
+    if (excludeDim !== 'timing') {
+      const f = this.data.filterTiming.find((c) => c.value === p.buyTiming);
+      if (f && !f.active) return true;
+    }
+
+    if (excludeDim !== 'frontierState') {
+      const fs = this.computeFrontierState(p);
+      const f = this.data.filterFrontierState.find((c) => c.value === fs);
+      if (f && !f.active) return true;
+    }
+
     return false;
   },
 
@@ -736,106 +1098,157 @@ Page({
     };
   },
 
-  /** 买入价输入: 校验 > 0, 标记 source='edited' */
-  onEditorPriceChange(e: WechatMiniprogram.Input) {
+  /** 按 groupKey 查找组内所有 points */
+  findGroupPoints(snap: EditorSnapshot, groupKey: string): EditedPlanPoint[] {
+    return snap.points.filter((p) => this.getGroupKey(p) === groupKey);
+  },
+
+  /** 展开/折叠持有期多选菜单 */
+  onToggleHoldingMenu(e: WechatMiniprogram.TouchEvent) {
+    const groupKey = e.currentTarget.dataset.groupKey as string;
+    this.setData({ openHoldingMenuKey: this.data.openHoldingMenuKey === groupKey ? '' : groupKey });
+  },
+
+  /** 切换某个持有期变体的 active 状态 (deferred 切换) */
+  onToggleHoldingVariant(e: WechatMiniprogram.TouchEvent) {
     const rowId = e.currentTarget.dataset.rowId as string;
-    const raw = e.detail.value;
-    const price = Number(raw);
     const snap = this.cloneSnapshot();
     if (!snap) return;
     const point = snap.points.find((p) => p.rowId === rowId);
     if (!point) return;
 
-    const errors = { ...this.data.editorPriceErrors };
-
-    // 校验: 必须是 > 0 的数字
-    if (raw === '' || isNaN(price) || price <= 0) {
-      errors[rowId] = '买入价需大于 0';
-      // 标记为不参与重算 (excluded)
-      point.excluded = true;
+    point.deferred = !point.deferred;
+    if (point.deferred) {
+      if (!snap.deferredRowIds.includes(rowId)) snap.deferredRowIds.push(rowId);
     } else {
-      delete errors[rowId];
-      point.editedBuyPrice = price;
-      point.excluded = false;
-      if (point.source === 'original') point.source = 'edited';
+      snap.deferredRowIds = snap.deferredRowIds.filter((id) => id !== rowId);
     }
-
-    editorState?.push(snap);
-    this.setData({ editorPriceErrors: errors });
-    this.updateEditorView(snap);
+    this.commitEdit(snap);
   },
 
-  /** 渠道 picker 变更 */
+  /** 买入价输入: 仅合法时实时应用, 非法时不校验不提示 (等 blur 再判断) */
+  onEditorPriceChange(e: WechatMiniprogram.Input) {
+    const groupKey = e.currentTarget.dataset.groupKey as string;
+    const raw = e.detail.value;
+    const price = Number(raw);
+
+    // 输入过程中不校验合法性, 只在值合法时实时应用价格
+    if (raw === '' || isNaN(price) || price <= 0 || price > 999999) {
+      // 输入中途不合法 (如清空准备重输): 不校验, 不提示, 不改价, 等 blur 再判断
+      return;
+    }
+
+    // 合法值: 实时应用价格, 取消排除
+    const snap = this.cloneSnapshot();
+    if (!snap) return;
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    if (groupPoints.length === 0) return;
+
+    const errors = { ...this.data.editorPriceErrors };
+    delete errors[groupKey];
+    for (const p of groupPoints) {
+      p.editedBuyPrice = price;
+      p.excluded = false;
+      if (p.source === 'original') p.source = 'edited';
+    }
+
+    this.setData({ editorPriceErrors: errors });
+    this.commitEdit(snap);
+  },
+
+  /** 买入价失焦: 最终校验, 仍不合法则排除 */
+  onEditorPriceBlur(e: WechatMiniprogram.Input) {
+    const groupKey = e.currentTarget.dataset.groupKey as string;
+    const raw = e.detail.value;
+    const price = Number(raw);
+
+    // 合法值无需处理 (input 时已应用)
+    if (raw !== '' && !isNaN(price) && price > 0 && price <= 999999) return;
+
+    const snap = this.cloneSnapshot();
+    if (!snap) return;
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    if (groupPoints.length === 0) return;
+
+    const errors = { ...this.data.editorPriceErrors };
+    errors[groupKey] = raw === '' ? '请输入价格' : '买入价不合法';
+    for (const p of groupPoints) p.excluded = true;
+
+    this.setData({ editorPriceErrors: errors });
+    this.commitEdit(snap);
+  },
+
+  /** 渠道 picker 变更: 应用到组内所有变体 */
   onEditorChannelChange(e: WechatMiniprogram.CustomEvent) {
-    const rowId = e.currentTarget.dataset.rowId as string;
+    const groupKey = e.currentTarget.dataset.groupKey as string;
     const idx = Number(e.detail.value);
     const channel = this.data.editorChannels[idx];
     const snap = this.cloneSnapshot();
     if (!snap) return;
-    const point = snap.points.find((p) => p.rowId === rowId);
-    if (!point) return;
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    if (groupPoints.length === 0) return;
 
     const errors = { ...this.data.editorPriceErrors };
 
-    if (channel === '快照价') {
-      // 恢复原价, 不可手动修改价格
-      point.channel = undefined;
-      point.editedBuyPrice = undefined;
-      point.source = 'original';
-      point.excluded = false;
-      (point as any)._isCustomChannel = false;
-      delete errors[rowId];
-    } else if (channel === '其他') {
-      point.channel = '';
-      (point as any)._isCustomChannel = true;
-    } else {
-      point.channel = channel;
-      (point as any)._isCustomChannel = false;
+    for (const point of groupPoints) {
+      if (channel === '快照价') {
+        point.channel = undefined;
+        point.editedBuyPrice = undefined;
+        point.source = 'original';
+        point.excluded = false;
+        (point as any)._isCustomChannel = false;
+        delete errors[groupKey];
+      } else if (channel === '其他') {
+        point.channel = '';
+        (point as any)._isCustomChannel = true;
+      } else {
+        point.channel = channel;
+        (point as any)._isCustomChannel = false;
+      }
     }
 
-    editorState?.push(snap);
     this.setData({ editorPriceErrors: errors });
-    this.updateEditorView(snap);
+    this.commitEdit(snap);
   },
 
-  /** 自定义渠道输入 */
+  /** 自定义渠道输入: 应用到组内所有变体 */
   onEditorCustomChannelInput(e: WechatMiniprogram.Input) {
-    const rowId = e.currentTarget.dataset.rowId as string;
+    const groupKey = e.currentTarget.dataset.groupKey as string;
     const value = e.detail.value;
     const snap = this.cloneSnapshot();
     if (!snap) return;
-    const point = snap.points.find((p) => p.rowId === rowId);
-    if (!point) return;
-
-    point.channel = value;
-    editorState?.push(snap);
-    this.updateEditorView(snap);
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    for (const point of groupPoints) {
+      point.channel = value;
+    }
+    this.commitEdit(snap);
   },
 
-  /** 切换「是否使用国补」 */
+  /** 切换「是否使用国补」: 应用到组内所有变体 */
   onEditorSubsidyToggle(e: WechatMiniprogram.TouchEvent) {
-    const rowId = e.currentTarget.dataset.rowId as string;
+    const groupKey = e.currentTarget.dataset.groupKey as string;
     const snap = this.cloneSnapshot();
     if (!snap) return;
-    const point = snap.points.find((p) => p.rowId === rowId);
-    if (!point) return;
-
-    point.useSubsidy = !point.useSubsidy;
-    editorState?.push(snap);
-    this.updateEditorView(snap);
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    for (const point of groupPoints) {
+      point.useSubsidy = !point.useSubsidy;
+    }
+    this.commitEdit(snap);
   },
 
-  /** 单行排除 checkbox 切换 */
+  /** 整组排除 checkbox 切换 */
   onEditorExcludeToggle(e: WechatMiniprogram.TouchEvent) {
-    const rowId = e.currentTarget.dataset.rowId as string;
+    const groupKey = e.currentTarget.dataset.groupKey as string;
     const snap = this.cloneSnapshot();
     if (!snap) return;
-    const point = snap.points.find((p) => p.rowId === rowId);
-    if (!point) return;
-
-    point.excluded = !point.excluded;
-    editorState?.push(snap);
-    this.updateEditorView(snap);
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    if (groupPoints.length === 0) return;
+    // 以第一个 point 的 excluded 取反作为目标值
+    const newExcluded = !groupPoints[0].excluded;
+    for (const point of groupPoints) {
+      point.excluded = newExcluded;
+    }
+    this.commitEdit(snap);
   },
 
   /** 批量排除: 按 8G 内存 / 持有期 > 3 年 */
@@ -854,50 +1267,97 @@ Page({
       }
     }
 
-    editorState?.push(snap);
-    this.updateEditorView(snap);
+    this.commitEdit(snap);
   },
 
-  /** 移入暂不考虑 */
+  /** 移入暂不考虑: 整组所有变体 deferred */
   onEditorDefer(e: WechatMiniprogram.TouchEvent) {
-    const rowId = e.currentTarget.dataset.rowId as string;
+    const groupKey = e.currentTarget.dataset.groupKey as string;
     const snap = this.cloneSnapshot();
     if (!snap) return;
-    const point = snap.points.find((p) => p.rowId === rowId);
-    if (!point) return;
-
-    point.deferred = true;
-    if (!snap.deferredRowIds.includes(rowId)) {
-      snap.deferredRowIds.push(rowId);
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    for (const point of groupPoints) {
+      point.deferred = true;
+      if (!snap.deferredRowIds.includes(point.rowId)) {
+        snap.deferredRowIds.push(point.rowId);
+      }
     }
-    editorState?.push(snap);
-    this.updateEditorView(snap);
+    this.commitEdit(snap);
   },
 
-  /** 从暂不考虑恢复到主列表 */
+  /** 从暂不考虑恢复到主列表: 整组所有变体恢复 */
   onEditorRestore(e: WechatMiniprogram.TouchEvent) {
-    const rowId = e.currentTarget.dataset.rowId as string;
+    const groupKey = e.currentTarget.dataset.groupKey as string;
     const snap = this.cloneSnapshot();
     if (!snap) return;
-    const point = snap.points.find((p) => p.rowId === rowId);
-    if (!point) return;
-
-    point.deferred = false;
-    snap.deferredRowIds = snap.deferredRowIds.filter((id) => id !== rowId);
-    editorState?.push(snap);
-    this.updateEditorView(snap);
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    const groupRowIds = new Set(groupPoints.map((p) => p.rowId));
+    for (const point of groupPoints) {
+      point.deferred = false;
+    }
+    snap.deferredRowIds = snap.deferredRowIds.filter((id) => !groupRowIds.has(id));
+    this.commitEdit(snap);
   },
 
-  /** 删除自定义方案 (仅 source='custom' 可删除) */
-  onEditorDeletePlan(e: WechatMiniprogram.TouchEvent) {
-    const rowId = e.currentTarget.dataset.rowId as string;
+  /** 卡片复制: 深拷贝整组所有变体 + 生成全新唯一 ID, 插入到当前分组下方 */
+  onEditorCopyPlan(e: WechatMiniprogram.TouchEvent) {
+    const groupKey = e.currentTarget.dataset.groupKey as string;
     const snap = this.cloneSnapshot();
     if (!snap) return;
 
-    snap.points = snap.points.filter((p) => p.rowId !== rowId);
-    snap.deferredRowIds = snap.deferredRowIds.filter((id) => id !== rowId);
-    editorState?.push(snap);
-    this.updateEditorView(snap);
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    if (groupPoints.length === 0) return;
+
+    // 方案数量上限防爆栈拦截
+    if (snap.points.length + groupPoints.length > 500) {
+      wx.showToast({ title: '最多支持同时比价 500 个方案，请先删除一些不需要的方案', icon: 'none' });
+      return;
+    }
+
+    // 找到组内最后一个 point 的索引
+    const lastIdx = Math.max(...groupPoints.map((p) => snap.points.indexOf(p)));
+
+    // 深拷贝所有变体, 每个生成全新 rowId, 共享同一 _copyKey 以形成独立分组
+    const copyKey = `copy-${Date.now()}`;
+    const copies: EditedPlanPoint[] = groupPoints.map((orig) => ({
+      ...orig,
+      rowId: `row-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      _copyKey: copyKey,
+    }));
+
+    snap.points.splice(lastIdx + 1, 0, ...copies);
+    this.commitEdit(snap);
+
+    // 高亮动画提示新复制的选项卡
+    const baseModel = copies[0].model.replace(/\s*×\s*[\d.]+年$/, '');
+    const newGroupKey = `${baseModel}_${copies[0].buyTiming}_${copyKey}`;
+    if (animateTipTimer) clearTimeout(animateTipTimer);
+    this.setData({ animateGroupKey: newGroupKey });
+    animateTipTimer = setTimeout(() => {
+      this.setData({ animateGroupKey: '' });
+      animateTipTimer = null;
+    }, 1500);
+  },
+
+  /** 删除方案: 二次确认后整组彻底移除 */
+  onEditorDeletePlan(e: WechatMiniprogram.TouchEvent) {
+    const groupKey = e.currentTarget.dataset.groupKey as string;
+    wx.showModal({
+      title: '确认永久删除此方案？',
+      content: '删除后无法恢复，该方案（含所有持有期）将从列表中彻底移除',
+      confirmText: '删除',
+      cancelText: '取消',
+      confirmColor: '#F24B4B',
+      success: (res) => {
+        if (!res.confirm) return;
+        const snap = this.cloneSnapshot();
+        if (!snap) return;
+        const groupRowIds = new Set(this.findGroupPoints(snap, groupKey).map((p) => p.rowId));
+        snap.points = snap.points.filter((p) => !groupRowIds.has(p.rowId));
+        snap.deferredRowIds = snap.deferredRowIds.filter((id) => !groupRowIds.has(id));
+        this.commitEdit(snap);
+      },
+    });
   },
 
   /** 撤销 */
@@ -966,6 +1426,12 @@ Page({
     const snap = this.cloneSnapshot();
     if (!snap) return;
 
+    // 方案数量上限防爆栈拦截 (task 5.4)
+    if (snap.points.length >= 500) {
+      wx.showToast({ title: '最多支持同时比价 500 个方案，请先删除一些不需要的方案', icon: 'none' });
+      return;
+    }
+
     const newPoint: EditedPlanPoint = {
       model: `${form.model}_${form.buyTiming === 'new' ? '新品' : '二手'} × ${form.holdingYears}年`,
       chip: form.chip,
@@ -988,9 +1454,8 @@ Page({
     };
 
     snap.points.push(newPoint);
-    editorState?.push(snap);
     this.setData({ editorShowAddForm: false });
-    this.updateEditorView(snap);
+    this.commitEdit(snap);
   },
 
   /** 导出长图 */
