@@ -53,6 +53,20 @@
       "devMetadata": {
         "imageSrc": "assets/pareto-logo-gradient.jpg"
       }
+    },
+    {
+      "id": "image-004",
+      "title": "帕累托前沿九宫格图表 Logo",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1786668000000,
+      "canvasData": {
+        "x": 1860,
+        "y": 0
+      },
+      "devMetadata": {
+        "imageSrc": "assets/pareto-logo-grid-chart-final.jpg"
+      }
     }
   ],
   "config": {

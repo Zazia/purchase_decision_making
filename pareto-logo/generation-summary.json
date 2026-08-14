@@ -7,7 +7,7 @@
     "recorded_at": "2026-08-14T08:12:00.000+08:00"
   },
   "operation": "append-image-assets",
-  "assetCount": 3,
+  "assetCount": 4,
   "assets": [
     {
       "filename": "pareto-logo.jpg",
@@ -26,6 +26,13 @@
     {
       "filename": "pareto-logo-gradient.jpg",
       "title": "帕累托前沿色块渐变 Logo",
+      "deliverableType": "logo",
+      "intendedAspect": "square 1:1",
+      "status": "generated"
+    },
+    {
+      "filename": "pareto-logo-grid-chart-final.jpg",
+      "title": "帕累托前沿九宫格图表 Logo",
       "deliverableType": "logo",
       "intendedAspect": "square 1:1",
       "status": "generated"
