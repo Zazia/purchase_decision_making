@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo 设计确认 - 帕累托决策</title>
+<style>
+  @font-face { font-family: 'Noto Sans SC'; src: local('Noto Sans SC'), local('Noto Sans CJK SC'); }
+  @font-face { font-family: 'Microsoft YaHei'; src: local('Microsoft YaHei'); }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Inter", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background: #F5F5F7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1D1D1F;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: #86868B;
+    margin-bottom: 60px;
+  }
+
+  .comparison {
+    display: flex;
+    gap: 80px;
+    align-items: flex-start;
+    margin-bottom: 60px;
+  }
+
+  .logo-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .logo-card-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #86868B;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .logo-wrapper {
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(29, 29, 31, 0.08);
+    padding: 30px;
+  }
+
+  .logo-wrapper img,
+  .logo-wrapper svg {
+    width: 240px;
+    height: 240px;
+  }
+
+  .app-name-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px 60px;
+    background: #FFFFFF;
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(29, 29, 31, 0.08);
+  }
+
+  .app-name-preview .logo-small {
+    width: 80px;
+    height: 80px;
+  }
+
+  .app-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1D1D1F;
+    letter-spacing: -0.01em;
+  }
+
+  .app-tagline {
+    font-size: 16px;
+    color: #86868B;
+  }
+
+  .details {
+    max-width: 800px;
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 24px rgba(29, 29, 31, 0.06);
+  }
+
+  .details h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1D1D1F;
+    margin-bottom: 20px;
+  }
+
+  .details table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .details td {
+    padding: 10px 0;
+    font-size: 15px;
+    border-bottom: 1px solid #F2F2F7;
+  }
+
+  .details td:first-child {
+    color: #86868B;
+    width: 140px;
+  }
+
+  .details td:last-child {
+    color: #1D1D1F;
+  }
+
+  .color-swatch {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Logo 设计确认</h1>
+<p class="subtitle">对比原图与 SVG 重绘版本，确认后制作动画</p>
+
+<div class="comparison">
+  <!-- 原图 -->
+  <div class="logo-card">
+    <div class="logo-card-label">原始 PNG</div>
+    <div class="logo-wrapper">
+      <img src="assets/logo-original.png" alt="原始 Logo" />
+    </div>
+  </div>
+
+  <!-- SVG 重绘 -->
+  <div class="logo-card">
+    <div class="logo-card-label">SVG 重绘</div>
+    <div class="logo-wrapper">
+      <svg viewBox="0 0 200 200" width="240" height="240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- 蓝色渐变：左上较浅，右下较深 -->
+          <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#5AC8FA" />
+            <stop offset="40%" stop-color="#2196F3" />
+            <stop offset="100%" stop-color="#0051D5" />
+          </linearGradient>
+
+          <!-- 曲线边缘加深 -->
+          <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#007AFF" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#0051D5" stop-opacity="0.3" />
+          </linearGradient>
+
+          <!-- 圆角方块裁剪 -->
+          <clipPath id="squircleClip">
+            <rect x="0" y="0" width="200" height="200" rx="45" ry="45" />
+          </clipPath>
+
+          <!-- 阴影滤镜 -->
+          <filter id="dotShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="0.8"/>
+            <feOffset dx="0" dy="0.5"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
+            <feMerge>
+              <feMergeNode/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- 裁剪组 -->
+        <g clip-path="url(#squircleClip)">
+          <!-- 蓝色渐变背景（充满整个方块） -->
+          <rect x="0" y="0" width="200" height="200" fill="url(#blueGrad)" />
+
+          <!-- 白色区域（左上角，由曲线界定） -->
+          <path
+            d="M 0 0 L 200 0 L 200 0 C 180 20, 140 30, 100 55 C 60 80, 30 120, 0 140 Z"
+            fill="#FFFFFF"
+          />
+
+          <!-- 曲线边缘加深线 -->
+          <path
+            d="M 200 0 C 180 20, 140 30, 100 55 C 60 80, 30 120, 0 140"
+            stroke="url(#edgeGrad)"
+            stroke-width="2.5"
+            fill="none"
+            stroke-linecap="round"
+          />
+
+          <!-- 白色圆点（散布在蓝色区域） -->
+          <circle cx="130" cy="60" r="9" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="165" cy="85" r="6" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="110" cy="100" r="7" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="155" cy="125" r="8" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="90" cy="130" r="5" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="135" cy="155" r="7" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="175" cy="150" r="5" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="70" cy="160" r="6" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="175" cy="55" r="4" fill="#FFFFFF" filter="url(#dotShadow)" />
+          <circle cx="115" cy="170" r="5" fill="#FFFFFF" filter="url(#dotShadow)" />
+        </g>
+
+        <!-- 外圆角边框（微妙） -->
+        <rect x="0.5" y="0.5" width="199" height="199" rx="44.5" ry="44.5"
+              fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="1" />
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- 应用名称预览 -->
+<div class="app-name-preview">
+  <svg class="logo-small" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="blueGradSmall" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#5AC8FA" />
+        <stop offset="40%" stop-color="#2196F3" />
+        <stop offset="100%" stop-color="#0051D5" />
+      </linearGradient>
+      <clipPath id="squircleClipSmall">
+        <rect x="0" y="0" width="200" height="200" rx="45" ry="45" />
+      </clipPath>
+    </defs>
+    <g clip-path="url(#squircleClipSmall)">
+      <rect x="0" y="0" width="200" height="200" fill="url(#blueGradSmall)" />
+      <path
+        d="M 0 0 L 200 0 C 180 20, 140 30, 100 55 C 60 80, 30 120, 0 140 Z"
+        fill="#FFFFFF"
+      />
+      <circle cx="130" cy="60" r="9" fill="#FFFFFF" />
+      <circle cx="165" cy="85" r="6" fill="#FFFFFF" />
+      <circle cx="110" cy="100" r="7" fill="#FFFFFF" />
+      <circle cx="155" cy="125" r="8" fill="#FFFFFF" />
+      <circle cx="90" cy="130" r="5" fill="#FFFFFF" />
+      <circle cx="135" cy="155" r="7" fill="#FFFFFF" />
+      <circle cx="175" cy="150" r="5" fill="#FFFFFF" />
+      <circle cx="70" cy="160" r="6" fill="#FFFFFF" />
+      <circle cx="175" cy="55" r="4" fill="#FFFFFF" />
+      <circle cx="115" cy="170" r="5" fill="#FFFFFF" />
+    </g>
+  </svg>
+  <div class="app-name">帕累托决策</div>
+  <div class="app-tagline">数据驱动的理性消费工具</div>
+</div>
+
+<!-- 设计参数 -->
+<div class="details">
+  <h2>SVG 重绘设计参数</h2>
+  <table>
+    <tr>
+      <td>容器形状</td>
+      <td>圆角方块 (squircle), rx=45/200 ≈ 22.5%</td>
+    </tr>
+    <tr>
+      <td>分割曲线</td>
+      <td>从右上角弧形扫向左下角，白色区域占 ~38%</td>
+    </tr>
+    <tr>
+      <td>蓝色渐变</td>
+      <td>
+        <span class="color-swatch" style="background:#5AC8FA"></span>#5AC8FA →
+        <span class="color-swatch" style="background:#2196F3"></span>#2196F3 →
+        <span class="color-swatch" style="background:#0051D5"></span>#0051D5
+      </td>
+    </tr>
+    <tr>
+      <td>白色圆点</td>
+      <td>10 个，半径 4-9px，带微弱投影</td>
+    </tr>
+    <tr>
+      <td>曲线边缘</td>
+      <td>半透明蓝色描边 (2.5px)，增加层次感</td>
+    </tr>
+    <tr>
+      <td>动画计划</td>
+      <td>开场：蓝色填充 → 曲线绘制 → 圆点逐一闪烁入场；收尾：圆点微闪 → Logo 缩放呈现</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

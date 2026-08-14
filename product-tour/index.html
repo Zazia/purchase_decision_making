@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
-    <title>苹果购买决策分析 - Product Tour</title>
+    <title>帕累托决策 - Product Tour</title>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=block"
@@ -66,7 +66,7 @@
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="21"
+      data-duration="30"
       data-width="1920"
       data-height="1080"
     >
@@ -83,38 +83,64 @@
         data-height="1080"
       ></div>
 
-      <!-- Scene 2-5: Product Tour (2-16s) -->
+      <!-- Scene 2: Product Tour Basic (2-9s) -->
       <div
-        id="scene-2-5"
+        id="scene-2"
         class="scene"
         data-composition-id="scene2-5-product-tour"
         data-composition-src="compositions/scene2-5-product-tour.html"
         data-start="2"
-        data-duration="14"
+        data-duration="7"
         data-track-index="1"
         data-width="1920"
         data-height="1080"
       ></div>
 
-      <!-- Scene 6: Logo Outro (16-21s) -->
+      <!-- Scene 3: Features Deep Dive (9-22s) -->
       <div
-        id="scene-6"
+        id="scene-3"
+        class="scene"
+        data-composition-id="scene3-features"
+        data-composition-src="compositions/scene3-features.html"
+        data-start="9"
+        data-duration="13"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- Scene 4: Share Card (22-25s) -->
+      <div
+        id="scene-4"
+        class="scene"
+        data-composition-id="scene4-sharecard"
+        data-composition-src="compositions/scene4-sharecard.html"
+        data-start="22"
+        data-duration="3"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- Scene 5: Logo Outro (25-30s) -->
+      <div
+        id="scene-5"
         class="scene"
         data-composition-id="scene6-logo-outro"
         data-composition-src="compositions/scene6-logo-outro.html"
-        data-start="16"
+        data-start="25"
         data-duration="5"
         data-track-index="1"
         data-width="1920"
         data-height="1080"
       ></div>
 
-      <!-- Captions (2-16s) -->
+      <!-- Captions (2-25s) -->
       <div
         id="captions-comp"
         data-composition-id="captions"
         data-start="2"
-        data-duration="14"
+        data-duration="23"
         data-track-index="2"
         data-width="1920"
         data-height="1080"
@@ -128,24 +154,44 @@
             const tl = gsap.timeline({ paused: true });
             const text = document.querySelector("#caption-text");
 
-            // Caption 1: 选择品类 (0-3.5s)
-            tl.to(text, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.2);
-            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 3.2);
+            // Caption 1: 选择品类 (2-4.5s)
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 2.3);
 
-            // Caption 2: 帕累托前沿 (3.5-7s)
-            tl.set(text, { innerText: "帕累托前沿分析，最优方案一目了然", y: 30 }, 3.5);
-            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 3.5);
-            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 6.7);
+            // Caption 2: 帕累托前沿 (4.5-8s)
+            tl.set(text, { innerText: "帕累托前沿分析，最优方案一目了然", y: 30 }, 2.6);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 2.6);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 5.8);
 
-            // Caption 3: 数据驱动 (7-10.5s)
-            tl.set(text, { innerText: "数据驱动，理性消费", y: 30 }, 7.0);
+            // Caption 3: 方案详情 (8-9s)
+            tl.set(text, { innerText: "点击查看方案详情", y: 30 }, 6.1);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 6.1);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 6.8);
+
+            // Caption 4: 帕累托图解释 (9-12s) - Scene 3 starts
+            tl.set(text, { innerText: "帕累托前沿图：成本与性能的最优平衡", y: 30 }, 7.0);
             tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 7.0);
-            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 10.2);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 10.0);
 
-            // Caption 4: 一键分享 (10.5-14s)
-            tl.set(text, { innerText: "一键分享，决策留存", y: 30 }, 10.5);
-            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 10.5);
-            tl.to(text, { opacity: 0, y: -20, duration: 0.4, ease: "power3.in" }, 13.4);
+            // Caption 5: 交互探索 (12-14s)
+            tl.set(text, { innerText: "点击图表上的点或方案卡片，进入详情", y: 30 }, 10.3);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 10.3);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 13.0);
+
+            // Caption 6: 手动修改 (14-17s)
+            tl.set(text, { innerText: "手动修改方案 — 你的购买调研笔记本", y: 30 }, 13.3);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 13.3);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 16.0);
+
+            // Caption 7: 筛选与重算 (17-20s)
+            tl.set(text, { innerText: "条件筛选，一键重算，即时更新推荐", y: 30 }, 16.3);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 16.3);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.3, ease: "power3.in" }, 19.0);
+
+            // Caption 8: 一键分享 (20-23s)
+            tl.set(text, { innerText: "一键分享，决策留存", y: 30 }, 20.0);
+            tl.to(text, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 20.0);
+            tl.to(text, { opacity: 0, y: -20, duration: 0.4, ease: "power3.in" }, 22.5);
 
             window.__timelines = window.__timelines || {};
             window.__timelines["captions"] = tl;
@@ -158,14 +204,34 @@
       window.__timelines = window.__timelines || {};
       const mainTl = gsap.timeline({ paused: true });
 
-      // Scene 2-5 starts clean
-      mainTl.set("#scene-2-5", { scale: 1, filter: "blur(0px)", opacity: 1 }, 2);
+      // Scene 2 starts clean
+      mainTl.set("#scene-2", { scale: 1, filter: "blur(0px)", opacity: 1 }, 2);
 
-      // Transition: Scene 2-5 → Scene 6 (blur + scale down at end)
+      // Transition: Scene 2 → Scene 3 (blur + scale)
       mainTl.to(
-        "#scene-2-5",
+        "#scene-2",
         { duration: 0.3, scale: 0.96, filter: "blur(8px)", opacity: 0, ease: "power2.in" },
-        15.5,
+        8.7,
+      );
+
+      // Scene 3 starts clean
+      mainTl.set("#scene-3", { scale: 1, filter: "blur(0px)", opacity: 1 }, 9);
+
+      // Transition: Scene 3 → Scene 4 (blur + scale)
+      mainTl.to(
+        "#scene-3",
+        { duration: 0.3, scale: 0.96, filter: "blur(8px)", opacity: 0, ease: "power2.in" },
+        21.7,
+      );
+
+      // Scene 4 starts clean
+      mainTl.set("#scene-4", { scale: 1, filter: "blur(0px)", opacity: 1 }, 22);
+
+      // Transition: Scene 4 → Scene 5 (blur + scale)
+      mainTl.to(
+        "#scene-4",
+        { duration: 0.3, scale: 0.96, filter: "blur(8px)", opacity: 0, ease: "power2.in" },
+        24.7,
       );
 
       window.__timelines["main"] = mainTl;

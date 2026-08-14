@@ -8,35 +8,63 @@
     <div class="canvas">
       <!-- Background -->
       <div class="bg-glow" data-layout-allow-overflow></div>
-      <div class="ghost-text" data-layout-ignore>DECISION</div>
+      <div class="ghost-text" data-layout-ignore>PARETO</div>
 
-      <!-- Logo Container -->
+      <!-- Logo SVG (inline for GSAP animation) -->
       <div class="logo-container">
-        <!-- 4 quadrant pieces -->
-        <div class="logo-piece piece-tl"></div>
-        <div class="logo-piece piece-tr"></div>
-        <div class="logo-piece piece-bl"></div>
-        <div class="logo-piece piece-br"></div>
+        <svg class="logo-svg" viewBox="-8 -8 116 116" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo">
+          <defs>
+            <linearGradient id="outro-grad-blue" x1="15" y1="5" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#5AC8FA"/>
+              <stop offset="50%" stop-color="#2B8CF7"/>
+              <stop offset="100%" stop-color="#007AFF"/>
+            </linearGradient>
+            <linearGradient id="outro-grad-hl" x1="4.96" y1="100" x2="103.93" y2="4.04" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.87"/>
+              <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.47"/>
+              <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+            </linearGradient>
+            <clipPath id="outro-clip-sq">
+              <rect x="0" y="0" width="100" height="100" rx="22" ry="22"/>
+            </clipPath>
+            <filter id="outro-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1D1D1F" flood-opacity="0.12"/>
+            </filter>
+          </defs>
 
-        <!-- Pareto curve -->
-        <svg class="pareto-curve" viewBox="0 0 200 200" width="200" height="200">
-          <path
-            d="M 50 150 L 50 120 L 90 120 L 90 90 L 130 90 L 130 60 L 160 60"
-            stroke="white"
-            stroke-width="7"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <circle cx="50" cy="120" r="5" fill="white" />
-          <circle cx="90" cy="90" r="5" fill="white" />
-          <circle cx="130" cy="60" r="5" fill="white" />
+          <g id="outro-squircle">
+            <rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="#FFFFFF" filter="url(#outro-shadow)"/>
+          </g>
+          <g id="outro-logo-content" clip-path="url(#outro-clip-sq)">
+            <g id="outro-curve">
+              <path id="outro-curve-fill"
+                    d="M70,0 H100 V100 H0 V70 C0,51.4348 7.37498,33.6301 20.5025,20.5025 C33.6301,7.375 51.4348,0 70,0 Z"
+                    fill="url(#outro-grad-blue)"/>
+              <path id="outro-curve-highlight"
+                    d="M100,0 H71.2 C53.3775,0 36.2849,7.375 23.6824,20.5025 C11.08,33.6301 4,51.4348 4,70 V100"
+                    fill="none" stroke="url(#outro-grad-hl)" stroke-width="8" stroke-linecap="round"/>
+            </g>
+            <g id="outro-dots" fill="#FFFFFF">
+              <circle id="outro-dot-01" cx="87"   cy="20"   r="3"/>
+              <circle id="outro-dot-02" cx="29"   cy="31"   r="3"/>
+              <circle id="outro-dot-03" cx="26.5" cy="43.5" r="5.5"/>
+              <circle id="outro-dot-04" cx="84"   cy="45"   r="4"   opacity="0.8"/>
+              <circle id="outro-dot-05" cx="69.5" cy="29.5" r="6.5" opacity="0.85"/>
+              <circle id="outro-dot-06" cx="39.5" cy="61.5" r="4.5" opacity="0.9"/>
+              <circle id="outro-dot-07" cx="60"   cy="54"   r="5"   opacity="0.85"/>
+              <circle id="outro-dot-08" cx="49"   cy="33"   r="5"   opacity="0.9"/>
+              <circle id="outro-dot-09" cx="44"   cy="80"   r="4"   opacity="0.6"/>
+              <circle id="outro-dot-10" cx="20.5" cy="66.5" r="3.5"/>
+              <circle id="outro-dot-11" cx="81"   cy="60"   r="3"   opacity="0.6"/>
+              <circle id="outro-dot-12" cx="51"   cy="16"   r="5"/>
+            </g>
+          </g>
         </svg>
       </div>
 
       <!-- Tagline -->
       <div class="text-container">
-        <div class="tagline">苹果购买决策分析</div>
+        <div class="tagline">帕累托决策</div>
         <div class="subtitle">数据驱动的理性消费工具</div>
         <div class="url-pill">
           <div class="url-icon">
@@ -78,7 +106,7 @@
         top: 400px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 280px;
+        font-size: 260px;
         font-weight: 800;
         color: rgba(0, 122, 255, 0.03);
         letter-spacing: -0.04em;
@@ -88,51 +116,29 @@
 
       [data-composition-id="scene6-logo-outro"] .logo-container {
         position: absolute;
-        left: 860px;
-        top: 360px;
-        width: 200px;
-        height: 200px;
+        left: 850px;
+        top: 330px;
+        width: 220px;
+        height: 220px;
         z-index: 2;
       }
 
-      [data-composition-id="scene6-logo-outro"] .logo-piece {
-        position: absolute;
-        width: 100px;
-        height: 100px;
-        transform-origin: center center;
-        opacity: 0;
+      [data-composition-id="scene6-logo-outro"] .logo-svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
       }
 
-      [data-composition-id="scene6-logo-outro"] .piece-tl {
-        background: #007AFF;
-        border-radius: 40px 0 0 0;
-        top: 0; left: 0;
-      }
-      [data-composition-id="scene6-logo-outro"] .piece-tr {
-        background: #4DA2FF;
-        border-radius: 0 40px 0 0;
-        top: 0; right: 0;
-      }
-      [data-composition-id="scene6-logo-outro"] .piece-bl {
-        background: #0051D5;
-        border-radius: 0 0 0 40px;
-        bottom: 0; left: 0;
-      }
-      [data-composition-id="scene6-logo-outro"] .piece-br {
-        background: #007AFF;
-        border-radius: 0 0 40px 0;
-        bottom: 0; right: 0;
-      }
-
-      [data-composition-id="scene6-logo-outro"] .pareto-curve {
-        position: absolute;
-        top: 0; left: 0;
-        opacity: 0;
+      [data-composition-id="scene6-logo-outro"] .logo-svg #outro-squircle,
+      [data-composition-id="scene6-logo-outro"] .logo-svg #outro-curve,
+      [data-composition-id="scene6-logo-outro"] .logo-svg #outro-dots circle {
+        transform-box: fill-box;
+        transform-origin: center;
       }
 
       [data-composition-id="scene6-logo-outro"] .text-container {
         position: absolute;
-        top: 660px;
+        top: 640px;
         width: 100%;
         display: flex;
         flex-direction: column;
@@ -147,7 +153,7 @@
         opacity: 0;
         margin-bottom: 16px;
         text-align: center;
-        letter-spacing: -0.02em;
+        letter-spacing: 0.02em;
       }
 
       [data-composition-id="scene6-logo-outro"] .subtitle {
@@ -190,75 +196,92 @@
         const tl = gsap.timeline({ paused: true });
         const sel = (s) => `[data-composition-id="scene6-logo-outro"] ${s}`;
 
-        const pieces = [".piece-tl", ".piece-tr", ".piece-bl", ".piece-br"];
-        const logoGlow = sel(".bg-glow");
-        const paretoCurve = sel(".pareto-curve");
-        const tagline = sel(".tagline");
-        const subtitle = sel(".subtitle");
-        const urlPill = sel(".url-pill");
+        const dotOps = [1, 1, 1, 0.8, 0.85, 0.9, 0.85, 0.9, 0.6, 1, 0.6, 1];
 
-        // 1. Pieces slide in from the right with stagger
-        pieces.forEach((piece, i) => {
-          tl.fromTo(
-            sel(piece),
-            { x: 1920, opacity: 0 },
-            { x: 0, opacity: 1, duration: 1.0, ease: "power4.out" },
-            0.1 + i * 0.08
-          );
-        });
+        // Initial states — use gsap.set (immediate, not timeline-bound)
+        gsap.set(sel("#outro-squircle"), { scale: 0.88, opacity: 0 });
+        gsap.set(sel("#outro-curve"), { scale: 0.92, opacity: 0 });
+        gsap.set(sel("#outro-curve-highlight"), { opacity: 0 });
+        gsap.set(sel("#outro-dots circle"), { scale: 0, opacity: 0 });
+        gsap.set(sel(".bg-glow"), { opacity: 0, scale: 0.5 });
+        gsap.set(sel(".tagline"), { opacity: 0, y: 25 });
+        gsap.set(sel(".subtitle"), { opacity: 0, y: 15 });
+        gsap.set(sel(".url-pill"), { opacity: 0, y: 12, scale: 0.9 });
+        gsap.set(sel(".ghost-text"), { opacity: 0 });
 
-        // 2. Pieces expand slightly then settle
-        const expandTime = 1.0;
-        tl.to(
-          pieces.map(p => sel(p)),
-          { scale: 1.12, duration: 0.4, ease: "back.out(1.7)", stagger: 0.02 },
-          expandTime
-        );
-        tl.to(
-          pieces.map(p => sel(p)),
-          { scale: 1, duration: 0.35, ease: "power2.inOut" },
-          expandTime + 0.3
-        );
+        // 1. Squircle fades in (0.0 - 0.5s)
+        tl.to(sel("#outro-squircle"), {
+          scale: 1, opacity: 1,
+          duration: 0.5,
+          ease: "power3.out"
+        }, 0);
 
-        // 3. Glow blooms
-        tl.fromTo(
-          logoGlow,
-          { opacity: 0, scale: 0.5 },
-          { opacity: 1, scale: 1.2, duration: 0.4, ease: "power2.out" },
-          expandTime
-        );
-        tl.to(logoGlow, {
-          opacity: 0.6, scale: 1.5, duration: 1.0, ease: "power2.out",
-        }, expandTime + 0.4);
+        // 2. Blue curve fades in (0.2 - 0.6s)
+        tl.to(sel("#outro-curve"), {
+          scale: 1, opacity: 1,
+          duration: 0.4,
+          ease: "power2.out"
+        }, 0.2);
 
-        // 4. Pareto curve fades in
-        tl.to(paretoCurve, { opacity: 1, duration: 0.4, ease: "power2.out" }, expandTime + 0.2);
+        // Curve highlight glow
+        tl.to(sel("#outro-curve-highlight"), {
+          opacity: 1,
+          duration: 0.4,
+          ease: "power2.out"
+        }, 0.4);
 
-        // 5. Tagline and subtitle fade in
-        tl.fromTo(
-          tagline,
-          { opacity: 0, y: 25 },
-          { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
-          expandTime + 0.6
-        );
+        // 3. Dots pop in one by one with stagger (0.4 - 1.4s)
+        tl.to(sel("#outro-dots circle"), {
+          scale: 1.15,
+          opacity: function(i) { return dotOps[i]; },
+          duration: 0.3,
+          ease: "back.out(2)",
+          stagger: 0.06
+        }, 0.4);
 
-        tl.fromTo(
-          subtitle,
-          { opacity: 0, y: 15 },
-          { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
-          expandTime + 1.0
-        );
+        // Settle dots
+        tl.to(sel("#outro-dots circle"), {
+          scale: 1,
+          duration: 0.15,
+          ease: "power2.inOut",
+          stagger: 0.06
+        }, 0.70);
 
-        // 6. URL pill appears
-        tl.fromTo(
-          urlPill,
-          { opacity: 0, y: 12, scale: 0.9 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" },
-          expandTime + 1.4
-        );
+        // 4. Glow blooms (0.5s)
+        tl.to(sel(".bg-glow"), {
+          opacity: 1, scale: 1.2, duration: 0.5, ease: "power2.out"
+        }, 0.5);
+        tl.to(sel(".bg-glow"), {
+          opacity: 0.6, scale: 1.5, duration: 1.0, ease: "power2.out"
+        }, 0.9);
 
-        // 7. Ghost text fades in slowly
-        tl.fromTo(sel(".ghost-text"), { opacity: 0 }, { opacity: 1, duration: 1.5, ease: "power2.out" }, 0.5);
+        // 5. Tagline rises (1.1 - 1.8s)
+        tl.to(sel(".tagline"), {
+          opacity: 1, y: 0, duration: 0.7, ease: "power3.out"
+        }, 1.1);
+
+        // 6. Subtitle fades in (1.5 - 2.1s)
+        tl.to(sel(".subtitle"), {
+          opacity: 1, y: 0, duration: 0.6, ease: "power3.out"
+        }, 1.5);
+
+        // 7. URL pill appears (1.9 - 2.4s)
+        tl.to(sel(".url-pill"), {
+          opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)"
+        }, 1.9);
+
+        // 8. Ghost text fades in slowly
+        tl.to(sel(".ghost-text"), { opacity: 1, duration: 1.5, ease: "power2.out" }, 0.5);
+
+        // 9. Idle: dots gentle twinkle (2.5s onwards)
+        tl.to(sel("#outro-dots circle"), {
+          opacity: function(i) { return dotOps[i] * 0.7; },
+          duration: 0.8,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 1,
+          stagger: 0.1
+        }, 2.5);
 
         window.__timelines = window.__timelines || {};
         window.__timelines["scene6-logo-outro"] = tl;

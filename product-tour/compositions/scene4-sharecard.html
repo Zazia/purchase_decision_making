@@ -1,0 +1,202 @@
+<template id="scene4-sharecard-template">
+  <div
+    data-composition-id="scene4-sharecard"
+    data-width="1920"
+    data-height="1080"
+    data-duration="3"
+  >
+    <div class="canvas">
+      <!-- Background -->
+      <div class="bg-base"></div>
+      <div class="bg-glow" data-layout-allow-overflow></div>
+      <div class="ghost-text" data-layout-ignore>SHARE</div>
+
+      <!-- Phone Mockup -->
+      <div class="phone-wrapper">
+        <div class="phone-mockup">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <img class="screenshot" src="assets/step-08-sharecard.png" alt="Share Card" />
+          </div>
+        </div>
+        <div class="phone-shadow"></div>
+      </div>
+
+      <!-- Feature callout -->
+      <div class="callout-panel">
+        <div class="callout-number">07</div>
+        <div class="callout-title">一键分享</div>
+        <div class="callout-desc">数据可视化卡片</div>
+        <div class="callout-desc">决策依据随时留存</div>
+      </div>
+    </div>
+
+    <style>
+      @font-face { font-family: 'Noto Sans SC'; src: local('Noto Sans SC'), local('Noto Sans CJK SC'); }
+      @font-face { font-family: 'Microsoft YaHei'; src: local('Microsoft YaHei'); }
+      [data-composition-id="scene4-sharecard"] .canvas {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: "Inter", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      }
+
+      [data-composition-id="scene4-sharecard"] .bg-base {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: #F5F5F7;
+      }
+
+      [data-composition-id="scene4-sharecard"] .bg-glow {
+        position: absolute;
+        top: 100px; left: 200px;
+        width: 800px; height: 800px;
+        background: radial-gradient(circle, rgba(0, 122, 255, 0.05) 0%, rgba(245, 245, 247, 0) 70%);
+        border-radius: 50%;
+      }
+
+      [data-composition-id="scene4-sharecard"] .ghost-text {
+        position: absolute;
+        bottom: 30px; right: -20px;
+        font-size: 180px;
+        font-weight: 800;
+        color: rgba(0, 122, 255, 0.03);
+        letter-spacing: -0.04em;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      [data-composition-id="scene4-sharecard"] .phone-wrapper {
+        position: absolute;
+        left: 560px;
+        top: 70px;
+        width: 400px;
+        height: 940px;
+        transform-origin: center center;
+      }
+
+      [data-composition-id="scene4-sharecard"] .phone-mockup {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #1D1D1F;
+        border-radius: 52px;
+        padding: 10px;
+        box-shadow: 0 40px 80px rgba(29, 29, 31, 0.12),
+                    0 15px 35px rgba(29, 29, 31, 0.08),
+                    inset 0 0 0 2px rgba(255,255,255,0.06);
+        z-index: 5;
+      }
+
+      [data-composition-id="scene4-sharecard"] .phone-notch {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 28px;
+        background: #1D1D1F;
+        border-radius: 0 0 18px 18px;
+        z-index: 10;
+      }
+
+      [data-composition-id="scene4-sharecard"] .phone-screen {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 44px;
+        overflow: hidden;
+        background: #FFFFFF;
+      }
+
+      [data-composition-id="scene4-sharecard"] .screenshot {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      [data-composition-id="scene4-sharecard"] .phone-shadow {
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 340px;
+        height: 30px;
+        background: radial-gradient(ellipse, rgba(29,29,31,0.15) 0%, rgba(245,245,247,0) 70%);
+        border-radius: 50%;
+      }
+
+      [data-composition-id="scene4-sharecard"] .callout-panel {
+        position: absolute;
+        right: 100px;
+        top: 300px;
+        width: 420px;
+        z-index: 15;
+        opacity: 0;
+      }
+
+      [data-composition-id="scene4-sharecard"] .callout-number {
+        font-family: "JetBrains Mono", "Inter", monospace;
+        font-size: 16px;
+        font-weight: 600;
+        color: #007AFF;
+        margin-bottom: 6px;
+        letter-spacing: 0.05em;
+      }
+
+      [data-composition-id="scene4-sharecard"] .callout-title {
+        font-size: 40px;
+        font-weight: 700;
+        color: #1D1D1F;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+      }
+
+      [data-composition-id="scene4-sharecard"] .callout-desc {
+        font-size: 22px;
+        font-weight: 400;
+        color: #86868B;
+        line-height: 1.5;
+      }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const sel = (s) => `[data-composition-id="scene4-sharecard"] ${s}`;
+
+        gsap.set(sel(".phone-wrapper"), { scale: 0.85, opacity: 0, y: 40 });
+        gsap.set(sel(".callout-panel"), { x: 60, opacity: 0 });
+
+        // Phone appears
+        tl.to(sel(".phone-wrapper"), {
+          scale: 1, opacity: 1, y: 0,
+          duration: 0.5, ease: "back.out(1.3)",
+        }, 0.1);
+
+        // Callout appears
+        tl.to(sel(".callout-panel"), {
+          x: 0, opacity: 1,
+          duration: 0.4, ease: "power3.out",
+        }, 0.5);
+
+        // Wipe out for outro transition
+        tl.to([
+          sel(".phone-wrapper"),
+          sel(".callout-panel"),
+        ], {
+          x: -2200, duration: 0.4, ease: "expo.in", stagger: 0.03,
+        }, 2.5);
+
+        tl.to(sel(".ghost-text"), { opacity: 0, duration: 0.3 }, 2.5);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines["scene4-sharecard"] = tl;
+      })();
+    </script>
+  </div>
+</template>

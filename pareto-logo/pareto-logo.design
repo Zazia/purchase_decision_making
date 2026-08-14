@@ -62,7 +62,11 @@
       "createdAt": 1786668000000,
       "canvasData": {
         "x": 1860,
-        "y": 0
+        "y": 0,
+        "naturalSize": {
+          "width": 1920,
+          "height": 1920
+        }
       },
       "devMetadata": {
         "imageSrc": "assets/pareto-logo-grid-chart-final.jpg"

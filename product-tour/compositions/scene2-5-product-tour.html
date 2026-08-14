@@ -3,7 +3,7 @@
     data-composition-id="scene2-5-product-tour"
     data-width="1920"
     data-height="1080"
-    data-duration="14"
+    data-duration="7"
   >
     <div class="canvas">
       <!-- Background layer -->
@@ -22,7 +22,6 @@
             <img class="screenshot ss-2" src="assets/step-03-holding.png" alt="Holding" />
             <img class="screenshot ss-3" src="assets/step-06-result.png" alt="Result" />
             <img class="screenshot ss-4" src="assets/step-07-detail.png" alt="Detail" />
-            <img class="screenshot ss-5" src="assets/step-08-sharecard.png" alt="Share" />
           </div>
         </div>
         <!-- Phone shadow -->
@@ -49,8 +48,8 @@
         </div>
         <div class="callout-item callout-3">
           <div class="callout-number">03</div>
-          <div class="callout-title">方案详情与分享</div>
-          <div class="callout-desc">数据透明，一键留存决策依据</div>
+          <div class="callout-title">方案详情与修改</div>
+          <div class="callout-desc">数据透明，手动调整更灵活</div>
         </div>
       </div>
 
@@ -89,7 +88,6 @@
         font-family: "Inter", "Noto Sans SC", "Microsoft YaHei", sans-serif;
       }
 
-      /* Background layer */
       [data-composition-id="scene2-5-product-tour"] .bg-base {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -134,7 +132,6 @@
         white-space: nowrap;
       }
 
-      /* Phone Mockup */
       [data-composition-id="scene2-5-product-tour"] .phone-wrapper {
         position: absolute;
         left: 560px;
@@ -200,7 +197,6 @@
         border-radius: 50%;
       }
 
-      /* Tap indicator */
       [data-composition-id="scene2-5-product-tour"] .tap-indicator {
         position: absolute;
         z-index: 20;
@@ -228,7 +224,6 @@
         left: -6px;
       }
 
-      /* Feature callouts */
       [data-composition-id="scene2-5-product-tour"] .callout-panel {
         position: absolute;
         right: 100px;
@@ -268,7 +263,6 @@
         line-height: 1.4;
       }
 
-      /* Highlight badges */
       [data-composition-id="scene2-5-product-tour"] .badge-container {
         position: absolute;
         left: 1000px;
@@ -315,7 +309,6 @@
         color: #1D1D1F;
       }
 
-      /* Connector lines */
       [data-composition-id="scene2-5-product-tour"] .connector-lines {
         position: absolute;
         top: 0; left: 0;
@@ -338,124 +331,76 @@
         gsap.set(sel(".callout-3"), { x: 60, opacity: 0 });
         gsap.set(sel(".tap-indicator"), { opacity: 0, scale: 0.5 });
 
-        // === Phase 1: Phone appears with first screenshot ===
+        // === Phase 1: Phone appears with first screenshot (0-1.5s) ===
         tl.to(sel(".phone-wrapper"), {
           scale: 1, opacity: 1, y: 0,
-          duration: 0.8, ease: "back.out(1.3)",
-        }, 0.2);
+          duration: 0.6, ease: "back.out(1.3)",
+        }, 0.1);
 
-        // Callout 1 appears
         tl.to(sel(".callout-1"), {
           x: 0, opacity: 1,
-          duration: 0.5, ease: "power3.out",
-        }, 0.8);
+          duration: 0.4, ease: "power3.out",
+        }, 0.5);
 
         // Tap indicator on category selection
-        tl.to(sel(".tap-indicator"), {
-          opacity: 1, scale: 1,
-          duration: 0.2, ease: "power2.out",
-        }, 1.4);
-        tl.set(sel(".tap-indicator"), { x: 730, y: 480 }, 1.4);
-        tl.to(sel(".tap-ring"), {
-          scale: 1.8, opacity: 0,
-          duration: 0.4, ease: "power2.out",
-        }, 1.4);
-        tl.to(sel(".tap-indicator"), {
-          opacity: 0, duration: 0.2,
-        }, 1.9);
+        tl.set(sel(".tap-indicator"), { x: 730, y: 480 }, 1.0);
+        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.15 }, 1.0);
+        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.3, ease: "power2.out" }, 1.0);
+        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.15 }, 1.4);
 
-        // === Phase 2: Transition to holding period screenshot ===
-        tl.to(sel(".ss-1"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 2.2);
-        tl.to(sel(".ss-2"), { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 2.3);
+        // === Phase 2: Transition to holding period screenshot (1.5-3s) ===
+        tl.to(sel(".ss-1"), { opacity: 0, duration: 0.25, ease: "power2.inOut" }, 1.6);
+        tl.to(sel(".ss-2"), { opacity: 1, duration: 0.25, ease: "power2.inOut" }, 1.7);
 
-        // Tap indicator on multi-select
-        tl.set(sel(".tap-indicator"), { x: 700, y: 550 }, 2.8);
-        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.2 }, 2.8);
-        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.4, ease: "power2.out" }, 2.8);
-        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.2 }, 3.3);
+        tl.set(sel(".tap-indicator"), { x: 700, y: 550 }, 2.2);
+        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.15 }, 2.2);
+        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.3, ease: "power2.out" }, 2.2);
+        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.15 }, 2.6);
 
-        // === Phase 3: Transition to result page (HERO) ===
-        tl.to(sel(".ss-2"), { opacity: 0, duration: 0.4, ease: "power2.inOut" }, 3.8);
-        tl.to(sel(".ss-3"), { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 3.9);
+        // === Phase 3: Transition to result page (3-4.5s) ===
+        tl.to(sel(".ss-2"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 2.9);
+        tl.to(sel(".ss-3"), { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 3.0);
 
-        // Phone enlarges slightly for hero moment
-        tl.to(sel(".phone-wrapper"), {
-          scale: 1.04,
-          duration: 0.6, ease: "power2.out",
-        }, 4.0);
+        tl.to(sel(".phone-wrapper"), { scale: 1.04, duration: 0.4, ease: "power2.out" }, 3.1);
 
-        // Callout 2 appears
-        tl.to(sel(".callout-2"), {
-          x: 0, opacity: 1,
-          duration: 0.5, ease: "power3.out",
-        }, 4.3);
+        tl.to(sel(".callout-2"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 3.4);
 
         // Badges appear with stagger
-        tl.to(sel(".badge-1"), {
-          x: 0, opacity: 1,
-          duration: 0.4, ease: "back.out(1.5)",
-        }, 4.6);
-        tl.to(sel(".conn-1"), { opacity: 0.6, duration: 0.3 }, 4.8);
+        tl.to(sel(".badge-1"), { x: 0, opacity: 1, duration: 0.3, ease: "back.out(1.5)" }, 3.6);
+        tl.to(sel(".conn-1"), { opacity: 0.6, duration: 0.2 }, 3.8);
+        tl.to(sel(".badge-2"), { x: 0, opacity: 1, duration: 0.3, ease: "back.out(1.5)" }, 3.9);
+        tl.to(sel(".conn-2"), { opacity: 0.6, duration: 0.2 }, 4.1);
+        tl.to(sel(".badge-3"), { x: 0, opacity: 1, duration: 0.3, ease: "back.out(1.5)" }, 4.2);
+        tl.to(sel(".conn-3"), { opacity: 0.6, duration: 0.2 }, 4.4);
 
-        tl.to(sel(".badge-2"), {
-          x: 0, opacity: 1,
-          duration: 0.4, ease: "back.out(1.5)",
-        }, 4.9);
-        tl.to(sel(".conn-2"), { opacity: 0.6, duration: 0.3 }, 5.1);
-
-        tl.to(sel(".badge-3"), {
-          x: 0, opacity: 1,
-          duration: 0.4, ease: "back.out(1.5)",
-        }, 5.2);
-        tl.to(sel(".conn-3"), { opacity: 0.6, duration: 0.3 }, 5.4);
-
-        // Badges hold, then fade
+        // Badges hold briefly, then fade
         tl.to([sel(".badge-1"), sel(".badge-2"), sel(".badge-3")], {
-          opacity: 0, y: -20,
-          duration: 0.3, ease: "power2.in", stagger: 0.05,
-        }, 7.8);
-        tl.to([sel(".conn-1"), sel(".conn-2"), sel(".conn-3")], {
-          opacity: 0, duration: 0.2,
-        }, 7.8);
+          opacity: 0, y: -20, duration: 0.25, ease: "power2.in", stagger: 0.04,
+        }, 5.0);
+        tl.to([sel(".conn-1"), sel(".conn-2"), sel(".conn-3")], { opacity: 0, duration: 0.2 }, 5.0);
 
-        // Phone returns to normal scale
-        tl.to(sel(".phone-wrapper"), {
-          scale: 1,
-          duration: 0.4, ease: "power2.inOut",
-        }, 8.0);
+        tl.to(sel(".phone-wrapper"), { scale: 1, duration: 0.3, ease: "power2.inOut" }, 5.2);
 
-        // === Phase 4: Transition to detail page ===
-        tl.to(sel(".ss-3"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 8.3);
-        tl.to(sel(".ss-4"), { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 8.4);
+        // === Phase 4: Transition to detail page (5-6.5s) ===
+        tl.to(sel(".ss-3"), { opacity: 0, duration: 0.25, ease: "power2.inOut" }, 5.4);
+        tl.to(sel(".ss-4"), { opacity: 1, duration: 0.25, ease: "power2.inOut" }, 5.5);
 
-        // Callout 3 appears
-        tl.to(sel(".callout-3"), {
-          x: 0, opacity: 1,
-          duration: 0.5, ease: "power3.out",
-        }, 8.7);
+        tl.to(sel(".callout-3"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 5.8);
 
-        // === Phase 5: Transition to share card ===
-        tl.to(sel(".ss-4"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 10.2);
-        tl.to(sel(".ss-5"), { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 10.3);
-
-        // === Phase 6: Wipe everything left for outro transition ===
+        // === Phase 5: Wipe everything for transition (6.5-7s) ===
         tl.to([
           sel(".phone-wrapper"),
           sel(".callout-panel"),
           sel(".badge-container"),
           sel(".tap-indicator"),
         ], {
-          x: -2200,
-          duration: 0.5,
-          ease: "expo.in",
-          stagger: 0.03,
-        }, 12.8);
+          x: -2200, duration: 0.4, ease: "expo.in", stagger: 0.03,
+        }, 6.4);
 
-        // Background fades
-        tl.to(sel(".bg-base"), { backgroundColor: "#F5F5F7", duration: 0.3 }, 13.2);
+        tl.to(sel(".bg-base"), { backgroundColor: "#F5F5F7", duration: 0.3 }, 6.6);
         tl.to([sel(".bg-glow-left"), sel(".bg-glow-right"), sel(".ghost-text"), sel(".ghost-text-2")], {
           opacity: 0, duration: 0.3, ease: "power2.in",
-        }, 13.2);
+        }, 6.6);
 
         window.__timelines = window.__timelines || {};
         window.__timelines["scene2-5-product-tour"] = tl;
