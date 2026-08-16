@@ -42,6 +42,18 @@ npx hyperframes lint --json     # machine-readable output for CI
 npx hyperframes docs <topic> # reference docs in terminal
 ```
 
+### Windows render: FFmpeg conflict (2026-08-16)
+
+**现象**：帧捕获完成后编码失败，`Error opening input file ...\captured-frames\frame_%06d.jpg: No such file or directory`。
+**原因**：PATH 第一项是 TRAE 内置的极简 ffmpeg（`TRAE SOLO CN\resources\app\bin\ffmpeg.exe`，`--disable-everything` 构建，无 `image2` demuxer / mjpeg decoder）。当 drawElement 捕获模式因帧验证失败回退到 screenshot 模式时，需要用 ffmpeg 读取 jpg 帧序列，极简版不支持即报错。
+**解决**：渲染前把完整版 ffmpeg 前置到 PATH（本机完整版位于 `C:\Users\Administrator\.local\bin\ffmpeg.exe`）：
+
+```powershell
+$env:Path = "C:\Users\Administrator\.local\bin;" + $env:Path; npm run render
+```
+
+验证方法：`& "C:\Users\Administrator\.local\bin\ffmpeg.exe" -demuxers | Select-String image2`。
+
 > **`npm run dev` is a long-running server, not a one-shot command.** It blocks until stopped.
 > In Claude Code, always run it with `run_in_background: true`. Never run it as a foreground
 > command — it will time out and the server will die, breaking the browser preview.

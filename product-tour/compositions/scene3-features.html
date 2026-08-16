@@ -1,100 +1,112 @@
 <template id="scene3-features-template">
-  <div
-    data-composition-id="scene3-features"
-    data-width="1920"
-    data-height="1080"
-    data-duration="13"
-  >
-    <div class="canvas">
+  <div data-hf-id="hf-zyv6" data-composition-id="scene3-features" data-width="1920" data-height="1080" data-duration="16">
+    <div data-hf-id="hf-nq1o" class="canvas">
       <!-- Background -->
-      <div class="bg-base"></div>
-      <div class="bg-glow-left" data-layout-allow-overflow></div>
-      <div class="bg-glow-right" data-layout-allow-overflow></div>
-      <div class="ghost-text" data-layout-ignore>PARETO</div>
-      <div class="ghost-text-2" data-layout-ignore>FRONTIER</div>
+      <div data-hf-id="hf-7v19" class="bg-base"></div>
+      <div data-hf-id="hf-1w7w" class="bg-glow-left" data-layout-allow-overflow=""></div>
+      <div data-hf-id="hf-el05" class="bg-glow-right" data-layout-allow-overflow=""></div>
+      <div data-hf-id="hf-tfil" class="ghost-text" data-layout-ignore="">PARETO</div>
+      <div data-hf-id="hf-93ku" class="ghost-text-2" data-layout-ignore="">FRONTIER</div>
 
       <!-- Phone Mockup -->
-      <div class="phone-wrapper">
-        <div class="phone-mockup">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img class="screenshot ss-pareto" src="assets/step-10-pareto-chart.png" alt="Pareto Chart" />
-            <img class="screenshot ss-detail" src="assets/step-07-detail.png" alt="Detail" />
-            <img class="screenshot ss-editor" src="assets/step-11-editor-main.png" alt="Editor" />
-            <img class="screenshot ss-filter" src="assets/step-12-editor-filter.png" alt="Filter" />
-            <img class="screenshot ss-recompute" src="assets/step-13-editor-recompute.png" alt="Recompute" />
+      <div data-hf-id="hf-vuku" class="phone-wrapper">
+        <div data-hf-id="hf-gkzk" class="phone-mockup">
+          <div data-hf-id="hf-c27x" class="phone-notch"></div>
+          <div data-hf-id="hf-9o7x" class="phone-screen">
+            <img data-hf-id="hf-sdj6" class="screenshot ss-pareto" src="assets/step-10-pareto-chart.png" alt="Pareto Chart">
+            <img data-hf-id="hf-jo7v" class="screenshot ss-detail" src="assets/step-07-detail.png" alt="Detail">
+            <img data-hf-id="hf-d5p2" class="screenshot ss-detail2" src="assets/step-10.5-detail-page.png" alt="Detail Page">
+            <img data-hf-id="hf-vpuw" class="screenshot ss-editor" src="assets/step-11-editor-main.png" alt="Editor">
+            <img data-hf-id="hf-pnkg" class="screenshot ss-filter" src="assets/step-12-editor-filter.png" alt="Filter">
+            <img data-hf-id="hf-p1vd" class="screenshot ss-recompute" src="assets/step-13-editor-recompute.png" alt="Recompute">
           </div>
         </div>
-        <div class="phone-shadow"></div>
+        <div data-hf-id="hf-8htt" class="phone-shadow"></div>
       </div>
 
-      <!-- Tap indicator -->
-      <div class="tap-indicator" data-layout-allow-overflow>
-        <div class="tap-ring"></div>
-        <div class="tap-dot"></div>
+      <!-- Tap indicators (independent, individually draggable in preview) -->
+      <div data-hf-id="hf-tap1" class="tap-indicator tap-chart" data-layout-allow-overflow="">
+        <div data-hf-id="hf-tap1r" class="tap-ring"></div>
+        <div data-hf-id="hf-tap1d" class="tap-dot"></div>
+      </div>
+      <div data-hf-id="hf-tap2" class="tap-indicator tap-price1" data-layout-allow-overflow="">
+        <div data-hf-id="hf-tap2r" class="tap-ring"></div>
+        <div data-hf-id="hf-tap2d" class="tap-dot"></div>
+      </div>
+      <div data-hf-id="hf-tap3" class="tap-indicator tap-price2" data-layout-allow-overflow="">
+        <div data-hf-id="hf-tap3r" class="tap-ring"></div>
+        <div data-hf-id="hf-tap3d" class="tap-dot"></div>
+      </div>
+      <div data-hf-id="hf-tap4" class="tap-indicator tap-filter" data-layout-allow-overflow="">
+        <div data-hf-id="hf-tap4r" class="tap-ring"></div>
+        <div data-hf-id="hf-tap4d" class="tap-dot"></div>
+      </div>
+      <div data-hf-id="hf-tap5" class="tap-indicator tap-recompute" data-layout-allow-overflow="">
+        <div data-hf-id="hf-tap5r" class="tap-ring"></div>
+        <div data-hf-id="hf-tap5d" class="tap-dot"></div>
       </div>
 
       <!-- Feature annotations (right side) -->
-      <div class="annotation-panel">
+      <div data-hf-id="hf-oo76" class="annotation-panel">
         <!-- Phase 1: Pareto chart explanation -->
-        <div class="anno-item anno-pareto">
-          <div class="anno-number">04</div>
-          <div class="anno-title">帕累托前沿图</div>
-          <div class="anno-desc">横轴月均成本，纵轴性能满足度</div>
-          <div class="anno-desc">前沿上的点不存在更优选择</div>
+        <div data-hf-id="hf-yz3o" class="anno-item anno-pareto">
+          <div data-hf-id="hf-g61m" class="anno-number">04</div>
+          <div data-hf-id="hf-x72j" class="anno-title">帕累托前沿图</div>
+          <div data-hf-id="hf-3jy4" class="anno-desc">横轴月均成本，纵轴性能满足度</div>
+          <div data-hf-id="hf-l6z0" class="anno-desc">前沿上的点不存在更优选择</div>
         </div>
 
         <!-- Phase 2: Tap to detail -->
-        <div class="anno-item anno-tap-detail">
-          <div class="anno-number">05</div>
-          <div class="anno-title">交互式探索</div>
-          <div class="anno-desc">点击图表上的点或方案卡片</div>
-          <div class="anno-desc">即可进入方案详情页</div>
+        <div data-hf-id="hf-kz2q" class="anno-item anno-tap-detail">
+          <div data-hf-id="hf-bprh" class="anno-number">05</div>
+          <div data-hf-id="hf-546k" class="anno-title">交互式探索</div>
+          <div data-hf-id="hf-ctzo" class="anno-desc">点击图表上的点或方案卡片</div>
+          <div data-hf-id="hf-1ghj" class="anno-desc">即可进入方案详情页</div>
         </div>
 
         <!-- Phase 3: Manual modification -->
-        <div class="anno-item anno-manual">
-          <div class="anno-number">06</div>
-          <div class="anno-title">手动修改方案</div>
-          <div class="anno-desc">用户的购买调研笔记本</div>
-          <div class="anno-desc">记录实际价格，调整方案</div>
+        <div data-hf-id="hf-p8t7" class="anno-item anno-manual">
+          <div data-hf-id="hf-gyno" class="anno-number">06</div>
+          <div data-hf-id="hf-ks5q" class="anno-title">手动修改方案</div>
+          <div data-hf-id="hf-wc5p" class="anno-desc">用户的购买调研笔记本</div>
+          <div data-hf-id="hf-0dyr" class="anno-desc">记录实际价格，调整方案</div>
         </div>
 
         <!-- Phase 4: Price adjustment -->
-        <div class="anno-item anno-price">
-          <div class="anno-icon-row">
-            <div class="anno-icon-box">¥</div>
-            <div class="anno-inline-title">调整买入价格</div>
+        <div data-hf-id="hf-b26o" class="anno-item anno-price">
+          <div data-hf-id="hf-zik9" class="anno-icon-row">
+            <div data-hf-id="hf-c1bd" class="anno-icon-box">¥</div>
+            <div data-hf-id="hf-b1ug" class="anno-inline-title">调整买入价格</div>
           </div>
-          <div class="anno-desc">直接修改价格，记录调研结果</div>
+          <div data-hf-id="hf-l2d2" class="anno-desc">直接修改价格，记录调研结果</div>
         </div>
 
         <!-- Phase 5: Filter -->
-        <div class="anno-item anno-filter">
-          <div class="anno-icon-row">
-            <div class="anno-icon-box">⚙</div>
-            <div class="anno-inline-title">条件筛选</div>
+        <div data-hf-id="hf-chur" class="anno-item anno-filter">
+          <div data-hf-id="hf-s2h9" class="anno-icon-row">
+            <div data-hf-id="hf-ktrx" class="anno-icon-box">⚙</div>
+            <div data-hf-id="hf-sxxc" class="anno-inline-title">条件筛选</div>
           </div>
-          <div class="anno-desc">按型号、内存、存储等维度筛选</div>
+          <div data-hf-id="hf-gt07" class="anno-desc">按型号、内存、存储等维度筛选</div>
         </div>
 
         <!-- Phase 6: Recompute -->
-        <div class="anno-item anno-recompute">
-          <div class="anno-icon-row">
-            <div class="anno-icon-box">↻</div>
-            <div class="anno-inline-title">重算报告</div>
+        <div data-hf-id="hf-p9lt" class="anno-item anno-recompute">
+          <div data-hf-id="hf-t9ec" class="anno-icon-row">
+            <div data-hf-id="hf-hvef" class="anno-icon-box">↻</div>
+            <div data-hf-id="hf-6x7g" class="anno-inline-title">重算报告</div>
           </div>
-          <div class="anno-desc">一键重算，即时更新推荐结果</div>
+          <div data-hf-id="hf-980q" class="anno-desc">一键重算，即时更新推荐结果</div>
         </div>
       </div>
 
       <!-- Highlight pulse for chart points -->
-      <div class="pulse-ring" data-layout-allow-overflow></div>
+      <div data-hf-id="hf-drvz" class="pulse-ring" data-layout-allow-overflow=""></div>
 
       <!-- Connector line from annotation to phone -->
-      <svg class="connector-svg" viewBox="0 0 1920 1080" width="1920" height="1080">
-        <line class="conn-line conn-pareto" x1="970" y1="400" x2="1080" y2="400" stroke="#007AFF" stroke-width="2" stroke-dasharray="4 4" opacity="0" />
-        <line class="conn-line conn-editor" x1="970" y1="500" x2="1080" y2="500" stroke="#007AFF" stroke-width="2" stroke-dasharray="4 4" opacity="0" />
+      <svg data-hf-id="hf-hcbn" class="connector-svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+        <line data-hf-id="hf-05ee" class="conn-line conn-pareto" x1="970" y1="400" x2="1080" y2="400" stroke="#007AFF" stroke-width="2" stroke-dasharray="4 4" opacity="0" />
+        <line data-hf-id="hf-m5sa" class="conn-line conn-editor" x1="970" y1="500" x2="1080" y2="500" stroke="#007AFF" stroke-width="2" stroke-dasharray="4 4" opacity="0" />
       </svg>
     </div>
 
@@ -201,7 +213,8 @@
         top: 0; left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        object-position: center top;
         opacity: 0;
       }
 
@@ -224,6 +237,12 @@
         pointer-events: none;
         opacity: 0;
       }
+
+      [data-composition-id="scene3-features"] .tap-chart { left: 620px; top: 450px; }
+      [data-composition-id="scene3-features"] .tap-price1 { left: 535px; top: 438px; }
+      [data-composition-id="scene3-features"] .tap-price2 { left: 535px; top: 585px; }
+      [data-composition-id="scene3-features"] .tap-filter { left: 508px; top: 420px; }
+      [data-composition-id="scene3-features"] .tap-recompute { left: 561px; top: 221px; }
 
       [data-composition-id="scene3-features"] .tap-ring {
         position: absolute;
@@ -278,7 +297,7 @@
         font-family: "JetBrains Mono", "Inter", monospace;
         font-size: 16px;
         font-weight: 600;
-        color: #007AFF;
+        color: #0066CC;
         margin-bottom: 6px;
         letter-spacing: 0.05em;
       }
@@ -294,7 +313,7 @@
       [data-composition-id="scene3-features"] .anno-desc {
         font-size: 22px;
         font-weight: 400;
-        color: #86868B;
+        color: #6E6E73;
         line-height: 1.5;
       }
 
@@ -382,10 +401,9 @@
         tl.to(sel(".anno-tap-detail"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 3.3);
 
         // Tap indicator on chart point
-        tl.set(sel(".tap-indicator"), { x: 620, y: 450 }, 3.8);
-        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.15 }, 3.8);
-        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 3.8);
-        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.15 }, 4.2);
+        tl.to(sel(".tap-chart"), { opacity: 1, scale: 1, duration: 0.15 }, 3.8);
+        tl.to(sel(".tap-chart .tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 3.8);
+        tl.to(sel(".tap-chart"), { opacity: 0, duration: 0.15 }, 4.2);
 
         // Transition to detail page
         tl.to(sel(".ss-pareto"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 4.3);
@@ -394,66 +412,70 @@
         // Fade out tap-detail annotation
         tl.to(sel(".anno-tap-detail"), { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, 5.0);
 
-        // === Phase 3: Enter manual modification (5.5-7.5s) ===
-        tl.to(sel(".anno-manual"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 5.3);
+        // === Phase 2.5: Detail page — price mismatch (5.9-8.6s) ===
+        tl.to(sel(".ss-detail"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 5.9);
+        tl.to(sel(".ss-detail2"), { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 6.0);
+
+        // Slight push-in to hold attention on the detail page
+        tl.to(sel(".phone-wrapper"), { scale: 1.03, duration: 0.4, ease: "power2.out" }, 6.1);
+        tl.to(sel(".phone-wrapper"), { scale: 1, duration: 0.35, ease: "power2.inOut" }, 8.1);
+
+        // === Phase 3: Enter manual modification (8.6-10.4s) ===
+        tl.to(sel(".anno-manual"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 8.4);
 
         // Transition to editor main view
-        tl.to(sel(".ss-detail"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 5.8);
-        tl.to(sel(".ss-editor"), { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 5.9);
+        tl.to(sel(".ss-detail2"), { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 8.8);
+        tl.to(sel(".ss-editor"), { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 8.9);
 
         // Connector to editor
-        tl.to(sel(".conn-editor"), { opacity: 0.5, duration: 0.3 }, 6.2);
+        tl.to(sel(".conn-editor"), { opacity: 0.5, duration: 0.3 }, 9.2);
 
-        // Tap indicator on price field
-        tl.set(sel(".tap-indicator"), { x: 580, y: 500 }, 6.5);
-        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.15 }, 6.5);
-        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 6.5);
-        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.15 }, 6.9);
+        // Tap indicator on price field (card 1 price input)
+        tl.to(sel(".tap-price1"), { opacity: 1, scale: 1, duration: 0.15 }, 9.4);
+        tl.to(sel(".tap-price1 .tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 9.4);
+        tl.to(sel(".tap-price1"), { opacity: 0, duration: 0.15 }, 9.8);
 
         // Fade out manual annotation, transition to price annotation
-        tl.to(sel(".anno-manual"), { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, 7.0);
-        tl.to(sel(".conn-editor"), { opacity: 0, duration: 0.2 }, 7.0);
+        tl.to(sel(".anno-manual"), { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, 10.0);
+        tl.to(sel(".conn-editor"), { opacity: 0, duration: 0.2 }, 10.0);
 
-        // === Phase 4: Price adjustment (7.5-9.5s) ===
-        tl.to(sel(".anno-price"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 7.3);
+        // === Phase 4: Price adjustment (10.4-12s) ===
+        tl.to(sel(".anno-price"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 10.3);
 
-        // Tap indicator on price input
-        tl.set(sel(".tap-indicator"), { x: 580, y: 520 }, 7.8);
-        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.15 }, 7.8);
-        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 7.8);
-        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.15 }, 8.2);
+        // Tap indicator on price input (card 2)
+        tl.to(sel(".tap-price2"), { opacity: 1, scale: 1, duration: 0.15 }, 10.8);
+        tl.to(sel(".tap-price2 .tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 10.8);
+        tl.to(sel(".tap-price2"), { opacity: 0, duration: 0.15 }, 11.2);
 
         // Fade out price annotation
-        tl.to(sel(".anno-price"), { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, 8.8);
+        tl.to(sel(".anno-price"), { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, 11.8);
 
-        // === Phase 5: Filter (9.5-11s) ===
+        // === Phase 5: Filter (12-13.6s) ===
         // Transition to filter screenshot
-        tl.to(sel(".ss-editor"), { opacity: 0, duration: 0.25, ease: "power2.inOut" }, 9.0);
-        tl.to(sel(".ss-filter"), { opacity: 1, duration: 0.25, ease: "power2.inOut" }, 9.1);
+        tl.to(sel(".ss-editor"), { opacity: 0, duration: 0.25, ease: "power2.inOut" }, 12.0);
+        tl.to(sel(".ss-filter"), { opacity: 1, duration: 0.25, ease: "power2.inOut" }, 12.1);
 
-        tl.to(sel(".anno-filter"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 9.4);
+        tl.to(sel(".anno-filter"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 12.3);
 
-        // Tap indicator on filter toggle
-        tl.set(sel(".tap-indicator"), { x: 600, y: 320 }, 9.9);
-        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.15 }, 9.9);
-        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 9.9);
-        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.15 }, 10.3);
+        // Tap indicator on a model filter chip
+        tl.to(sel(".tap-filter"), { opacity: 1, scale: 1, duration: 0.15 }, 12.7);
+        tl.to(sel(".tap-filter .tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 12.7);
+        tl.to(sel(".tap-filter"), { opacity: 0, duration: 0.15 }, 13.1);
 
         // Fade out filter annotation
-        tl.to(sel(".anno-filter"), { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, 10.4);
+        tl.to(sel(".anno-filter"), { opacity: 0, x: -30, duration: 0.3, ease: "power2.in" }, 13.2);
 
-        // === Phase 6: Recompute (11-13s) ===
+        // === Phase 6: Recompute (13.6-16s) ===
         // Transition to recompute screenshot (scroll to top)
-        tl.to(sel(".ss-filter"), { opacity: 0, duration: 0.25, ease: "power2.inOut" }, 10.8);
-        tl.to(sel(".ss-recompute"), { opacity: 1, duration: 0.25, ease: "power2.inOut" }, 10.9);
+        tl.to(sel(".ss-filter"), { opacity: 0, duration: 0.25, ease: "power2.inOut" }, 13.6);
+        tl.to(sel(".ss-recompute"), { opacity: 1, duration: 0.25, ease: "power2.inOut" }, 13.7);
 
-        tl.to(sel(".anno-recompute"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 11.2);
+        tl.to(sel(".anno-recompute"), { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 13.9);
 
         // Tap indicator on recompute button (top of editor)
-        tl.set(sel(".tap-indicator"), { x: 580, y: 180 }, 11.7);
-        tl.to(sel(".tap-indicator"), { opacity: 1, scale: 1, duration: 0.15 }, 11.7);
-        tl.to(sel(".tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 11.7);
-        tl.to(sel(".tap-indicator"), { opacity: 0, duration: 0.15 }, 12.1);
+        tl.to(sel(".tap-recompute"), { opacity: 1, scale: 1, duration: 0.15 }, 14.3);
+        tl.to(sel(".tap-recompute .tap-ring"), { scale: 1.8, opacity: 0, duration: 0.35, ease: "power2.out" }, 14.3);
+        tl.to(sel(".tap-recompute"), { opacity: 0, duration: 0.15 }, 14.7);
 
         // Wipe everything for transition to share card
         tl.to([
@@ -463,11 +485,13 @@
           sel(".pulse-ring"),
         ], {
           x: -2200, duration: 0.5, ease: "expo.in", stagger: 0.03,
-        }, 12.3);
+        }, 15.2);
 
         tl.to([sel(".bg-glow-left"), sel(".bg-glow-right"), sel(".ghost-text"), sel(".ghost-text-2")], {
           opacity: 0, duration: 0.3, ease: "power2.in",
-        }, 12.5);
+        }, 15.4);
+
+        tl.set("[data-hf-id=\"hf-gkzk\"]", { width: 400, height: 840, immediateRender: true }, 0);
 
         window.__timelines = window.__timelines || {};
         window.__timelines["scene3-features"] = tl;

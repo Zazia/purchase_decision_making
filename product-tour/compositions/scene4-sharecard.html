@@ -1,33 +1,30 @@
 <template id="scene4-sharecard-template">
-  <div
-    data-composition-id="scene4-sharecard"
-    data-width="1920"
-    data-height="1080"
-    data-duration="3"
-  >
-    <div class="canvas">
+  <div data-hf-id="hf-7iza" data-composition-id="scene4-sharecard" data-width="1920" data-height="1080" data-duration="3">
+    
+    
+    <div data-hf-id="hf-nq1o" class="canvas">
       <!-- Background -->
-      <div class="bg-base"></div>
-      <div class="bg-glow" data-layout-allow-overflow></div>
-      <div class="ghost-text" data-layout-ignore>SHARE</div>
+      <div data-hf-id="hf-7v19" class="bg-base"></div>
+      <div data-hf-id="hf-aebc" class="bg-glow" data-layout-allow-overflow=""></div>
+      <div data-hf-id="hf-rlv9" class="ghost-text" data-layout-ignore="">SHARE</div>
 
       <!-- Phone Mockup -->
-      <div class="phone-wrapper">
-        <div class="phone-mockup">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img class="screenshot" src="assets/step-08-sharecard.png" alt="Share Card" />
+      <div data-hf-id="hf-vuku" class="phone-wrapper">
+        <div data-hf-id="hf-gkzk" class="phone-mockup">
+          <div data-hf-id="hf-c27x" class="phone-notch"></div>
+          <div data-hf-id="hf-9o7x" class="phone-screen">
+            <img data-hf-id="hf-mpag" class="screenshot" src="assets/step-08-sharecard.PNG" alt="Share Card">
           </div>
         </div>
-        <div class="phone-shadow"></div>
+        <div data-hf-id="hf-8htt" class="phone-shadow"></div>
       </div>
 
       <!-- Feature callout -->
-      <div class="callout-panel">
-        <div class="callout-number">07</div>
-        <div class="callout-title">一键分享</div>
-        <div class="callout-desc">数据可视化卡片</div>
-        <div class="callout-desc">决策依据随时留存</div>
+      <div data-hf-id="hf-lc7t" class="callout-panel">
+        <div data-hf-id="hf-pclz" class="callout-number">07</div>
+        <div data-hf-id="hf-si8g" class="callout-title">一键分享</div>
+        <div data-hf-id="hf-qrb5" class="callout-desc">数据可视化卡片</div>
+        <div data-hf-id="hf-vm6o" class="callout-desc">决策依据随时留存</div>
       </div>
     </div>
 
@@ -115,7 +112,8 @@
         top: 0; left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        object-position: center top;
       }
 
       [data-composition-id="scene4-sharecard"] .phone-shadow {
@@ -193,6 +191,8 @@
         }, 2.5);
 
         tl.to(sel(".ghost-text"), { opacity: 0, duration: 0.3 }, 2.5);
+
+        tl.set("[data-hf-id=\"hf-gkzk\"]", { width: 400, height: 840, immediateRender: true }, 0);
 
         window.__timelines = window.__timelines || {};
         window.__timelines["scene4-sharecard"] = tl;

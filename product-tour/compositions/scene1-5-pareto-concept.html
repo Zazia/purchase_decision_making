@@ -1,0 +1,663 @@
+<template id="scene1-5-pareto-concept-template">
+  <div data-hf-id="hf-pc00" data-composition-id="scene1-5-pareto-concept" data-width="1920" data-height="1080" data-duration="15">
+    <div data-hf-id="hf-pc01" class="canvas">
+      <!-- Background -->
+      <div data-hf-id="hf-pc02" class="bg-base"></div>
+      <div data-hf-id="hf-pc03" class="bg-glow" data-layout-allow-overflow=""></div>
+      <div data-hf-id="hf-pc04" class="ghost-text" data-layout-ignore="">PARETO</div>
+      <div data-hf-id="hf-pc05" class="ghost-text-2" data-layout-ignore="">1906</div>
+
+      <!-- Wish intro (companion to caption 1, 0.3-2.5s) -->
+      <div data-hf-id="hf-pcwi" class="intro-wish">
+        <div data-hf-id="hf-pcw1" class="wish-card wish-card-l">
+          <span data-hf-id="hf-pcw1a" class="wish-dot dot-blue"></span>
+          <span data-hf-id="hf-pcw1b" class="wish-word">性能最强</span>
+          <span data-hf-id="hf-pcw1c" class="wish-arrow">↑</span>
+        </div>
+        <div data-hf-id="hf-pcw2" class="wish-x">×</div>
+        <div data-hf-id="hf-pcw3" class="wish-card wish-card-r">
+          <span data-hf-id="hf-pcw3a" class="wish-dot dot-green"></span>
+          <span data-hf-id="hf-pcw3b" class="wish-word">价格最低</span>
+          <span data-hf-id="hf-pcw3c" class="wish-arrow">↓</span>
+        </div>
+        <div data-hf-id="hf-pcw4" class="wish-stamp" data-layout-ignore="">并不存在</div>
+      </div>
+
+      <!-- Chart card -->
+      <div data-hf-id="hf-pc06" class="chart-card">
+        <div data-hf-id="hf-pc07" class="card-header">
+          <span data-hf-id="hf-pc08" class="card-title">价格 × 性能 坐标系</span>
+          <span data-hf-id="hf-pc09" class="legend">
+            <span data-hf-id="hf-r9pc" class="chip"><i data-hf-id="hf-rzyu" class="sw sw-front"></i>前沿解</span>
+            <span data-hf-id="hf-2oro" class="chip"><i data-hf-id="hf-4gnn" class="sw sw-dom"></i>被支配</span>
+          </span>
+        </div>
+        <svg data-hf-id="hf-pc10" class="chart-svg" viewBox="0 0 840 600" width="840" height="600">
+          <defs data-hf-id="hf-mh0t">
+            <marker data-hf-id="hf-6eys" id="pc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse" data-hidden="">
+              <path data-hf-id="hf-kfzk" d="M0,0 L10,5 L0,10 z" fill="#B25000" />
+            </marker>
+          </defs>
+
+          <!-- grid -->
+          <g data-hf-id="hf-6ruy" class="grid">
+            <line data-hf-id="hf-i59m" x1="217.3" y1="60" x2="217.3" y2="510" />
+            <line data-hf-id="hf-h930" x1="376.4" y1="60" x2="376.4" y2="510" />
+            <line data-hf-id="hf-6jto" x1="535.5" y1="60" x2="535.5" y2="510" />
+            <line data-hf-id="hf-jgy0" x1="694.5" y1="60" x2="694.5" y2="510" />
+            <line data-hf-id="hf-n4rt" x1="90" y1="428.2" x2="790" y2="428.2" />
+            <line data-hf-id="hf-96t3" x1="90" y1="305.5" x2="790" y2="305.5" />
+            <line data-hf-id="hf-qw9l" x1="90" y1="182.7" x2="790" y2="182.7" />
+            <line data-hf-id="hf-9yt9" x1="90" y1="60" x2="790" y2="60" />
+          </g>
+
+          <!-- axes -->
+          <line data-hf-id="hf-225i" class="axis-x" x1="90" y1="510" x2="790" y2="510" />
+          <line data-hf-id="hf-js2e" class="axis-y" x1="90" y1="510" x2="90" y2="60" />
+
+          <!-- ticks -->
+          <g data-hf-id="hf-qtvc" class="ticks">
+            <text data-hf-id="hf-pmq7" x="217.3" y="532" text-anchor="middle">50</text>
+            <text data-hf-id="hf-dzxn" x="376.4" y="532" text-anchor="middle">75</text>
+            <text data-hf-id="hf-yn1y" x="535.5" y="532" text-anchor="middle">100</text>
+            <text data-hf-id="hf-xrur" x="694.5" y="532" text-anchor="middle">125</text>
+            <text data-hf-id="hf-zuf6" x="78" y="432.6" text-anchor="end">30</text>
+            <text data-hf-id="hf-eafk" x="78" y="309.9" text-anchor="end">45</text>
+            <text data-hf-id="hf-w0i1" x="78" y="187.1" text-anchor="end">60</text>
+            <text data-hf-id="hf-a3ve" x="78" y="64.4" text-anchor="end">75</text>
+          </g>
+          <text data-hf-id="hf-evld" class="axis-x-label" x="440" y="562" text-anchor="middle">月均成本（元/月）→ 越低越省</text>
+          <text data-hf-id="hf-95ak" class="axis-y-label" transform="rotate(-90 28 285)" x="28" y="285" text-anchor="middle">性能满足度（%）→ 越高越好</text>
+
+          <!-- impossible wish zone -->
+          <g data-hf-id="hf-xdyw" class="zone">
+            <circle data-hf-id="hf-kawd" class="zone-ring" cx="185" cy="160" r="68" />
+            <text data-hf-id="hf-5d3n" class="zone-q" x="185" y="178" text-anchor="middle">?</text>
+            <text data-hf-id="hf-cive" class="zone-label" x="185" y="258" text-anchor="middle">更省且更强？</text>
+            <text data-hf-id="hf-1umy" class="zone-label zone-label-alt" x="185" y="258" text-anchor="middle">并不存在</text>
+          </g>
+
+          <!-- dominated dots -->
+          <g data-hf-id="hf-cbpr" class="d-dots">
+            <circle data-hf-id="hf-vf9f" cx="341.9" cy="427.4" r="4.5" />
+            <circle data-hf-id="hf-41qm" cx="536.7" cy="411.8" r="4.5" />
+            <circle data-hf-id="hf-4ejw" cx="572.3" cy="330" r="4.5" />
+            <circle data-hf-id="hf-70wk" cx="669.7" cy="142.6" r="4.5" />
+            <circle data-hf-id="hf-fm46" cx="691.4" cy="124.6" r="4.5" />
+            <circle data-hf-id="hf-ckhy" cx="704.7" cy="318.5" r="4.5" />
+            <circle data-hf-id="hf-s49r" cx="731.5" cy="402.8" r="4.5" />
+            <circle data-hf-id="hf-3v02" cx="690.4" cy="411.8" r="4.5" />
+            <circle data-hf-id="hf-fg02" cx="677" cy="369.3" r="4.5" />
+            <circle data-hf-id="hf-i2bu" cx="642" cy="316.1" r="4.5" />
+          </g>
+
+          <!-- dominance arrow -->
+          <g data-hf-id="hf-zdky" class="dom-arrow">
+            <line data-hf-id="hf-7qo7" x1="569.1" y1="237.2" x2="696.1" y2="313.4" marker-end="url(#pc-arrow)" />
+            <text data-hf-id="hf-l8g5" x="645" y="262">更贵，还更弱</text>
+          </g>
+
+          <!-- frontier dashed segments -->
+          <g data-hf-id="hf-xfud" class="frontier">
+            <line data-hf-id="hf-2bn9" class="fseg" x1="186.1" y1="453.5" x2="244.4" y2="441.3" />
+            <line data-hf-id="hf-x96k" class="fseg" x1="244.4" y1="441.3" x2="273.3" y2="384.8" />
+            <line data-hf-id="hf-4jyu" class="fseg" x1="273.3" y1="384.8" x2="353.2" y2="369.3" />
+            <line data-hf-id="hf-w9ry" class="fseg" x1="353.2" y1="369.3" x2="440" y2="351.3" />
+            <line data-hf-id="hf-2rvp" class="fseg" x1="440" y1="351.3" x2="552" y2="226.9" />
+            <line data-hf-id="hf-r7xe" class="fseg" x1="552" y1="226.9" x2="609.5" y2="104.2" />
+          </g>
+          <text data-hf-id="hf-5kgj" class="f-label" transform="rotate(-48 496 289)" x="496" y="289" text-anchor="middle">帕累托前沿</text>
+
+          <!-- frontier dots -->
+          <g data-hf-id="hf-o3op" class="f-dots">
+            <circle data-hf-id="hf-ji2i" cx="186.1" cy="453.5" r="9" />
+            <circle data-hf-id="hf-0sxt" cx="244.4" cy="441.3" r="9" />
+            <circle data-hf-id="hf-xokn" cx="273.3" cy="384.8" r="9" />
+            <circle data-hf-id="hf-hatt" cx="353.2" cy="369.3" r="9" />
+            <circle data-hf-id="hf-scp1" cx="440" cy="351.3" r="9" />
+            <circle data-hf-id="hf-1zas" cx="552" cy="226.9" r="9" />
+            <circle data-hf-id="hf-a0ww" cx="609.5" cy="104.2" r="9" />
+          </g>
+
+          <!-- end labels -->
+          <text data-hf-id="hf-tstz" class="end-cheap" x="150" y="494" text-anchor="middle">更省</text>
+          <text data-hf-id="hf-kvvg" class="end-strong" x="655" y="92" text-anchor="middle">更强</text>
+
+          <!-- pulse on top frontier point -->
+          <circle data-hf-id="hf-1i76" class="pulse" cx="609.5" cy="104.2" r="12" />
+        </svg>
+      </div>
+
+      <!-- Narrative panel -->
+      <div data-hf-id="hf-pc30" class="panel">
+        <div data-hf-id="hf-pc31" class="phase p1">
+          <div data-hf-id="hf-0lfz" class="eyebrow">THE WISH</div>
+          <div data-hf-id="hf-a9a8" class="p-title">最好 &amp; 最便宜？</div>
+          <div data-hf-id="hf-xirj" class="p-desc">我们都想要性能最强、价格最低的手机</div>
+          <div data-hf-id="hf-r33j" class="p-desc">——但这样的选项，并不存在</div>
+        </div>
+        <div data-hf-id="hf-pc32" class="phase p2">
+          <div data-hf-id="hf-jw25" class="eyebrow">1906</div>
+          <div data-hf-id="hf-hed1" class="p-title">帕累托的答案</div>
+          <div data-hf-id="hf-mlw7" class="p-desc">意大利经济学家帕累托发现：</div>
+          <div data-hf-id="hf-iroy" class="p-desc">最优解不是唯一的点，而是一系列「前沿解」</div>
+        </div>
+        <div data-hf-id="hf-pc33" class="phase p3">
+          <div data-hf-id="hf-qabv" class="eyebrow">PARETO FRONTIER</div>
+          <div data-hf-id="hf-uagi" class="p-title">前沿解</div>
+          <div data-hf-id="hf-gpg2" class="p-desc">前沿上的方案，不存在「更省且更强」的替代</div>
+          <div data-hf-id="hf-2f0o" class="p-desc">它们之间没有绝对优劣，只有你的偏好</div>
+        </div>
+        <div data-hf-id="hf-pc34" class="phase p4">
+          <div data-hf-id="hf-3wcc" class="eyebrow">APPLY TO APPLE</div>
+          <div data-hf-id="hf-zt2a" class="p-title">把它用起来</div>
+          <div data-hf-id="hf-26r9" class="p-desc">我们把这套框架，用在苹果产品的价格分析上</div>
+          <div data-hf-id="hf-5opj" class="app-pill">
+            <svg data-hf-id="hf-6lyq" class="app-icon" width="46" height="46" viewBox="0 0 46 46">
+              <defs data-hf-id="hf-vl9d">
+                <lineargradient data-hf-id="hf-tov2" id="pc-grad" x1="0" y1="0" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+                  <stop data-hf-id="hf-qzn8" offset="0" stop-color="#5AC8FA" />
+                  <stop data-hf-id="hf-pf4z" offset="1" stop-color="#007AFF" />
+                </lineargradient>
+              </defs>
+              <rect data-hf-id="hf-3obq" x="1" y="1" width="44" height="44" rx="11" fill="url(#pc-grad)" />
+              <circle data-hf-id="hf-q7es" cx="30" cy="15" r="2.4" fill="#FFFFFF" />
+              <circle data-hf-id="hf-c7dl" cx="16" cy="20" r="2" fill="#FFFFFF" opacity="0.9" />
+              <circle data-hf-id="hf-xbl6" cx="22" cy="26" r="3.2" fill="#FFFFFF" opacity="0.95" />
+              <circle data-hf-id="hf-1ont" cx="14" cy="32" r="2.2" fill="#FFFFFF" opacity="0.8" />
+              <circle data-hf-id="hf-4qud" cx="31" cy="31" r="2" fill="#FFFFFF" opacity="0.75" />
+            </svg>
+            <span data-hf-id="hf-j4rf" class="app-name">帕累托买苹果</span>
+            <span data-hf-id="hf-nu3x" class="app-sub">微信小程序</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @font-face { font-family: 'Noto Sans SC'; src: local('Noto Sans SC'), local('Noto CJK SC'); }
+      @font-face { font-family: 'Microsoft YaHei'; src: local('Microsoft YaHei'); }
+      [data-composition-id="scene1-5-pareto-concept"] .canvas {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: "Inter", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .bg-base {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: #F5F5F7;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .bg-glow {
+        position: absolute;
+        top: 130px; left: 40px;
+        width: 820px; height: 820px;
+        background: radial-gradient(circle, rgba(0, 122, 255, 0.05) 0%, rgba(245, 245, 247, 0) 70%);
+        border-radius: 50%;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .ghost-text {
+        position: absolute;
+        top: 40px; left: -30px;
+        font-size: 190px;
+        font-weight: 800;
+        color: rgba(0, 122, 255, 0.035);
+        letter-spacing: -0.04em;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .ghost-text-2 {
+        position: absolute;
+        bottom: 30px; right: -20px;
+        font-size: 190px;
+        font-weight: 800;
+        color: rgba(0, 122, 255, 0.03);
+        letter-spacing: -0.04em;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .intro-wish {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 396px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 36px;
+        opacity: 0;
+        z-index: 5;
+      }
+      [data-composition-id="scene1-5-pareto-concept"] .wish-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        background: #FFFFFF;
+        border: 1px solid rgba(29, 29, 31, 0.06);
+        border-radius: 26px;
+        padding: 30px 44px;
+        box-shadow: 0 12px 40px rgba(29, 29, 31, 0.1);
+        opacity: 0;
+      }
+      [data-composition-id="scene1-5-pareto-concept"] .wish-word {
+        font-size: 42px;
+        font-weight: 700;
+        color: #1D1D1F;
+        letter-spacing: 0.02em;
+      }
+      [data-composition-id="scene1-5-pareto-concept"] .wish-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+      }
+      [data-composition-id="scene1-5-pareto-concept"] .dot-blue { background: #007AFF; }
+      [data-composition-id="scene1-5-pareto-concept"] .dot-green { background: #34C759; }
+      [data-composition-id="scene1-5-pareto-concept"] .wish-arrow {
+        font-size: 36px;
+        font-weight: 700;
+        color: #6E6E73;
+        line-height: 1;
+      }
+      [data-composition-id="scene1-5-pareto-concept"] .wish-x {
+        font-size: 60px;
+        font-weight: 600;
+        color: #6E6E73;
+        line-height: 1;
+        opacity: 0;
+      }
+      [data-composition-id="scene1-5-pareto-concept"] .wish-stamp {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background: #B25000;
+        color: #FFFFFF;
+        font-size: 46px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 12px 36px;
+        border-radius: 16px;
+        border: 4px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 10px 30px rgba(178, 80, 0, 0.35);
+        opacity: 0;
+        white-space: nowrap;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .chart-card {
+        position: absolute;
+        left: 110px;
+        top: 214px;
+        width: 888px;
+        background: #FFFFFF;
+        border-radius: 28px;
+        padding: 22px 24px 24px;
+        box-shadow: 0 24px 60px rgba(29, 29, 31, 0.08),
+                    0 6px 18px rgba(29, 29, 31, 0.05);
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        min-height: 30px;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .card-title {
+        font-family: "JetBrains Mono", "Inter", monospace;
+        font-size: 15px;
+        color: #6E6E73;
+        letter-spacing: 0.04em;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .legend {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #6E6E73;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .sw {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .sw-front { background: #007AFF; }
+      [data-composition-id="scene1-5-pareto-concept"] .sw-dom { background: #9E9EA8; opacity: 0.6; }
+
+      [data-composition-id="scene1-5-pareto-concept"] .chart-svg {
+        display: block;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .grid line {
+        stroke: #ECECF0;
+        stroke-width: 1;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .axis-x,
+      [data-composition-id="scene1-5-pareto-concept"] .axis-y {
+        stroke: #6E6E73;
+        stroke-width: 1.5;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .ticks text {
+        font-family: "JetBrains Mono", "Inter", monospace;
+        font-size: 13px;
+        fill: #6E6E73;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .axis-x-label,
+      [data-composition-id="scene1-5-pareto-concept"] .axis-y-label {
+        font-size: 15px;
+        fill: #6E6E73;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .zone {
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .zone-ring {
+        fill: rgba(0, 122, 255, 0.03);
+        stroke: #6E6E73;
+        stroke-width: 2;
+        stroke-dasharray: 6 6;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .zone-q {
+        font-size: 44px;
+        font-weight: 700;
+        fill: #6E6E73;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .zone-label {
+        font-size: 17px;
+        fill: #6E6E73;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .zone-label-alt {
+        fill: #B25000;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .d-dots circle {
+        fill: #9E9EA8;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .dom-arrow line {
+        stroke: #B25000;
+        stroke-width: 2;
+        stroke-dasharray: 1 6;
+        stroke-linecap: round;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .dom-arrow text {
+        font-size: 16px;
+        font-weight: 600;
+        fill: #B25000;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .fseg {
+        stroke: #007AFF;
+        stroke-width: 2.5;
+        stroke-dasharray: 8 7;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .f-label {
+        font-size: 16px;
+        font-weight: 700;
+        fill: #0066CC;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .f-dots circle {
+        fill: #007AFF;
+        stroke: #FFFFFF;
+        stroke-width: 2;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .end-cheap,
+      [data-composition-id="scene1-5-pareto-concept"] .end-strong {
+        font-size: 17px;
+        font-weight: 700;
+        fill: #0066CC;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .pulse {
+        fill: none;
+        stroke: #34C759;
+        stroke-width: 3;
+        opacity: 0;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .panel {
+        position: absolute;
+        left: 1060px;
+        top: 300px;
+        width: 750px;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .phase {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .eyebrow {
+        font-family: "JetBrains Mono", "Inter", monospace;
+        font-size: 17px;
+        font-weight: 600;
+        color: #0066CC;
+        letter-spacing: 0.12em;
+        margin-bottom: 10px;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .p-title {
+        font-size: 48px;
+        font-weight: 700;
+        color: #1D1D1F;
+        margin-bottom: 14px;
+        letter-spacing: -0.02em;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .p-desc {
+        font-size: 23px;
+        font-weight: 400;
+        color: #6E6E73;
+        line-height: 1.55;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .app-pill {
+        margin-top: 30px;
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        background: #FFFFFF;
+        border: 1px solid #D2D2D8;
+        border-radius: 100px;
+        padding: 13px 26px;
+        box-shadow: 0 4px 12px rgba(29, 29, 31, 0.06);
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .app-name {
+        font-size: 25px;
+        font-weight: 700;
+        color: #1D1D1F;
+      }
+
+      [data-composition-id="scene1-5-pareto-concept"] .app-sub {
+        font-size: 15px;
+        color: #6E6E73;
+      }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const sel = (s) => `[data-composition-id="scene1-5-pareto-concept"] ${s}`;
+
+        // Initial states
+        gsap.set(sel(".bg-glow"), { opacity: 0 });
+        gsap.set([sel(".ghost-text"), sel(".ghost-text-2")], { opacity: 0 });
+        gsap.set(sel(".chart-card"), { y: 40, opacity: 0, scale: 0.98 });
+        gsap.set(sel(".axis-x"), { strokeDasharray: 700, strokeDashoffset: 700 });
+        gsap.set(sel(".axis-y"), { strokeDasharray: 450, strokeDashoffset: 450 });
+        gsap.set([sel(".grid"), sel(".ticks")], { opacity: 0 });
+        gsap.set([sel(".axis-x-label"), sel(".axis-y-label")], { opacity: 0 });
+        gsap.set(sel(".zone"), { opacity: 0, scale: 0.7 });
+        gsap.set(sel(".zone-label-alt"), { opacity: 0 });
+        gsap.set(sel(".wish-card-l"), { opacity: 0, x: -90, y: 40 });
+        gsap.set(sel(".wish-card-r"), { opacity: 0, x: 90, y: 40 });
+        gsap.set(sel(".wish-x"), { opacity: 0, scale: 0.3 });
+        gsap.set(sel(".wish-stamp"), {
+          opacity: 0, scale: 1.6,
+          xPercent: -50, yPercent: -50, rotation: -5,
+        });
+        gsap.set(sel(".d-dots circle"), { scale: 0, opacity: 0 });
+        gsap.set(sel(".f-dots circle"), { scale: 0, opacity: 0 });
+        gsap.set(sel(".fseg"), { opacity: 0 });
+        gsap.set(sel(".f-label"), { opacity: 0 });
+        gsap.set(sel(".legend"), { opacity: 0 });
+        gsap.set([sel(".end-cheap"), sel(".end-strong")], { opacity: 0 });
+        gsap.set(sel(".dom-arrow"), { opacity: 0 });
+        gsap.set(sel(".phase"), { x: 60, opacity: 0 });
+        gsap.set(sel(".app-pill"), { scale: 0.85, opacity: 0 });
+
+        // === Phase 0: The wish caption over clean background (0-2.5s) ===
+        tl.to(sel(".bg-glow"), { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.1);
+        tl.to(sel(".ghost-text"), { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.15);
+
+        // Wish cards converge, then the stamp lands on "并不存在"
+        tl.to(sel(".intro-wish"), { opacity: 1, duration: 0.01 }, 0.3);
+        tl.to(sel(".wish-card-l"), {
+          x: 0, y: 0, opacity: 1,
+          duration: 0.5, ease: "back.out(1.4)",
+        }, 0.35);
+        tl.to(sel(".wish-card-r"), {
+          x: 0, y: 0, opacity: 1,
+          duration: 0.5, ease: "back.out(1.4)",
+        }, 0.6);
+        tl.to(sel(".wish-x"), { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 0.95);
+        tl.to(sel(".wish-stamp"), {
+          opacity: 1, scale: 1,
+          duration: 0.38, ease: "back.out(2.4)",
+        }, 1.45);
+        tl.to([sel(".wish-card-l"), sel(".wish-card-r")], {
+          opacity: 0.45, y: 8, duration: 0.3, ease: "power2.out",
+        }, 1.5);
+        tl.to(sel(".wish-x"), { opacity: 0.35, duration: 0.3, ease: "power2.out" }, 1.5);
+        tl.to(sel(".intro-wish"), { opacity: 0, y: -36, duration: 0.35, ease: "power2.in" }, 2.25);
+
+        // === Phase 1: Chart enters after the wish caption (2.5-4.7s) ===
+        tl.to(sel(".chart-card"), {
+          y: 0, opacity: 1, scale: 1,
+          duration: 0.6, ease: "back.out(1.1)",
+        }, 2.5);
+
+        tl.to(sel(".axis-x"), { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, 2.85);
+        tl.to(sel(".axis-y"), { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, 3.0);
+        tl.to([sel(".grid"), sel(".ticks")], { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.2);
+        tl.to([sel(".axis-x-label"), sel(".axis-y-label")], { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.3);
+
+        tl.to(sel(".p1"), { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 2.9);
+
+        tl.to(sel(".zone"), {
+          opacity: 1, scale: 1,
+          duration: 0.5, ease: "back.out(1.6)",
+        }, 3.15);
+
+        // === Phase 2: Pareto 1906 (4.7-7.5s) ===
+        tl.to(sel(".p1"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 4.5);
+        tl.to(sel(".p2"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 4.75);
+        tl.to(sel(".ghost-text-2"), { opacity: 1, duration: 0.6, ease: "power2.out" }, 4.9);
+
+        tl.to(sel(".d-dots circle"), {
+          scale: 1, opacity: 0.55,
+          duration: 0.35, ease: "back.out(1.7)", stagger: 0.07,
+        }, 4.9);
+
+        tl.to(sel(".zone"), { opacity: 0.3, duration: 0.4, ease: "power2.inOut" }, 5.8);
+
+        // === Phase 3: Frontier reveal (5.3-10.4s) ===
+        tl.to(sel(".f-dots circle"), {
+          scale: 1, opacity: 1,
+          duration: 0.4, ease: "back.out(2)", stagger: 0.09,
+        }, 5.3);
+
+        tl.to(sel(".fseg"), { opacity: 1, duration: 0.15, stagger: 0.12 }, 6.3);
+        tl.to(sel(".f-label"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 7.0);
+        tl.to(sel(".legend"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 7.1);
+        tl.to(sel(".d-dots circle"), { opacity: 0.32, duration: 0.35, ease: "power2.inOut" }, 7.3);
+
+        tl.to(sel(".p2"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 7.5);
+        tl.to(sel(".p3"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 7.65);
+
+        // Zone punchline: does not exist
+        tl.to(sel(".zone-label"), { opacity: 0, duration: 0.15, ease: "power1.in" }, 7.6);
+        tl.to(sel(".zone-label-alt"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 7.6);
+        tl.to(sel(".zone"), { opacity: 0.55, duration: 0.3, ease: "power2.out" }, 7.6);
+        tl.to(sel(".zone-ring"), { attr: { stroke: "#B25000" }, duration: 0.3 }, 7.6);
+
+        // Dominance arrow
+        tl.to(sel(".dom-arrow"), { opacity: 1, duration: 0.45, ease: "power2.out" }, 7.85);
+        tl.to([sel(".end-cheap"), sel(".end-strong")], { opacity: 1, duration: 0.35, ease: "power2.out" }, 8.1);
+
+        // Pulse on strongest frontier point
+        tl.fromTo(sel(".pulse"),
+          { attr: { r: 12 }, opacity: 0.9 },
+          { attr: { r: 38 }, opacity: 0, duration: 0.55, ease: "power2.out", immediateRender: false },
+          9.2
+        );
+        tl.fromTo(sel(".pulse"),
+          { attr: { r: 12 }, opacity: 0.9 },
+          { attr: { r: 38 }, opacity: 0, duration: 0.55, ease: "power2.out", immediateRender: false },
+          9.8
+        );
+
+        // === Phase 4: Apply to Apple (10.4-15s) ===
+        tl.to(sel(".p3"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 10.35);
+        tl.to(sel(".p4"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 10.5);
+
+        tl.to(sel(".app-pill"), {
+          scale: 1, opacity: 1,
+          duration: 0.5, ease: "back.out(1.5)",
+        }, 11.0);
+
+        tl.to(sel(".app-pill"), {
+          y: -6, duration: 0.8, ease: "sine.inOut", yoyo: true, repeat: 1,
+        }, 12.9);
+
+        // === Exit wipe ===
+        tl.to([
+          sel(".chart-card"),
+          sel(".panel"),
+        ], {
+          x: -2200, duration: 0.45, ease: "expo.in", stagger: 0.03,
+        }, 14.4);
+        tl.to([sel(".ghost-text"), sel(".ghost-text-2"), sel(".bg-glow")], {
+          opacity: 0, duration: 0.3, ease: "power2.in",
+        }, 14.4);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines["scene1-5-pareto-concept"] = tl;
+      })();
+    </script>
+  </div>
+</template>

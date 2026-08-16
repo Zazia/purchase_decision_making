@@ -1,84 +1,67 @@
 <template id="scene1-logo-intro-template">
-  <div
-    data-composition-id="scene1-logo-intro"
-    data-width="1920"
-    data-height="1080"
-    data-duration="2"
-  >
-    <div class="canvas">
+  <div data-hf-id="hf-r5wt" data-composition-id="scene1-logo-intro" data-width="1920" data-height="1080" data-duration="2">
+    <div data-hf-id="hf-nq1o" class="canvas">
       <!-- Background decoratives -->
-      <div class="bg-glow" data-layout-allow-overflow></div>
-      <div class="ghost-text" data-layout-ignore>PARETO</div>
+      <div data-hf-id="hf-aebc" class="bg-glow" data-layout-allow-overflow=""></div>
+      <div data-hf-id="hf-tfil" class="ghost-text" data-layout-ignore="">PARETO</div>
 
       <!-- Logo SVG (inline for GSAP animation) -->
-      <div class="logo-container">
-        <svg class="logo-svg" viewBox="-8 -8 116 116" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo">
-          <defs>
-            <linearGradient id="intro-grad-blue" x1="15" y1="5" x2="85" y2="95" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#5AC8FA"/>
-              <stop offset="50%" stop-color="#2B8CF7"/>
-              <stop offset="100%" stop-color="#007AFF"/>
-            </linearGradient>
-            <linearGradient id="intro-grad-hl" x1="4.96" y1="100" x2="103.93" y2="4.04" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.87"/>
-              <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.47"/>
-              <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
-            </linearGradient>
-            <clipPath id="intro-clip-sq">
-              <rect x="0" y="0" width="100" height="100" rx="22" ry="22"/>
-            </clipPath>
-            <filter id="intro-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1D1D1F" flood-opacity="0.12"/>
+      <div data-hf-id="hf-18pb" class="logo-container">
+        <svg data-hf-id="hf-ui2s" class="logo-svg" viewBox="-8 -8 116 116" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo">
+          <defs data-hf-id="hf-mh0t">
+            <lineargradient data-hf-id="hf-65w8" id="intro-grad-blue" x1="15" y1="5" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+              <stop data-hf-id="hf-jz8z" offset="0%" stop-color="#5AC8FA" />
+              <stop data-hf-id="hf-t2bi" offset="50%" stop-color="#2B8CF7" />
+              <stop data-hf-id="hf-5qfm" offset="100%" stop-color="#007AFF" />
+            </lineargradient>
+            <lineargradient data-hf-id="hf-l210" id="intro-grad-hl" x1="4.96" y1="100" x2="103.93" y2="4.04" gradientUnits="userSpaceOnUse">
+              <stop data-hf-id="hf-yax5" offset="0%" stop-color="#FFFFFF" stop-opacity="0.87" />
+              <stop data-hf-id="hf-aq3m" offset="50%" stop-color="#FFFFFF" stop-opacity="0.47" />
+              <stop data-hf-id="hf-24mf" offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+            </lineargradient>
+            <clippath data-hf-id="hf-zvkt" id="intro-clip-sq">
+              <rect data-hf-id="hf-b8rb" x="0" y="0" width="100" height="100" rx="22" ry="22" />
+            </clippath>
+            <filter data-hf-id="hf-ul4d" id="intro-shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <fedropshadow data-hf-id="hf-dx6y" dx="0" dy="2" stdDeviation="3" flood-color="#1D1D1F" flood-opacity="0.12" />
             </filter>
           </defs>
 
-          <g id="intro-squircle">
-            <rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="#FFFFFF" filter="url(#intro-shadow)"/>
+          <g data-hf-id="hf-xph2" id="intro-squircle">
+            <rect data-hf-id="hf-o5sn" x="0" y="0" width="100" height="100" rx="22" ry="22" fill="#FFFFFF" filter="url(#intro-shadow)" />
           </g>
-          <g id="intro-logo-content" clip-path="url(#intro-clip-sq)">
-            <g id="intro-curve">
-              <path id="intro-curve-fill"
-                    d="M70,0 H100 V100 H0 V70 C0,51.4348 7.37498,33.6301 20.5025,20.5025 C33.6301,7.375 51.4348,0 70,0 Z"
-                    fill="url(#intro-grad-blue)"/>
-              <path id="intro-curve-highlight"
-                    d="M100,0 H71.2 C53.3775,0 36.2849,7.375 23.6824,20.5025 C11.08,33.6301 4,51.4348 4,70 V100"
-                    fill="none" stroke="url(#intro-grad-hl)" stroke-width="8" stroke-linecap="round"/>
+          <g data-hf-id="hf-eqtr" id="intro-logo-content" clip-path="url(#intro-clip-sq)">
+            <g data-hf-id="hf-a8zh" id="intro-curve">
+              <path data-hf-id="hf-uqx5" id="intro-curve-fill" d="M70,0 H100 V100 H0 V70 C0,51.4348 7.37498,33.6301 20.5025,20.5025 C33.6301,7.375 51.4348,0 70,0 Z" fill="url(#intro-grad-blue)" />
+              <path data-hf-id="hf-97m9" id="intro-curve-highlight" d="M100,0 H71.2 C53.3775,0 36.2849,7.375 23.6824,20.5025 C11.08,33.6301 4,51.4348 4,70 V100" fill="none" stroke="url(#intro-grad-hl)" stroke-width="8" stroke-linecap="round" />
             </g>
-            <g id="intro-dots" fill="#FFFFFF">
-              <circle id="intro-dot-01" cx="87"   cy="20"   r="3"/>
-              <circle id="intro-dot-02" cx="29"   cy="31"   r="3"/>
-              <circle id="intro-dot-03" cx="26.5" cy="43.5" r="5.5"/>
-              <circle id="intro-dot-04" cx="84"   cy="45"   r="4"   opacity="0.8"/>
-              <circle id="intro-dot-05" cx="69.5" cy="29.5" r="6.5" opacity="0.85"/>
-              <circle id="intro-dot-06" cx="39.5" cy="61.5" r="4.5" opacity="0.9"/>
-              <circle id="intro-dot-07" cx="60"   cy="54"   r="5"   opacity="0.85"/>
-              <circle id="intro-dot-08" cx="49"   cy="33"   r="5"   opacity="0.9"/>
-              <circle id="intro-dot-09" cx="44"   cy="80"   r="4"   opacity="0.6"/>
-              <circle id="intro-dot-10" cx="20.5" cy="66.5" r="3.5"/>
-              <circle id="intro-dot-11" cx="81"   cy="60"   r="3"   opacity="0.6"/>
-              <circle id="intro-dot-12" cx="51"   cy="16"   r="5"/>
+            <g data-hf-id="hf-wl5f" id="intro-dots" fill="#FFFFFF">
+              <circle data-hf-id="hf-85xq" id="intro-dot-01" cx="87" cy="20" r="3" />
+              <circle data-hf-id="hf-uyej" id="intro-dot-02" cx="29" cy="31" r="3" />
+              <circle data-hf-id="hf-rr3f" id="intro-dot-03" cx="26.5" cy="43.5" r="5.5" />
+              <circle data-hf-id="hf-9wju" id="intro-dot-04" cx="84" cy="45" r="4" opacity="0.8" />
+              <circle data-hf-id="hf-8jt0" id="intro-dot-05" cx="69.5" cy="29.5" r="6.5" opacity="0.85" />
+              <circle data-hf-id="hf-3njk" id="intro-dot-06" cx="39.5" cy="61.5" r="4.5" opacity="0.9" />
+              <circle data-hf-id="hf-8qm1" id="intro-dot-07" cx="60" cy="54" r="5" opacity="0.85" />
+              <circle data-hf-id="hf-3204" id="intro-dot-08" cx="49" cy="33" r="5" opacity="0.9" />
+              <circle data-hf-id="hf-vjbc" id="intro-dot-09" cx="44" cy="80" r="4" opacity="0.6" />
+              <circle data-hf-id="hf-gi08" id="intro-dot-10" cx="20.5" cy="66.5" r="3.5" />
+              <circle data-hf-id="hf-guwz" id="intro-dot-11" cx="81" cy="60" r="3" opacity="0.6" />
+              <circle data-hf-id="hf-xpri" id="intro-dot-12" cx="51" cy="16" r="5" />
             </g>
           </g>
         </svg>
       </div>
 
       <!-- Expanding Ring -->
-      <div class="ring-container">
-        <svg viewBox="0 0 400 400" width="400" height="400">
-          <circle
-            class="ring"
-            cx="200"
-            cy="200"
-            r="80"
-            fill="none"
-            stroke="#007AFF"
-            stroke-width="3"
-          />
+      <div data-hf-id="hf-rr88" class="ring-container">
+        <svg data-hf-id="hf-tvhu" viewBox="0 0 400 400" width="400" height="400">
+          <circle data-hf-id="hf-hiem" class="ring" cx="200" cy="200" r="80" fill="none" stroke="#007AFF" stroke-width="3" />
         </svg>
       </div>
 
       <!-- App name flash -->
-      <div class="app-name-flash">帕累托决策</div>
+      <div data-hf-id="hf-brg7" class="app-name-flash">帕累托买苹果</div>
     </div>
 
     <style>
