@@ -30,6 +30,11 @@ debug.log
 # 一次性调试产物(脚本本身保留,运行产物不入库)
 scripts/debug/
 
+# product-tour 缓存与渲染产物(不入库)
+product-tour/.hyperframes/
+product-tour/.thumbnails/
+product-tour/renders/
+
 # 敏感密钥(小程序主体私钥等,严禁入库)
 *.key
 private.*
