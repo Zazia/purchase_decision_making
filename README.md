@@ -4,9 +4,9 @@
 
 A quantitative Apple-product analysis skill based on the **Pareto frontier**. It filters non-inferior purchase options on the *monthly cost × average holding-period performance* plane, helping you answer: which model, new vs. used, and how many years to hold.
 
-> **方法论见 [METHOD.md](METHOD.md)（中文 + English，同文件内可点击切换）。** 这是一篇独立文章，讲清楚为什么耐用品购买应该用帕累托框架，而不是「最佳推荐清单」。本 README 只描述技能的工程实现。
+> **方法论见 [METHOD.md](METHOD.md)（中文 + English）。** 这是一篇独立文章，讲清楚为什么耐用品购买应该用帕累托框架，而不是「最佳推荐清单」。本 README 只描述技能的工程实现。**完整框架见 [paretopurchase.com](HTTPS://paretopurchase.com)。**
 >
-> **The methodology lives in [METHOD.md](METHOD.md) (Chinese + English, switchable within the same file).** It is a standalone essay explaining why durable-goods purchases should use the Pareto framework rather than a "best-buy list." This README describes only the engineering implementation of the skill.
+> **The methodology lives in [METHOD.md](METHOD.md) (Chinese + English).** It is a standalone essay explaining why durable-goods purchases should use the Pareto framework rather than a "best-buy list." This README describes only the engineering implementation of the skill. **For the whole picture please refer to [paretopurchase.com](HTTPS://paretopurchase.com).**
 
 ---
 
