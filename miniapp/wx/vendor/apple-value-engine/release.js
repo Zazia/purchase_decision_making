@@ -48,6 +48,8 @@ function parseReleasePlan(constants, categoryKey, macroContext) {
     const predictedPriceHike = macroTriggered && !hikeInfo.hasHikeOccurred
         ? hikeInfo.median
         : 0;
+    // v4.1 锚涨幅: 新品已官宣定价时 = 中位数 (相对老款现行官方价口径), 否则 0
+    const anchorHike = hikeInfo.isAnnounced ? hikeInfo.median : 0;
     return {
         category: resolvedCategoryKey,
         nextReleaseMonth,
@@ -57,6 +59,7 @@ function parseReleasePlan(constants, categoryKey, macroContext) {
         macroCapacityFactor,
         predictedPriceHike,
         hasHikeOccurred: hikeInfo.hasHikeOccurred,
+        anchorHike,
     };
 }
 /**
@@ -91,10 +94,14 @@ function predictNewProductPrice(constants, categoryKey, releasePlan) {
     return currentOfficialPrice * (1 + hike);
 }
 /**
- * 类型 C 买入价预测 (冲击时变曲线 + 宏观因子调整)
- * 类型 C 买入价 = 当前市场价 × (1 - 调整后冲击幅度 × 冲击时变因子)
- *   调整后冲击幅度 = 历史均值 × (1 + 价格传导因子)
+ * 类型 C 买入价预测 (v4.1 锚定-冲击双因子模型, 见 SKILL.md §9.4)
+ * 类型 C 买入价 = 当前市场价 × (1 + 锚涨幅) × (1 - 调整后冲击幅度 × 冲击时变因子)
+ *   锚涨幅 = (新品官宣价 - 老款现行官方价) / 老款现行官方价
+ *            已官宣时 = 预测涨幅表中位数; 未官宣时 = 0 (退化 v3.8 形式)
+ *   调整后冲击幅度 = 历史均值 × (1 + 价格传导因子), 传导因子按锚涨幅查表 (锚涨幅>0 时)
  *   冲击时变因子 = 按新品发布后到买入的月数查「买入价下降因子」
+ *
+ * 注: 本公式为 §9.4 情景A (全额传导) 口径, 三情景加权与失效判定仍走 SOP 文字路径。
  *
  * @param oldCandBuyPrice 老款当前市场价 (通常是二手闲鱼中位价)
  */
@@ -102,15 +109,20 @@ function predictDiscountedOldPrice(constants, oldCandBuyPrice, releasePlan, macr
     const historicalMean = lookupImpactMean(constants, releasePlan.category);
     if (historicalMean <= 0)
         return oldCandBuyPrice;
-    const hike = resolveHikeForTransmission(releasePlan, macroContext);
-    const transmissionFactor = lookupTransmissionFactor(constants, hike);
+    // v4.1: 已官宣时传导因子按锚涨幅查表 (官宣价是事实, 不依赖宏观触发);
+    //       未官宣时沿用 v3.8 逻辑 (宏观触发的预测涨幅, 否则 0)
+    const anchorHike = releasePlan.anchorHike ?? 0;
+    const transmissionHike = anchorHike > 0
+        ? anchorHike
+        : resolveHikeForTransmission(releasePlan, macroContext);
+    const transmissionFactor = lookupTransmissionFactor(constants, transmissionHike);
     const adjustedImpact = historicalMean * (1 + transmissionFactor);
     // 新品发布后到买入的月数 = 上市到货延迟(月) × 宏观产能因子
     const delayMonths = Math.ceil(releasePlan.baselineDelayDays / 30);
     const monthsSinceRelease = delayMonths * releasePlan.macroCapacityFactor;
     const timeVaryingFactor = lookupImpactTimeVaryingFactor(constants, Math.ceil(monthsSinceRelease - 1e-9)).buyPriceDropFactor;
     const drop = adjustedImpact * timeVaryingFactor;
-    return oldCandBuyPrice * (1 - drop);
+    return oldCandBuyPrice * (1 + anchorHike) * (1 - drop);
 }
 /**
  * 查冲击时变曲线, 返回 { 残值调整因子, 买入价下降因子 }
@@ -195,13 +207,13 @@ function parseDays(s) {
     const m = s.match(/(\d+)/);
     return m ? Number(m[1]) : 0;
 }
-/** "38%" → 0.38, "12%" → 0.12, "0.38" → 0.38 */
+/** "38%" → 0.38, "12%" → 0.12, "0.38" → 0.38, "-25%(...)" → -0.25 (传导因子表为负值) */
 function parsePercent(s) {
     if (typeof s === 'number')
         return s;
     if (typeof s !== 'string')
         return 0;
-    const m = s.match(/(\d+(?:\.\d+)?)/);
+    const m = s.match(/(-?\d+(?:\.\d+)?)/);
     if (!m)
         return 0;
     const n = Number(m[1]);
@@ -307,11 +319,15 @@ function lookupDelay(constants, categoryKey) {
         pessimisticDelayDays: parseDays(entry.悲观),
     };
 }
-/** 查找品类的新品价格预测涨幅 (中位数 + 是否已涨价) */
+/**
+ * 查找品类的新品价格预测涨幅 (中位数 + 涨价状态)
+ * - hasHikeOccurred: "已发生/已涨价/已官宣" 均为 true (快照官方价已含涨价, 不再外推)
+ * - isAnnounced: "已官宣" (v4.1) — 新品官宣定价, 中位数即锚涨幅 (相对老款现行官方价)
+ */
 function lookupPriceHike(constants, categoryKey) {
     const table = constants.pricePredictionModel?._分品类预测涨幅表;
     if (!table)
-        return { median: 0, hasHikeOccurred: false };
+        return { median: 0, hasHikeOccurred: false, isAnnounced: false };
     // 键名带日期后缀 (如 _当前值_2026-08), 取第一个以 _当前值_ 开头的子表
     let current;
     for (const [k, v] of Object.entries(table)) {
@@ -321,14 +337,15 @@ function lookupPriceHike(constants, categoryKey) {
         }
     }
     if (!current)
-        return { median: 0, hasHikeOccurred: false };
+        return { median: 0, hasHikeOccurred: false, isAnnounced: false };
     const entry = lookupByCategory(current, categoryKey);
     if (!entry)
-        return { median: 0, hasHikeOccurred: false };
+        return { median: 0, hasHikeOccurred: false, isAnnounced: false };
     const trend = entry.预测涨幅 ?? '';
-    const hasHikeOccurred = trend.includes('已发生') || trend.includes('已涨价');
+    const isAnnounced = trend.includes('已官宣');
+    const hasHikeOccurred = isAnnounced || trend.includes('已发生') || trend.includes('已涨价');
     const median = parsePercent(entry.中位数);
-    return { median, hasHikeOccurred };
+    return { median, hasHikeOccurred, isAnnounced };
 }
 /** 查找品类的新品发布对老款冲击历史均值 (如 "38%" → 0.38) */
 function lookupImpactMean(constants, categoryKey) {

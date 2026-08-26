@@ -220,10 +220,11 @@ describe('computeMaintenanceCost', () => {
     expect(cost).toBe(200);
   });
 
-  it('iPhone 电池36月周期, 持48月 = 1次电池(748) + 2年维修(400)', () => {
-    // floor(48/36)=1, 1×748 + 4×200 = 748 + 800 = 1548
+  it('iPhone 电池36月周期, 持48月 = 1次电池 + 4年维修(800)', () => {
+    // floor(48/36)=1, 1×969 + 4×200 = 969 + 800 = 1769
+    // (电池费 748→969 为 constants v4.2 更新: iPhone 17 全系保外服务价)
     const cost = computeMaintenanceCost(constants, 'iPhone', 48);
-    expect(cost).toBe(1548);
+    expect(cost).toBe(1769);
   });
 });
 

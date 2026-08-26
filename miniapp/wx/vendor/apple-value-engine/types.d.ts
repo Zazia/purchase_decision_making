@@ -185,8 +185,14 @@ export interface ReleasePlan {
     macroCapacityFactor: number;
     /** 预测涨幅中位数 (如 0.12 表示 12%), 未触发宏观事件时为 0 */
     predictedPriceHike?: number;
-    /** 该品类是否已涨价 (true 时类型 B 直接用快照官方价) */
+    /** 该品类是否已涨价 (true 时类型 B 直接用快照官方价; v4.1 起含"已官宣"状态) */
     hasHikeOccurred: boolean;
+    /**
+     * 锚涨幅 (v4.1, SOP §9.4): 新品已官宣定价且高于老款现行官方价时,
+     * = 预测涨幅表中位数 (相对老款现行官方价口径); 未官宣时为 0, 公式退化为 v3.8 形式。
+     * 类型 C 买入价乘 (1 + 锚涨幅), 价格传导因子按锚涨幅查表。
+     */
+    anchorHike?: number;
 }
 /** 决策参数 */
 export interface DecisionParams {

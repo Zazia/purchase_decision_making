@@ -30,10 +30,14 @@ export declare function computeWaitMonths(releasePlan: ReleasePlan, macroContext
  */
 export declare function predictNewProductPrice(constants: Constants, categoryKey: string, releasePlan: ReleasePlan): number;
 /**
- * 类型 C 买入价预测 (冲击时变曲线 + 宏观因子调整)
- * 类型 C 买入价 = 当前市场价 × (1 - 调整后冲击幅度 × 冲击时变因子)
- *   调整后冲击幅度 = 历史均值 × (1 + 价格传导因子)
+ * 类型 C 买入价预测 (v4.1 锚定-冲击双因子模型, 见 SKILL.md §9.4)
+ * 类型 C 买入价 = 当前市场价 × (1 + 锚涨幅) × (1 - 调整后冲击幅度 × 冲击时变因子)
+ *   锚涨幅 = (新品官宣价 - 老款现行官方价) / 老款现行官方价
+ *            已官宣时 = 预测涨幅表中位数; 未官宣时 = 0 (退化 v3.8 形式)
+ *   调整后冲击幅度 = 历史均值 × (1 + 价格传导因子), 传导因子按锚涨幅查表 (锚涨幅>0 时)
  *   冲击时变因子 = 按新品发布后到买入的月数查「买入价下降因子」
+ *
+ * 注: 本公式为 §9.4 情景A (全额传导) 口径, 三情景加权与失效判定仍走 SOP 文字路径。
  *
  * @param oldCandBuyPrice 老款当前市场价 (通常是二手闲鱼中位价)
  */
