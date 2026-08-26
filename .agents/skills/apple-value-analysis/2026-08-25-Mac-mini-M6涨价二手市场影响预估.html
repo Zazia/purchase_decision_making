@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mac mini M6 / M5 Pro 涨价对二手市场的影响预估 · 2026-08-25</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+  /* 中性色(9阶)*/
+  --bg:      #F5F5F7;  --surface: #FFFFFF;  --rule: #D2D2D8;
+  --muted:   #86868F;  --fg:      #1D1D1F;
+  /* 品牌蓝(单一主蓝,承担所有"行动指向")*/
+  --accent:  #007AFF;  --accent-hover: #0063D4;  --accent-soft: #E6F2FF;
+  /* 语义色(仅进徽章,不大面积填充)*/
+  --success: #2A8A61;  --success-soft: #D9F0E3;
+  --warning: #E09500;  --warning-soft: #FFF0C2;
+  --error:   #F24B4B;  --error-soft:   #FFD9D9;
+  --font-display: 'DM Sans', -apple-system, 'SF Pro Display', 'PingFang SC', sans-serif;
+  --font-body: 'Inter', -apple-system, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.7; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+.hero { padding: 40px 0 24px; }
+.hero h1 { font-family: var(--font-display); font-size: 32px; font-weight: 600; line-height: 1.3; }
+.hero .sub { color: var(--muted); font-size: 14px; margin-top: 8px; }
+section { margin-top: 40px; }
+h2 { font-family: var(--font-display); font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+h2 .no { color: var(--accent); font-family: var(--font-mono); font-size: 16px; margin-right: 8px; }
+.lead { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.card {
+  background: var(--surface); border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(29,29,31,0.06), 0 1px 1px rgba(29,29,31,0.04);
+  padding: 20px; margin-top: 16px;
+}
+.card-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.big-num { font-family: var(--font-display); font-size: 32px; font-weight: 600; line-height: 1.2; }
+.grid { display: grid; gap: 12px; }
+.grid.c3 { grid-template-columns: repeat(3, 1fr); }
+.grid.c2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 640px) { .grid.c3, .grid.c2 { grid-template-columns: 1fr; } }
+.kpi { padding: 16px; }
+.kpi .label { font-size: 12px; color: var(--muted); }
+.kpi .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.report-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 16px; overflow: hidden;
+}
+.report-table th, .report-table td {
+  padding: 12px 16px; text-align: left;
+  border-bottom: 1px solid var(--rule); font-size: 14px;
+}
+.report-table thead th { color: var(--muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.report-table tbody tr:last-child td { border-bottom: none; }
+.report-table tbody tr:hover { filter: brightness(0.97); }
+.badge { display: inline-flex; align-items: center; height: 24px; padding: 0 8px;
+  border-radius: 9999px; font-size: 12px; font-weight: 400; line-height: 1; white-space: nowrap; }
+.badge-default { background: var(--bg);           color: var(--muted); }
+.badge-success { background: var(--success-soft); color: var(--success); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
+.badge-error   { background: var(--error-soft);   color: var(--error); }
+.pos { color: var(--success); font-weight: 600; }
+.neg { color: var(--error); font-weight: 600; }
+.formula { font-family: var(--font-mono); background: var(--bg); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 14px 16px; font-size: 13px; line-height: 1.8; overflow-x: auto; }
+.chart { width: 100%; height: 430px; }
+.chart.aux { height: 330px; }
+@media (max-width: 640px) { .chart, .chart.aux { height: 360px; } }
+.note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.warn-box { border-left: 4px solid var(--warning); background: var(--surface);
+  border-radius: 12px; padding: 14px 16px; margin-top: 16px; font-size: 14px; }
+.accent-box { border-left: 4px solid var(--accent); background: var(--surface);
+  border-radius: 12px; padding: 14px 16px; margin-top: 16px; font-size: 14px; }
+ul.tight { padding-left: 20px; }
+ul.tight li { margin: 6px 0; }
+.src { font-size: 12px; color: var(--muted); }
+.src a { color: var(--accent); text-decoration: none; }
+footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Mac mini M6 / M5 Pro 涨价<br>对二手市场的影响预估</h1>
+  <div class="sub">分析日期 2026-08-25（M6/M5 Pro 官宣当日）· 数据源：苹果官网直采 + 常量库市场价快照（2026-07-27）+ 公开市场报道 · 本报告预估的是「价格」，非保值率</div>
+</header>
+
+<!-- ============ 一、结论先行 ============ -->
+<section>
+  <h2><span class="no">01</span>结论先行</h2>
+  <p class="lead">一句话：对二手基础款（M1/M2/M4 丐版）总体偏利多——新品锚定效应压过代际冲击，发售后 1 个月二手价中枢预计横盘偏涨（约 +5%），区间 -15% ～ +17%；决定性变量是 M6 首发供货。Pro 档是例外，回调风险显著更高。</p>
+
+  <div class="grid c3">
+    <div class="card kpi">
+      <div class="label">基础款新品锚上移（vs 6月调价后 5999）</div>
+      <div class="big-num">+16.7<span style="font-size:20px">%</span></div>
+      <div class="note">M6 6999 元，较 M4 首发价 4499 累计 +55.6%</div>
+    </div>
+    <div class="card kpi">
+      <div class="label">发售后 1 个月二手中枢（概率加权）</div>
+      <div class="big-num" style="color:var(--accent)">≈ +5<span style="font-size:20px">%</span></div>
+      <div class="note">三情景区间 -15% ～ +17%，中性情景概率 45%</div>
+    </div>
+    <div class="card kpi">
+      <div class="label">Pro 档锚上移（M5 Pro vs M4 Pro 调价后）</div>
+      <div class="big-num">+4.0<span style="font-size:20px">%</span></div>
+      <div class="note">近乎平价换代 → 二手 Pro 无涨价缓冲</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">预估速览（M6 发售后 1 个月内 · 2026年10月下旬）</div>
+    <table class="report-table">
+      <thead><tr>
+        <th>机型（现机龄）</th><th>当前二手价*</th>
+        <th>情景A 现货充足<br>概率 30%</th><th>情景B 温和缺货<br>概率 45%</th><th>情景C 严重缺货+惜售<br>概率 25%</th><th>加权中枢</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>Mac mini M1 16G/256G（69月）</td><td>2,650 元</td>
+          <td class="neg">2,254（-15%）</td><td class="pos">2,999（+13%）</td><td class="pos">3,092（+17%）</td><td><b>2,799（+5.6%）</b></td>
+        </tr>
+        <tr>
+          <td>Mac mini M2 16G/256G（43月）</td><td>3,566 元</td>
+          <td class="neg">3,032（-15%）</td><td class="pos">4,035（+13%）</td><td class="pos">4,160（+17%）</td><td><b>3,765（+5.6%）</b></td>
+        </tr>
+        <tr style="background:var(--accent-soft)">
+          <td>Mac mini M4 16G/256G（22月）</td><td>4,500 元</td>
+          <td class="neg">3,828（-15%）</td><td class="pos">5,093（+13%）</td><td class="pos">5,250（+17%）</td><td><b>4,753（+5.6%）</b></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">*当前价口径：M1/M2 为闲鱼挂价中位（2026-07-27 采集，5/4 个样本），M4 为二手市场普遍叫价（2026-07，smzdm/V2EX，挂价口径）。挂价通常高于实际成交 5-10%，全部数字按同一口径横向比较。M4 行高亮：与 M6 同配置（16G/256G），受新品直接锚定，是本次最受关注的观察对象。</p>
+  </div>
+
+  <div class="accent-box">
+    <b>三个判断的置信度：</b>① 基础款短期「不会大跌」——高置信（两次历史涨价事件均支持，见 §04）；② 中枢 +5% 横盘偏涨——中置信（方向对，幅度依赖 M6 供货）；③ Pro 档回调——中置信（机制清晰，但 M5 Pro 基础款 CPU 跑分与 M4 Pro 顶配接近，代际压制弱于账面）。
+  </div>
+</section>
+
+<!-- ============ 二、涨价事实 ============ -->
+<section>
+  <h2><span class="no">02</span>这次涨价的事实：与以往发布形态不同</h2>
+  <p class="lead">以往 Mac mini 迭代是「降价或同价加量」，M6 是第一次大幅涨价发布；且基础档与 Pro 档涨幅严重分化。</p>
+
+  <div class="card">
+    <div class="card-title">国行定价时间线（基础款 / Pro 款）</div>
+    <table class="report-table">
+      <thead><tr><th>时点</th><th>基础款</th><th>Pro 款</th><th>事件</th></tr></thead>
+      <tbody>
+        <tr><td>2024-10 发布</td><td>M4 16G/256G = <b>4,499</b></td><td>M4 Pro 12核/24G/512G = <b>10,999</b></td><td>内存翻倍同价（「加量不加价」惯例的极致）</td></tr>
+        <tr><td>2026-04</td><td>停产下架</td><td>停产下架</td><td>M4 全系退市，仅翻新渠道</td></tr>
+        <tr><td>2026-06-25 全线涨价</td><td>→ <b>5,999</b> <span class="badge badge-error">+33.3%</span></td><td>→ <b>12,499</b> <span class="badge badge-error">+13.6%</span></td><td>存储超级周期，苹果全线调价</td></tr>
+        <tr style="background:var(--accent-soft)"><td>2026-08-25 官宣</td><td>M6 16G/256G = <b>6,999</b> <span class="badge badge-warning">较调价后再 +16.7%</span></td><td>M5 Pro 15核/24G/512G = <b>12,999</b> <span class="badge badge-default">较调价后再 +4.0%</span></td><td>较各自首发价分别 +55.6% / +18.2% · 8-27 预购，9-22 发售，每人限购 2 台</td></tr>
+      </tbody>
+    </table>
+    <p class="note">历史发布惯例对照：M1（2020-11）5,299 → M2（2023-01）4,499（-15%）→ M4（2024-10）4,499（同价内存翻倍）→ M6（2026-08）6,999。前三次全部是「降价或同价」，M6 打破惯例——「和以往发布相比涨幅较大」属实，且涨幅集中在基础档。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">官方价与二手价的分叉：M4 丐版案例（2024-11 → 2026-10E）</div>
+    <div id="chart1" class="chart"></div>
+    <p class="note">官方价（蓝）与二手市场叫价（灰）在 2026 年 6 月后出现罕见「剪刀差收窄→倒挂」：国补期新机一度 2,999 元，如今二手叫价 4,500 元——比停产前官方首发价 4,499 还高。数据点：国补期新机 2,999-3,824（smzdm）；2026-07 二手 4,500（smzdm/V2EX 明盘）；2026-10E 为本报告情景加权预估。</p>
+  </div>
+</section>
+
+<!-- ============ 三、传导机制 ============ -->
+<section>
+  <h2><span class="no">03</span>传导机制：五股力量怎么作用于二手价</h2>
+  <p class="lead">把「新品涨价发布」拆成可量化的两股主力和三股定性侧力，净方向取决于供货。</p>
+
+  <div class="card">
+    <table class="report-table">
+      <thead><tr><th>力量</th><th>方向</th><th>量化（基础档）</th><th>机制说明</th></tr></thead>
+      <tbody>
+        <tr><td><b>① 锚定效应</b></td><td><span class="badge badge-success">利多</span></td><td><b>+16.7%</b></td><td>二手价锚定「当前在售新品官方价」。锚从 5,999 → 6,999，同配置二手的替代价值水涨船高。这是 6 月涨价后二手跟涨 50% 的同一机制。</td></tr>
+        <tr><td><b>② 代际冲击</b></td><td><span class="badge badge-error">利空</span></td><td><b>-28.5%</b>（调整后）</td><td>新品发布使老款相对性能落后+需求转移。Mac mini 历史冲击均值 38%（常量库口径）。</td></tr>
+        <tr><td><b>③ 涨价对冲</b></td><td><span class="badge badge-success">利多</span></td><td>冲击 38%→28.5%<br>（传导因子 -25%）</td><td>新品越贵，老款相对越便宜、性价比越凸显，冲击被部分抵消。涨幅 15-30% 对应传导因子 -25%。</td></tr>
+        <tr><td><b>④ 供给稀缺</b></td><td><span class="badge badge-success">利多</span></td><td>定性</td><td>M4 已停产；M6 为 2nm 首发芯片+存储超级周期，首发缺货概率高（M4 时期曾官网全面售罄、翻新机溢价 60%+）；每人限购 2 台。</td></tr>
+        <tr><td><b>⑤ AI 需求增量</b></td><td><span class="badge badge-success">利多</span></td><td>定性</td><td>本地 AI 推理需求（OpenClaw 等）自 2026 年起持续推高 Mac mini 需求曲线，6 月涨价后 M4 二手 +50% 中有相当部分来自此力。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">两股主力的对冲：基础档 vs Pro 档</div>
+    <div id="chart2" class="chart aux"></div>
+    <p class="note">横向条形图：基础档（M6 +16.7%）涨价对冲掉约 1/4 的代际冲击，净效应在 -15%（全额传导）与 +13%（iPhone 17 实证口径）之间；Pro 档（M5 Pro +4.0%）几乎拿不到对冲，净效应明确偏空。这就是「基础款利多、Pro 档利空」分化的量化来源。</p>
+  </div>
+</section>
+
+<!-- ============ 四、历史参考 ============ -->
+<section>
+  <h2><span class="no">04</span>历史参考：两次「上次涨价」都指向利多二手</h2>
+  <p class="lead">问题问「能否参考上次涨价后的二手变化」——可以，且有两个形态不同的先例，分别覆盖「新品涨价发布」与「存量直接提价」两种情形。</p>
+
+  <div class="card">
+    <div class="card-title">案例 A · 2025-09 iPhone 17 涨价发布（与本次形态最接近）</div>
+    <ul class="tight">
+      <li>iPhone 17 系列全球涨价最高近千元，打破「新机发布、旧款降价」惯例；</li>
+      <li><b>发布后一周，老款 iPhone 16 Pro 仅跌约 200 元（2-4%），15 Pro 跌约 100 元</b>；</li>
+      <li>发布后 2 个月（2025-11），16 Pro 95 新二手约 6,000 元，与正常保值率曲线理论值（7,999×75%）完全吻合——<b>涨价发布的代际冲击实测约为 0</b>；</li>
+      <li>iPhone 16 不降反涨，二手水涨船高，日本市场二手 iPhone 销量暴增 140%；「等新机发布买旧款捡漏」的逻辑在该轮彻底失效。</li>
+    </ul>
+    <p class="src">来源：常量库实测入库（smzdm / 头条，2026-08-08 修正记录）、新浪财经。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">案例 B · 2026-06-25 苹果全线涨价（存量直接提价）</div>
+    <ul class="tight">
+      <li>Mac mini M4 官方 4,499→5,999（+33.3%），MacBook Air +17.6%、Pro +18.5%、iPad Pro +20%；</li>
+      <li>冲击波即时传导二手：<b>转转 MacBook Pro 2021 款两周涨约 1,000 元</b>；多款老 iPhone 回收价环比 +10-20%；</li>
+      <li>Mac mini M4 丐版二手从国补期约 3,000 元涨至 4,500 元（<b>+50%，超过官方涨幅 33%</b>，叠加停产稀缺与 AI 需求）；</li>
+      <li>常量库 2026-07-27 实测校验：Mac 系列二手保值率普遍<b>高于历史曲线 10-18 个百分点</b>。</li>
+    </ul>
+    <p class="src">来源：常量库市场价快照与实测校验、东方财富网、smzdm、V2EX。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">两个先例对本次的映射</div>
+    <table class="report-table">
+      <thead><tr><th>维度</th><th>案例A iPhone 17</th><th>案例B 6月全线涨价</th><th>本次 M6/M5 Pro</th></tr></thead>
+      <tbody>
+        <tr><td>涨价形态</td><td>新品涨价发布</td><td>存量直接提价</td><td>新品涨价发布（叠加在 6 月提价之上）</td></tr>
+        <tr><td>官方涨幅</td><td>最高近千元</td><td>+13.6% ~ +33.3%</td><td>基础档 +16.7% / Pro 档 +4.0%</td></tr>
+        <tr><td>二手反应</td><td>老款跌幅 2-4%，两月后归零</td><td>十天涨千元，M4 二手 +50%</td><td>预估：横盘偏涨（+5% 中枢）</td></tr>
+        <tr><td>对本次启示</td><td>涨价发布 → 冲击趋近于零（情景B/C 依据）</td><td>锚定传导强劲且可能超调（稀缺+需求叠加）（情景C 依据）</td><td>两者叠加，唯一利空是 M6 现货敞开（情景A）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 五、三情景量化预估 ============ -->
+<section>
+  <h2><span class="no">05</span>三情景量化预估</h2>
+  <p class="lead">公式与参数全部来自常量库机制（新品冲击均值、价格传导因子表、冲击时变曲线），情景差异只在「冲击实际落地幅度」。</p>
+
+  <div class="card">
+    <div class="card-title">预估公式</div>
+    <div class="formula">
+预估二手价 = 当前二手价 × (1 + 锚涨幅) × (1 − 冲击幅度 × 时变因子)
+
+锚涨幅     = (新品官方价 − 老款现行官方价) / 老款现行官方价        → 本次基础档 +16.7%
+冲击幅度   = 冲击历史均值 × (1 + 价格传导因子)                    → 38% × (1−25%) = 28.5%
+时变因子   = 发售后 1 月内取 0.95（3月内 0.85 / 6月内 0.60 / 12月内 0.30）
+
+情景A（现货充足） : 冲击全额落地 28.5%×0.95 = 27.1%  → 净 ×0.851（−15%）
+情景B（温和缺货） : 冲击按 iPhone 17 实证 ≈ 3%        → 净 ×1.132（+13%）
+情景C（严重缺货） : 冲击 ≈ 0，锚定全额传导             → 净 ×1.167（+17%）
+    </div>
+    <p class="note">概率赋值 A 30% / B 45% / C 25%：依据——M6 为 2nm 首发+存储周期，缺货概率高，但 6,999 定价本身吸收了部分成本压力且抑制需求，缺货烈度大概率不及 M4 时期（当时 4,499 严重供不应求）；同时 6-7 月二手已透支一轮大涨（M4 +50%），继续大涨空间收窄。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">三机型 × 三情景（发售后 1 个月）</div>
+    <div id="chart4" class="chart"></div>
+    <p class="note">柱状图：灰色=当前价，橙=情景A，蓝=情景B（中性），绿=情景C。所有价格同口径（挂价/叫价），横向可比。M1 客群与 M6 价位错位最大（预算锚 2,000-3,000 vs 6,999），代际冲击天然最小；M4 与 M6 同配置，代际压制最强但涨价缓冲也最强，两力相抵后波动区间与 M2 接近。</p>
+  </div>
+
+  <div class="warn-box">
+    <b>Pro 档警示（M4 Pro / M2 Pro 二手持有者）：</b>M5 Pro 12,999 仅比 M4 Pro 调价后官方价高 4%，属于「近乎平价换代」——按传导因子表（涨幅 0-5% → 因子 -5%），涨价对冲几乎为零，调整后冲击 36.1%，净效应约 -32%（全额传导口径）。缓冲因素：M5 Pro 基础款（15核，GB6 多核 25,892）与 M4 Pro 顶配（14核）CPU 跑分接近，代际压制弱于账面。<b>综合预估二手 M4 Pro 发售后回调 -10% ～ -30%</b>（现价无实测快照，理论推算约 8,400-8,800 元）。持有二手 Pro 档、计划一年内出手者，9-22 发售前后是最后的高位窗口。
+  </div>
+
+  <div class="card">
+    <div class="card-title">中期路径（3-6 个月 / 12 个月）</div>
+    <ul class="tight">
+      <li><b>3-6 个月：</b>若 M6 供货正常化（到货周期回到 1-2 周），老款向情景A 回归，回调 10-15%；若存储超级周期延续（行业预期 2027-2028 才缓解），高位横盘、按曲线斜率缓慢阴跌（43 月后约 -0.5%/月）。</li>
+      <li><b>12 个月：</b>当前二手价位大概率是「周期顶部区域」。但回落至 2026-06 涨价前水平（M4 丐版 3,000）需要同时满足「M6 现货敞开 + 存储周期缓解 + AI 需求退潮」三个条件，概率低于 20%。</li>
+      <li><b>对买家：</b>等 9-22 发售观察 M6 到货周期再决策，几乎无机会成本——最坏情形（情景C）也不过比现在贵 17%，而情景A 可以便宜 15%。</li>
+      <li><b>对卖家：</b>8-27 预购至 9-22 发售之间的「官宣窗口」情绪最好（惜售+涨价预期），是挂价窗口；发售后第一周成交数据出来前，建议用限高价挂出而非明盘。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 六、方法论 ============ -->
+<section>
+  <h2><span class="no">06</span>预估方法论：下次再遇到涨价发布，怎么算</h2>
+  <p class="lead">五步法，参数全部可查常量库，输出区间而非点值。</p>
+
+  <div class="card">
+    <table class="report-table">
+      <thead><tr><th>步骤</th><th>操作</th><th>本次取值示例</th></tr></thead>
+      <tbody>
+        <tr><td><b>1. 算锚涨幅</b></td><td>新品官宣价 vs 老款现行官方价（不是 vs 首发价）</td><td>6,999 / 5,999 − 1 = +16.7%</td></tr>
+        <tr><td><b>2. 查传导因子</b></td><td>按新品涨幅查表，得到冲击折扣</td><td>涨 15-30% → 因子 -25% → 冲击 38%→28.5%</td></tr>
+        <tr><td><b>3. 乘时变因子</b></td><td>按「发售后到目标时点」查表</td><td>1 月内 ×0.95 → 实际冲击 27.1%</td></tr>
+        <tr><td><b>4. 定性修正</b></td><td>三问：老款停产了吗？新品会缺货吗？需求有结构性增量吗？基线透支了吗？</td><td>停产✓ 缺货概率高✓ AI 需求✓ 已透支50%✓ → 概率向 B/C 倾斜但幅度收窄</td></tr>
+        <tr><td><b>5. 三情景输出</b></td><td>全额传导 / 实证口径（找最近一次涨价发布的实测冲击）/ 零冲击，附概率</td><td>-15% / +13% / +17%，概率 30/45/25</td></tr>
+      </tbody>
+    </table>
+    <p class="note">价格传导因子表速查：新品涨幅 ≤0% → +0%；0-5% → -5%；5-15% → -15%；15-30% → -25%；＞30% → -35%。冲击时变（残值口径）：1月内 0.95 / 3月内 0.85 / 6月内 0.60 / 12月内 0.30 / 12月后 0.10。</p>
+    <p class="note">「实证口径」优先找同类事件：本次用了 iPhone 17（2025-09 涨价发布，老款冲击实测 2-4%）。若没有同类事件，用冲击均值全额口径作保守边界即可。</p>
+  </div>
+</section>
+
+<!-- ============ 七、监测指标 ============ -->
+<section>
+  <h2><span class="no">07</span>监测指标与验证时点</h2>
+  <div class="card">
+    <table class="report-table">
+      <thead><tr><th>时点</th><th>看什么</th><th>信号含义</th></tr></thead>
+      <tbody>
+        <tr><td>8-27 9:00 预购开启</td><td>官网/京东 M6 预购发货周期</td><td>显示「2-4 周」以上 → 情景C 权重上调；现货/1周内 → 情景A 权重上调</td></tr>
+        <tr><td>9-22 发售日</td><td>首发日现货率、黄牛溢价（得物/ eBay 溢价幅度）</td><td>溢价 >10% → 二手老款跟涨确认；平价现货 → 冲击开始计价</td></tr>
+        <tr><td>10 月下旬</td><td>闲鱼 M1/M2/M4 挂价中位数周环比（第 1/2/4 周）</td><td>验证本报告：中枢是否落在 2,799 / 3,765 / 4,753 附近</td></tr>
+        <tr><td>持续</td><td>苹果官翻渠道 M4 是否上架及定价</td><td>官翻 M4 若定 5,xxx，将直接封顶二手 M4 上行空间</td></tr>
+        <tr><td>9-10 月</td><td>iPhone 18 发布定价（行业预计再涨 10-15%）</td><td>涨价周期延续确认 → 二手苹果全系溢价维持；恢复同价 → 周期顶部信号</td></tr>
+      </tbody>
+    </table>
+    <p class="note">触发重新分析的条件：M6 实际到货周期与预估偏差 ≥1 个月；发售后 2 周内闲鱼中位价偏离加权中枢 ±10%；苹果官翻 M4 上架。届时用真实价格替换本报告全部预测值（常量库 SOP：新品实际发布后触发快照红色全更新）。</p>
+  </div>
+</section>
+
+<!-- ============ 八、数据来源 ============ -->
+<section>
+  <h2><span class="no">08</span>数据来源与置信度</h2>
+  <div class="card">
+    <table class="report-table">
+      <thead><tr><th>数据</th><th>来源</th><th>置信度</th></tr></thead>
+      <tbody>
+        <tr><td>M6 / M5 Pro 官方定价与规格</td><td>苹果官网 specs/商店页 + Apple Newsroom（2026-08-25 官宣日直采）</td><td><span class="badge badge-success">高</span></td></tr>
+        <tr><td>M4 首发价 4,499 / M4 Pro 10,999</td><td>Apple Newsroom 2024-10 发布稿</td><td><span class="badge badge-success">高</span></td></tr>
+        <tr><td>2026-06-25 全线涨价幅度</td><td>常量库宏观事件记录（官网前后价对比）+ 爱范儿（M4 Pro 调价后 12,499）</td><td><span class="badge badge-success">高</span></td></tr>
+        <tr><td>M1/M2 二手价（2,650 / 3,566）</td><td>常量库市场价快照，闲鱼列表页 2026-07-27，5/4 样本 + 用户实采验证（2,800，2026-08-10）</td><td><span class="badge badge-default">中（挂价口径）</span></td></tr>
+        <tr><td>M4 二手叫价 4,500</td><td>smzdm（2026-07）+ V2EX 明盘帖，非实付晒单</td><td><span class="badge badge-warning">中低（挂价/叫价）</span></td></tr>
+        <tr><td>iPhone 17 涨价发布冲击实测</td><td>常量库 2026-08-08 修正记录（smzdm / 头条二手数据）</td><td><span class="badge badge-default">中</span></td></tr>
+        <tr><td>6 月涨价后二手跟涨现象</td><td>东方财富网/橙柿财经（转转成交价）、smzdm、新浪财经</td><td><span class="badge badge-default">中</span></td></tr>
+        <tr><td>二手 M4 Pro 现价</td><td>无实测快照，按保值率曲线理论推算（22 月 × 67.3% × 官方价）</td><td><span class="badge badge-warning">低（推算）</span></td></tr>
+      </tbody>
+    </table>
+    <p class="note">本报告为市场影响预估，非购买决策报告。所有预测值在 M6 发售后应以真实价格复核。常量库机制参数（冲击均值 38%、传导因子表、时变曲线）中，Mac mini 冲击均值无实测来源（早期预设值，iPhone 同字段已依实测从 35% 修正为 10%），这是情景A与情景B差距较大的根源，也是输出区间而非点值的原因。</p>
+  </div>
+</section>
+
+<footer>
+  生成于 2026-08-25 · apple-value-analysis 技能（SOP v4.0 / constants.json 市场价快照 2026-08-25）· 预估模型：锚定效应 × 代际冲击（含价格传导对冲与时变衰减）· 下次建议复核时点：2026-09-22 M6 发售日
+</footer>
+
+</div>
+
+<script>
+var C_PRIMARY = '#007AFF', C_ACCENT_SOFT = '#E6F2FF';
+var C_MUTED = '#86868F', C_BORDER = '#D2D2D8', C_GRAY = '#C7C7CC';
+var C_SUCCESS = '#2A8A61', C_WARNING = '#E09500', C_ERROR = '#F24B4B';
+var PALETTE = ['#007AFF', '#8E8E93', '#2A8A61', '#E09500', '#AF52DE', '#5856D6'];
+
+var baseOption = {
+  backgroundColor: 'transparent',
+  color: PALETTE,
+  textStyle: { fontFamily: 'Inter, -apple-system, "PingFang SC", sans-serif', color: '#1D1D1F' },
+  grid: { left: 60, right: 24, top: 50, bottom: 60, containLabel: true },
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#D2D2D8', borderWidth: 1,
+    textStyle: { color: '#1D1D1F', fontSize: 13 },
+    extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;'
+  },
+  legend: { top: 8, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },
+  xAxis: {
+    type: 'value',
+    nameLocation: 'middle', nameGap: 32, nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } },
+    axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }
+  },
+  yAxis: {
+    type: 'value',
+    nameLocation: 'middle', nameGap: 40, nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } },
+    axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }
+  }
+};
+var charts = [];
+function mk(id, opt) { var el = document.getElementById(id); if (!el) return; var c = echarts.init(el); c.setOption(opt); charts.push(c); }
+window.addEventListener('resize', function () { charts.forEach(function (c) { c.resize(); }); });
+
+/* 图1 官方价 vs 二手价时间线 */
+mk('chart1', Object.assign({}, baseOption, {
+  xAxis: { type: 'category', nameLocation: 'middle', nameGap: 32, nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } }, axisLabel: { color: C_MUTED, fontSize: 11, interval: 0 },
+    splitLine: { show: false },
+    data: ['2024-11\nM4发售', '2025-06\n国补期', '2026-04\n停产', '2026-06\n全线涨价', '2026-07\n当前', '2026-10E\nM6发售后'] },
+  yAxis: { type: 'value', name: '价格(元)', min: 0, max: 8000,
+    nameLocation: 'middle', nameGap: 40, nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } }, axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } } },
+  tooltip: { trigger: 'axis', backgroundColor: '#FFFFFF', borderColor: '#D2D2D8', borderWidth: 1,
+    textStyle: { color: '#1D1D1F', fontSize: 13 },
+    extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;' },
+  legend: { top: 8, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },
+  series: [
+    { name: '基础款官方价', type: 'line', step: 'middle', symbol: 'circle', symbolSize: 8,
+      data: [4499, 4499, 4499, 5999, 5999, 6999],
+      lineStyle: { color: C_PRIMARY, width: 3 }, itemStyle: { color: C_PRIMARY },
+      markPoint: { symbol: 'circle', symbolSize: 46, itemStyle: { color: C_ACCENT_SOFT },
+        label: { color: C_PRIMARY, fontSize: 11, fontWeight: 600 },
+        data: [{ coord: ['2026-10E\nM6发售后', 6999], value: 'M6\n6999' }] },
+      markLine: { symbol: 'none', silent: true, lineStyle: { color: C_WARNING, type: 'dashed' },
+        label: { formatter: 'M4首发价 4499', color: C_WARNING, fontSize: 11 },
+        data: [{ yAxis: 4499 }] } },
+    { name: 'M4丐版二手(挂价口径)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 7,
+      data: [4200, 2900, 3000, 3800, 4500, 4753],
+      lineStyle: { color: '#8E8E93', width: 2.5 }, itemStyle: { color: '#8E8E93' },
+      areaStyle: { color: 'rgba(142,142,147,0.08)' } }
+  ]
+}));
+
+/* 图2 力的对冲：基础档 vs Pro 档 */
+mk('chart2', Object.assign({}, baseOption, {
+  grid: { left: 70, right: 40, top: 50, bottom: 40, containLabel: true },
+  xAxis: { type: 'value', name: '对二手价的百分比影响(%)', nameLocation: 'middle', nameGap: 32,
+    nameTextStyle: { color: C_MUTED, fontSize: 12 }, axisLine: { lineStyle: { color: C_BORDER } },
+    axisLabel: { color: C_MUTED, fontSize: 12, formatter: '{value}%' },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } } },
+  yAxis: { type: 'category', nameLocation: 'middle', nameGap: 90,
+    axisLine: { lineStyle: { color: C_BORDER } }, axisLabel: { color: '#1D1D1F', fontSize: 12 },
+    splitLine: { show: false },
+    data: ['锚定效应', '代际冲击(对冲后)', '净效应·全额口径', '净效应·实证口径'] },
+  tooltip: { trigger: 'item', backgroundColor: '#FFFFFF', borderColor: '#D2D2D8', borderWidth: 1,
+    textStyle: { color: '#1D1D1F', fontSize: 13 },
+    extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;',
+    formatter: function (p) { return p.seriesName + ' · ' + p.name + '<br>' + p.value.toFixed(1) + '%'; } },
+  legend: { top: 0, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },
+  series: [
+    { name: '基础档(M6 +16.7%)', type: 'bar', barWidth: 16,
+      itemStyle: { color: C_PRIMARY, borderRadius: 4 },
+      data: [16.7, -27.1, -14.9, 13.2] },
+    { name: 'Pro档(M5 Pro +4.0%)', type: 'bar', barWidth: 16,
+      itemStyle: { color: '#8E8E93', borderRadius: 4 },
+      data: [4.0, -34.3, -31.7, -31.7] }
+  ]
+}));
+
+/* 图4 三情景预估 */
+mk('chart4', Object.assign({}, baseOption, {
+  xAxis: { type: 'category', nameLocation: 'middle', nameGap: 32,
+    axisLine: { lineStyle: { color: C_BORDER } }, axisLabel: { color: C_MUTED, fontSize: 12, interval: 0 },
+    splitLine: { show: false },
+    data: ['M1 16G/256G\n(69月)', 'M2 16G/256G\n(43月)', 'M4 16G/256G\n(22月)'] },
+  yAxis: { type: 'value', name: '二手价(元·挂价口径)', min: 0, max: 6000,
+    nameLocation: 'middle', nameGap: 40, nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } }, axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } } },
+  tooltip: { trigger: 'axis', backgroundColor: '#FFFFFF', borderColor: '#D2D2D8', borderWidth: 1,
+    textStyle: { color: '#1D1D1F', fontSize: 13 },
+    extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;' },
+  legend: { top: 0, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },
+  series: [
+    { name: '当前价(2026-07)', type: 'bar', barWidth: 18, itemStyle: { color: C_GRAY, borderRadius: 4 }, data: [2650, 3566, 4500] },
+    { name: '情景A 现货充足 30%', type: 'bar', barWidth: 18, itemStyle: { color: C_WARNING, borderRadius: 4 }, data: [2254, 3032, 3828] },
+    { name: '情景B 温和缺货 45%', type: 'bar', barWidth: 18, itemStyle: { color: C_PRIMARY, borderRadius: 4 }, data: [2999, 4035, 5093] },
+    { name: '情景C 严重缺货 25%', type: 'bar', barWidth: 18, itemStyle: { color: C_SUCCESS, borderRadius: 4 }, data: [3092, 4160, 5250] }
+  ]
+}));
+</script>
+</body>
+</html>

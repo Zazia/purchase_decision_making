@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "3.9",
-    "last_updated": "2026-08-10",
+    "version": "4.0",
+    "last_updated": "2026-08-25",
     "data_sources": [
       "SellMacBook Device Depreciation Guide",
       "SellCell resale index",
@@ -14,7 +14,11 @@
       "MacRumors M5 实测跑分首测(2026-03-05)",
       "Notebookcheck M5 Pro/Max CPU 分析(2026-03)",
       "Bloomberg/Mark Gurman 苹果路线图(2026)",
-      "TechInsights/Counterpoint iPhone 18 Pro BOM 分析(2026-07)"
+      "TechInsights/Counterpoint iPhone 18 Pro BOM 分析(2026-07)",
+      "Apple Newsroom Mac mini M6/M5 Pro 官宣(2026-08-25)",
+      "Apple 中国官网 Mac mini 规格页与商店页(2026-08-25 直采)",
+      "Notebookcheck M5 Pro 15-Core 实测跑分(GB 6.7.1)",
+      "IT之家/凤凰网/9to5mac M6 Mac mini 与 Mac Studio 报道(2026-08-25)"
     ],
     "data_provenance_v3.8": {
       "_说明": "v3.8新增。记录关键数据更新来源,便于追溯",
@@ -22,6 +26,14 @@
       "存储超级周期数据": "TrendForce(https://www.trendforce.com/presscenter/news/20260122-12893.html,20260721-13148.html) + Gartner(https://www.gartner.com/en/newsroom/press-releases/2026-04-08-...) + UBS(2026-07)",
       "苹果涨价传导": "MacRumors(https://www.macrumors.com/2026/06/25/apple-just-increased-prices/) + Nasdaq(https://www.nasdaq.com/articles/apple-rolling-out-huge-price-increases-...) + 新浪财经",
       "iPhone_18_发布": "MacRumors iPhone 18 Pro roundup + Beebom(Gurman 9月9日预测)"
+    },
+    "data_provenance_v4.0": {
+      "_说明": "v4.0新增。Mac mini M6/M5 Pro 官宣数据入库来源",
+      "Mac_mini_官宣": "Apple Newsroom(https://www.apple.com/newsroom/2026/08/apple-unveils-a-more-powerful-mac-mini-featuring-the-all-new-m6-and-m5-pro/) + 中国官网规格页(https://www.apple.com.cn/mac-mini/specs/) + 商店页(https://www.apple.com.cn/shop/buy-mac/mac-mini) + IT之家价目表(http://m.toutiao.com/group/7677960550952862243/)",
+      "M6_芯片规格": "Apple M6/M5 Ultra 芯片新闻稿(https://www.apple.com/newsroom/2026/08/apple-introduces-m6-and-m5-ultra-for-a-big-leap-in-performance-and-ai-compute/) + 9to5mac(https://9to5mac.com/2026/08/25/apple-launches-next-gen-apple-silicon-chips-m6-and-m5-ultra/)",
+      "M5_Pro_15核_实测": "Notebookcheck(https://www.notebookcheck.net/Apple-M5-Pro-15-Core-Processor-Benchmarks-and-Specs.1244350.0.html,GB6.7.1:单核4302/多核25892) + cputronic(https://cputronic.com/en/cpu/apple-m5-pro-15-cores,单样本4085/25068)",
+      "M6_跑分推算": "官方比值(MT最高1.2x M5)+iPhone Mania发布前试算(https://iphone-mania.jp/mac-598872/,单核约5050)。⚠️推算值,2026-09-22发售后需实测回填",
+      "Mac_Studio_官宣": "IT之家(https://m.ithome.com/html/994215.htm,M5 Max款19999起/M5 Ultra款46999起)+机锋网(M5 Ultra四芯片融合架构规格)"
     },
     "confidence_note": "保值率为历史统计均值,实际成交价有±5-10%波动。设计代际差异可能导致单机偏差达±15%(如iPhone 13 Pro Max因无灵动岛保值率偏低)",
     "update_frequency": {
@@ -41,6 +53,16 @@
       "新增'苹果产品发布节奏._发布时间预测校验_v3.8':定期校验预测是否已偏离现实≥1季度",
       "新增'宏观因素扩展模型_v3.8':扩展宏观扫描范围与传导链",
       "M系列r从0.17下调至0.16(基于M5实测重算)"
+    ],
+    "v4.0_变更摘要": [
+      "Mac mini M6/M5 Pro官宣数据入库(2026-08-25官宣,8-27 9:00预购,9-22发售,每人限购2台):国行价格/配置/规格/发布时间",
+      "Mac mini基础款确认跳代:M1→M2→M4→M6(跳过M3/M5),发布节奏预测需加入桌面端跳代因子",
+      "M6芯片条目新增(单核4900/多核21000/GPU 70000为官方比值推算,待实测回填);M5_Ultra条目新增(推算值,随Mac Studio官宣)",
+      "M5_Pro条目补充15核变体说明:Mac mini M5 Pro基础款为15核(5超级+10性能),GB6.7.1实测4302/25892,与18核版(28500)区分",
+      "残值分母基准切换:Mac_mini新品官方价快照新增M6基础款6999元(置于首位,getCurrentNewPrice取值);M4全系停产下架,原5999作历史分母保留",
+      "Mac Studio M5 Max/Ultra同日官宣(早于原2026-10预测约1.5个月):M5 Max款19999起,M5 Ultra款46999起",
+      "芯片代际详表新增M5→M6条目(官方+20%口径);_下一代预测_M6验证结果回填(2nm首发判断命中,但发布节奏加速使年化口径超预判)",
+      "品类基准芯片暂不切换M6(推算值不进引擎计算),待9-22发售后实测回填再统一切换;Mac_Pro基准随M5 Ultra官宣改为×1.88口径推算"
     ]
   },
   "宏观因素扩展模型_v3.8": {
@@ -517,13 +539,26 @@
         "单核": 4300,
         "多核": 28500,
         "GPU_OpenCL": 75000,
-        "_实测说明_v3.8": "v3.7字段值25000为预测值(按M4 Pro×1.14外推),实测28500(MacRumors/Notebookcheck 2026-03-05首测,28500-29500区间)。M5 Pro与M5 Max共用18核CPU模块故多核接近"
+        "_实测说明_v3.8": "v3.7字段值25000为预测值(按M4 Pro×1.14外推),实测28500(MacRumors/Notebookcheck 2026-03-05首测,28500-29500区间)。M5 Pro与M5 Max共用18核CPU模块故多核接近",
+        "_15核变体说明_v4.0": "2026-08-25 Mac mini M5 Pro基础款为15核版(5超级核+10性能核,无能效核;16核GPU,307GB/s带宽,24G统一内存可选48/64G),GB6.7.1实测约单核4302/多核25892(Notebookcheck汇总;cputronic单样本4085/25068)。18核版(6超级+12性能,20核GPU,即本条目28500)为Mac mini高配选配与MacBook Pro配置。分析Mac mini M5 Pro基础款时按25892折算,系数高估约10%"
       },
       "M5_Max": {
         "单核": 4300,
         "多核": 29300,
         "GPU_OpenCL": 165000,
         "_实测说明_v3.8": "v3.7字段值36000为外推预测值,严重高估。实测29300(MacRumors 2026-03-05,29233-29415区间),与M5 Pro接近因共用18核CPU模块。Max优势在GPU/带宽而非CPU多核"
+      },
+      "M6": {
+        "单核": 4900,
+        "多核": 21000,
+        "GPU_OpenCL": 70000,
+        "_实测说明_v4.0": "2026-08-25随Mac mini首发,苹果首款2nm芯片,发售前无实测,本条目为推算值。多核21000:官方口径'MT最高1.2x M5'(17100×1.2≈20500)与'Mac mini口径CPU较M4最高+40%'(15000×1.4=21000)交叉,区间20500-21700。单核4900:官方称'全球最快单线程',锚点M5(4200)/M5 Pro超级核(4302)/iPhone Mania试算(5050),区间4600-5100。GPU_OpenCL 70000为保守推算(M5=52000+12核+新架构;官方'图形2x vs M4 mini'为RT/AI场景口径不可线性外推),区间65000-90000。规格:12核CPU(2超级+4性能+6能效)/12核GPU(每核神经网络加速器,Mac mini首次)/双16核神经网络引擎/带宽153-170GB/s/统一内存16-32GB。⚠️2026-09-22发售后必须用Geekbench实测回填,并触发品类基准芯片切换"
+      },
+      "M5_Ultra": {
+        "单核": 4300,
+        "多核": 55000,
+        "GPU_OpenCL": 300000,
+        "_实测说明_v4.0": "2026-08-25随Mac Studio M5 Ultra发布(国行46999元起,9-22发售),发售前无实测,本条目为推算值:多核按历史Ultra/Max倍率(M1 Ultra=2.0x M1 Max:12000→24000;M2 Ultra=1.8x M2 Max:15000→27000)取M5 Max(29300)×1.88≈55000,GPU同倍率推算(165000×1.82≈300000)。规格:苹果首款四芯片融合架构(2×M5 Max封装),最高36核CPU/80核GPU/512GB统一内存/1.2TB/s带宽。⚠️实测后回填"
       }
     },
     "iPhone_iPad芯片": {
@@ -597,14 +632,22 @@
           "年化": "10%/年",
           "类型": "常规(3nm延续)"
         },
+        "M5→M6": {
+          "多核": "17100→约21000(官方'最高1.2x'口径推算,待实测)",
+          "间隔月": 5,
+          "提升率": "+20%(官方口径,待实测)",
+          "年化": "≈49%/年(发布节奏加速致年化失真,不宜与历史代际直接比较)",
+          "类型": "常规(2nm首发,提升率<24%未达跃升阈值)"
+        },
         "_跃升识别规律": "提升率≥24%且年化≥20%为跃升代际(M1→M2,M3→M4);否则为常规代际。跃升代际通常对应:①架构大改 ②工艺节点成熟期 ③核心数增加。预测下一代时若信号符合任一,使用跃升系数(年化22-26%);否则用长期CAGR(16%)",
         "_下一代预测_M6": {
           "信号": "M5延续3nm,M6预计2nm首发",
           "历史类比": "2nm首发类似A16→A17Pro(3nm首发),年化仅6%(节点切换初期收益低)",
-          "预测": "M6大概率≤+20%年化(2nm良率爬坡期),M7可能成为下一跃升代际(2nm成熟+架构大改)"
+          "预测": "M6大概率≤+20%年化(2nm良率爬坡期),M7可能成为下一跃升代际(2nm成熟+架构大改)",
+          "_验证结果_v4.0": "2nm首发判断✓命中;绝对提升+20%(官方MT最高1.2x)符合'良率爬坡期收益有限'方向,未达跃升阈值✓;但M5(2026-03)→M6(2026-08)间隔仅5个月,节奏加速使年化口径达≈49%/年,超出'≤+20%年化'字面预判——预测模型未纳入发布节奏加速变量,下代预测应同时给出绝对提升率与年化双口径。M7跃升判断待验证"
         }
       },
-      "近期趋势": "M4→M5仅10%/年,显示放缓迹象"
+      "近期趋势": "M4→M5仅10%/年,显示放缓迹象;M5→M6绝对+20%但因节奏加速年化≈49%/年,趋势判断需双口径"
     },
     "A系列": {
       "r": 0.15,
@@ -780,12 +823,15 @@
       "发布周期月": 24,
       "典型发布月": "不定",
       "macOS支持月数": 72,
-      "下一次预计": "2026年第三季度 M5"
+      "下一次预计": "已发生:2026-08-25官宣M6+M5 Pro,9-22发售。下一次:约2028年中(按M4→M6实测22月周期外推,M8世代)",
+      "_v4.0注": "Mac mini基础款存在跳代行为(M1→M2→M4→M6,跳过M3/M5),预测时不能假设'最新M系列芯片=下一代mini基础芯片';Pro款跟随MacBook Pro同代(M2 Pro→M4 Pro→M5 Pro)"
     },
     "Mac_Studio": {
       "发布周期月": 24,
       "典型发布月": 3,
-      "macOS支持月数": 72
+      "macOS支持月数": 72,
+      "下一次预计": "已发生:2026-08-25官宣M5 Max+M5 Ultra,9-22发售(偏离典型3月节奏)。下一次:约2028年",
+      "_v4.0注": "M5 Ultra为苹果首款四芯片融合架构(2×M5 Max封装);国行M5 Max款19999元起(教育18399),M5 Ultra款46999元起(教育43599)"
     },
     "iMac": {
       "发布周期月": 24,
@@ -892,7 +938,7 @@
             "依据": "使用基线"
           }
         },
-        "_当前应用_2026-08": "存储超级周期进行中,Mac Studio M5 Ultra若2026-10发布:基线30天 × 2.0 = 60天延迟;悲观120天 × 2.0 = 240天。即实际能在2026-12~2027-06买到"
+        "_当前应用_2026-08": "存储超级周期进行中。v4.0更新(2026-08-25):Mac Studio M5 Ultra与Mac mini M6/M5 Pro已官宣,9-22发售——官宣到发售28天,首发实际到货情况待观察;若沿用×2.0宏观产能因子,实际能买到预计2026-10~2026-12。Mac mini新品每人限购2台(官网需求管理信号)"
       },
       "_国补窗口说明": {
         "_状态": "京东国补通常需等待新品上市后1-3个月才大规模开放补贴,首发期常无国补叠加",
@@ -910,7 +956,7 @@
         "_搜索结果偏离≥1季度": "在报告中标注'⚠️ 发布时间预测偏差≥1季度,类型B/C方案置信度降级',并触发用户重新确认是否等待",
         "_搜索结果完全无信息": "保留原预测,但置信度=低,报告中提示'⚠️ 发布时间无新信息,基于历史周期推算'"
       },
-      "_当前校验结果_2026-08-02": {
+      "_当前校验结果_2026-08-25": {
         "iPhone_Pro": {
           "预测": "2026-09",
           "实测": "Bloomberg/Gurman确认9月9日发布",
@@ -924,16 +970,16 @@
           "处理": "保留"
         },
         "Mac_mini": {
-          "预测": "2026-Q3 M5",
-          "实测": "M5已于3月发布于MacBook但Mac mini M5至今无任何发布迹象,M4仍为当前在售款",
-          "置信度": "低",
-          "处理": "⚠️偏差已超1季度,可能推迟至2026-Q4甚至2027;类型B/C方案置信度降级,在报告中显著提示"
+          "预测": "2026-Q3 M5(2026-08-02校验时置信度低,判断可能推迟至Q4/2027)",
+          "实测": "2026-08-25官宣M6+M5 Pro(8-27 9:00预购,9-22发售)。时间命中Q3✓;但代际偏差:基础款跳过M5直接M6(2nm),Pro款为M5 Pro",
+          "置信度": "高(已官宣)",
+          "处理": "发布时间与价格已回填快照。⚠️教训:Mac mini基础款存在跳代行为(M1→M2→M4→M6),'最新M系列芯片=下一代mini基础芯片'假设失效,预测模型需加入桌面端跳代因子;2026-08-02的'低置信度+可能推迟'判断方向错误(实际提前官宣)"
         },
         "Mac_studio": {
-          "预测": "M3 Ultra为当前款,M5 Ultra预计2026-10",
-          "实测": "MacRumors/Bloomberg确认M5 Ultra推迟到2026-10甚至更晚,M3 Ultra当前交付排队到10月+",
-          "置信度": "中",
-          "处理": "M5 Ultra延迟已现实,建议等待方案按2026-10后实际能买到=12月+处理"
+          "预测": "M5 Ultra预计2026-10",
+          "实测": "2026-08-25官宣M5 Max+M5 Ultra,9-22发售,早于预测约1.5个月",
+          "置信度": "高(已官宣)",
+          "处理": "已回填。M3 Ultra交付排队问题被新品替代;缺货模型按新品首发实际到货情况校准"
         },
         "MacBook_pro": {
           "预测": "2026-10",
@@ -1043,6 +1089,7 @@
       "说明": "苹果同产品线同档次新品定价通常与上一代持平(如Mac mini M4基础款5999元,M5基础款预计同为5999元)。用于类型B(等新品买新品)的买入价预测",
       "依据": "苹果历年定价惯例:同档次新品定价持平或微调,大幅调价罕见",
       "风险": "苹果偶尔调整定价策略(如存储升级同价、芯片升级加价),预测价可能偏差。M5实际发布后应以官网真实价格替换",
+      "_v4.0验证": "2026存储超级周期中该假设失效:Mac mini M6基础款6999元,较M4基础款5999元上涨16.7%,与2026-06-25苹果全线涨价事件方向一致。印证'触发宏观事件时必须改用新品价格预测模型'的设计;未触发宏观事件的正常周期内,同档同价仍可作默认值",
       "适用场景": "类型B买入价预测;类型B/C残值分母(M5发布后当前同品类新品价=M5官方价=同档同价)",
       "_失效场景_v3.8": "当步骤2宏观扫描检测到'苹果全线涨价'或'存储超级周期'事件时,本假设失效,必须改用'新品价格预测模型'"
     },
@@ -1052,7 +1099,7 @@
       "_计算公式": "类型B预测买入价 = 当前同档老款官方价 × (1 + 预测涨幅中位数)",
       "_分品类预测涨幅表": {
         "_更新机制": "步骤2检测到涨价事件时,WebSearch搜索'{品类} 涨价 {年份} 预测'更新本表。无新数据时使用上一次记录值",
-        "_当前值_2026-08": {
+        "_当前值_2026-08-25": {
           "iPhone_Pro": {
             "预测涨幅": "10-15%",
             "中位数": "12%",
@@ -1079,14 +1126,14 @@
             "依据": "2026-06已涨价(8499→9999)"
           },
           "Mac_mini": {
-            "预测涨幅": "已发生",
-            "中位数": "33.3%",
-            "依据": "2026-06已涨价(4499→5999)"
+            "预测涨幅": "已官宣",
+            "中位数": "相对2024发布价4499累计+55.6%;相对2026-06调整价5999再+16.7%",
+            "依据": "2026-08-25官宣:M6基础款(16G/256G)6999元(教育6199),M5 Pro款(15核/24G/512G)12999元(教育12199),9-22发售。官网真实价已回填快照"
           },
           "Mac_studio": {
-            "预测涨幅": "10-20%",
-            "中位数": "15%",
-            "依据": "M5 Ultra预计2026-10发布,可能再涨(M3 Ultra已涨到44999)"
+            "预测涨幅": "已官宣",
+            "中位数": "M5 Ultra款较M3 Ultra款(44999)+4.4%",
+            "依据": "2026-08-25官宣:M5 Max款19999元起(教育18399),M5 Ultra款46999元起(教育43599),9-22发售"
           },
           "iMac": {
             "预测涨幅": "已发生",
@@ -1162,6 +1209,7 @@
       "_说明": "性能满足度计算时,芯片系数的分母(基准)。基准=该品类当前最新旗舰芯片。v3.8已按实测跑分更新",
       "_iPad_Pro说明": "iPad Pro使用M系列芯片,基准按Mac_基础(M5)计算,内存/存储权重也用Mac_基础表",
       "_便携品类说明": "Apple Watch/AirPods等品类跑分数据有限,性能满足度计算参考价值低,分析中应定性描述为主",
+      "_v4.0说明": "2026-08-25 M6/M5 Pro Mac mini与M5 Max/Ultra Mac Studio已官宣,但M6/M5_Ultra跑分为推算值(见芯片性能跑分对应_实测说明_v4.0),品类基准芯片暂保持实测口径;M6实测落地(9-22发售后)统一切换:Mac_mini_基础→M6。Mac_Pro基准已随M5 Ultra官宣改为×1.88口径推算",
       "iPhone_iPad": "A19 Pro(多核9500)",
       "MacBook_Air": "M5(多核17100)",
       "Mac_mini_基础": "M5(多核17100)",
@@ -1169,7 +1217,7 @@
       "MacBook_Pro": "M5 Pro(多核28500)",
       "Mac_Studio_Pro": "M5 Max(多核29300)",
       "iMac": "M5(多核17100)",
-      "Mac_Pro": "M5 Ultra(多核44000,按M5 Max×1.5估算)",
+      "Mac_Pro": "M5 Ultra(多核55000,按M5 Max×1.88估算,待实测)",
       "Vision_Pro": "M5(多核17100,Vision Pro使用M系列芯片)"
     },
     "示例": {
@@ -1193,6 +1241,8 @@
     "Mac_mini_M2": "2023-01",
     "Mac_mini_M2_Pro": "2023-01",
     "Mac_mini_M4": "2024-10",
+    "Mac_mini_M6": "2026-08",
+    "Mac_mini_M5_Pro": "2026-08",
     "MacBook_Air_M1": "2020-11",
     "MacBook_Air_M2": "2022-07",
     "MacBook_Air_M3": "2024-03",
@@ -1213,6 +1263,8 @@
     "Mac_Studio_M1Max": "2022-03",
     "Mac_Studio_M2Ultra": "2023-06",
     "Mac_Studio_M4Max": "2025-03",
+    "Mac_Studio_M5_Max": "2026-08",
+    "Mac_Studio_M5_Ultra": "2026-08",
     "iPhone_12": "2020-10",
     "iPhone_13": "2021-09",
     "iPhone_14": "2022-09",
@@ -1365,14 +1417,49 @@
     ],
     "_待搜索品类清单": [],
     "Mac_mini": {
-      "_说明": "Mac mini 全系,基础芯片款。残值分母用 Mac mini M4 基础款官方售价5999元",
+      "_说明": "Mac mini 全系,基础芯片款。残值分母用 Mac mini M6 基础款官方售价6999元(v4.0起;原M4口径5999元作历史分母保留于M4条目)",
+      "M6_16G_256G_新品": {
+        "官方价": 6999,
+        "官方价_来源": "https://www.apple.com.cn/mac-mini/specs/ 与 https://www.apple.com.cn/shop/buy-mac/mac-mini (WebFetch直接搜索,2026-08-25官宣日)",
+        "京东自营价": "待上市(8-27 9:00起官网预购,9-22发售)",
+        "闲鱼中位价_二手同款": "无法搜索(未发售,二手市场暂无流通)",
+        "京东拍拍价_二手": "无法搜索",
+        "爱回收售价_二手": "无法搜索",
+        "爱回收回收报价_下限": "无法搜索",
+        "样本量": "官方价1(官网直采,四个标准配置价目齐全)",
+        "搜索来源URL": [
+          "https://www.apple.com.cn/mac-mini/specs/",
+          "https://www.apple.com.cn/shop/buy-mac/mac-mini",
+          "https://www.apple.com/newsroom/2026/08/apple-unveils-a-more-powerful-mac-mini-featuring-the-all-new-m6-and-m5-pro/",
+          "http://m.toutiao.com/group/7677960550952862243/"
+        ],
+        "搜索日期": "2026-08-25",
+        "置信度": "高(官宣日官网直采)",
+        "备注": "2026-08-25官宣,9-22发售,每人限购2台。标准配置:M6 16G/256G=6999(教育6199);M6 16G/512G=8499;M6 24G/512G=9999;M5 Pro 15核/24G/512G=12999(教育12199)。CTO:M6 1TB=10749;M5 Pro 1TB=15249,2TB=18999。M6规格:12核CPU(2超级+4性能+6能效)/12核GPU(每核神经网络加速器)/双16核NE/带宽153GB/s(16G档)-170GB/s(24/32G档)/统一内存16-32GB/雷雳4×3/Wi-Fi 7。M4全系已停产(官网自4月起下架,仅翻新渠道)。⚠️注:IT之家价目表将M5 Pro基础款标为16G内存,与官网规格页24G标配不符,以官网为准(15249/18999恰为12999+存储升级差价,佐证24G口径)"
+      },
+      "M5_Pro_24G_512G_新品": {
+        "官方价": 12999,
+        "官方价_来源": "https://www.apple.com.cn/mac-mini/specs/ (WebFetch直接搜索,2026-08-25官宣日)",
+        "京东自营价": "待上市(9-22发售)",
+        "闲鱼中位价_二手同款": "无法搜索(未发售)",
+        "京东拍拍价_二手": "无法搜索",
+        "爱回收售价_二手": "无法搜索",
+        "爱回收回收报价_下限": "无法搜索",
+        "样本量": "官方价1(官网直采)",
+        "搜索来源URL": [
+          "https://www.apple.com.cn/mac-mini/specs/"
+        ],
+        "搜索日期": "2026-08-25",
+        "置信度": "高(官宣日官网直采)",
+        "备注": "Mac mini M5 Pro基础款:15核CPU(5超级+10性能,无能效核)+16核GPU,24G统一内存(可选48/64G),307GB/s带宽,雷雳5×3;可选配18核CPU+20核GPU。GB6.7.1实测参考:单核4302/多核25892(Notebookcheck,15核版)。⚠️引擎芯片性能系数按M5_Pro条目(18核,28500)计算,15核基础款实际约25892,系数高估约10%"
+      },
       "M4_16G_256G_新品": {
         "官方价": 5999,
         "官方价_来源": "https://www.apple.com.cn/shop/buy-mac/mac-mini (WebFetch直接搜索)",
         "京东自营价": "无法搜索(京东页面需登录,WebFetch返回登录页)",
         "京东国补到手价_参考": 5073.66,
         "京东国补到手价_参考来源": "WebSearch:什么值得买文章(2026-07-22,https://m.smzdm.com/p/179021952/),PLUS会员立减29.99+部分地区国补云闪付15%,实付5073.66元。⚠️非实付晒单,为资讯稿,置信度低",
-        "闲鱼中位价_二手同款": "无法搜索(M4为当前在售款,二手市场暂无大量流通)",
+        "闲鱼中位价_二手同款": "无法搜索(采集时点在售期二手流通少;M4已停产下架,二手价待M6发售后重新采集)",
         "京东拍拍价_二手": "无法搜索",
         "爱回收售价_二手": "无法搜索",
         "爱回收回收报价_下限": "无法搜索",
@@ -1383,11 +1470,11 @@
         ],
         "搜索日期": "2026-07-26",
         "置信度": "高(官方价)/低(京东国补参考,资讯稿非实付晒单)",
-        "备注": "M4为当前在售款,官方价5999元WebFetch直接搜索"
+        "备注": "v4.0更新:M4全系已于2026年4月起停产下架(仅翻新渠道),官方价5999元为2026-07-26采集时点值,作历史分母保留;新品残值分母自v4.0起用M6基础款6999元"
       },
       "M2_16G_256G_二手": {
         "官方价": null,
-        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M4官方价5999元",
+        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M6官方价6999元",
         "闲鱼中位价_二手同款": 3566,
         "闲鱼中位价_二手同款_参考": 2700,
         "闲鱼中位价_二手同款_参考区间": [
@@ -1414,7 +1501,7 @@
       },
       "M1_16G_256G_二手": {
         "官方价": null,
-        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M4官方价5999元",
+        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M6官方价6999元",
         "闲鱼中位价_二手同款": 2650,
         "闲鱼中位价_二手同款_参考": 2800,
         "闲鱼中位价_二手同款_参考区间": [
@@ -1441,7 +1528,7 @@
       },
       "M2_8G_256G_二手": {
         "官方价": null,
-        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M4官方价5999元",
+        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M6官方价6999元",
         "闲鱼中位价_二手同款": 2675,
         "闲鱼中位价_二手同款_参考": null,
         "闲鱼中位价_二手同款_参考区间": [
@@ -1472,7 +1559,7 @@
       },
       "M1_8G_256G_二手": {
         "官方价": null,
-        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M4官方价5999元",
+        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M6官方价6999元",
         "闲鱼中位价_二手同款": 2244,
         "闲鱼中位价_二手同款_参考": null,
         "闲鱼中位价_二手同款_参考区间": [
@@ -1503,7 +1590,7 @@
       },
       "M2_16G_512G_二手": {
         "官方价": null,
-        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M4官方价5999元",
+        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M6官方价6999元",
         "闲鱼中位价_二手同款": 4799,
         "闲鱼中位价_二手同款_参考": null,
         "闲鱼中位价_二手同款_参考区间": [
@@ -1539,7 +1626,7 @@
       },
       "M1_8G_512G_二手": {
         "官方价": null,
-        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M4官方价5999元(基础款)。注:512G版本配置溢价未在分母中体现,实测保值率会偏高",
+        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M6官方价6999元(基础款)。注:512G版本配置溢价未在分母中体现,实测保值率会偏高",
         "闲鱼中位价_二手同款": 2500,
         "闲鱼中位价_二手同款_参考": null,
         "京东拍拍价_二手": "无法搜索",
@@ -1553,7 +1640,7 @@
       },
       "M1_16G_512G_二手": {
         "官方价": null,
-        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M4官方价5999元(基础款)。注:512G版本配置溢价未在分母中体现,实测保值率会偏高",
+        "官方价_说明": "已停产。残值分母使用当前同品类新品价=Mac mini M6官方价6999元(基础款)。注:512G版本配置溢价未在分母中体现,实测保值率会偏高",
         "闲鱼中位价_二手同款": 3500,
         "闲鱼中位价_二手同款_参考": null,
         "京东拍拍价_二手": "无法搜索",
@@ -1563,14 +1650,14 @@
         "搜索来源URL": [],
         "搜索日期": "2026-08-10",
         "置信度": "高(用户提供实采数据)",
-        "备注": "用户提供价格3500元(2026-08-10)。M1 Mac mini 2020-11发布,机龄69月。⚠️16G+512G为高配版本,保值率含配置溢价,标准化分母5999(基础款)会高估保值率"
+        "备注": "用户提供价格3500元(2026-08-10)。M1 Mac mini 2020-11发布,机龄69月。⚠️16G+512G为高配版本,保值率含配置溢价,标准化分母6999(基础款)会高估保值率"
       },
       "M4_16G_512G_新品": {
         "官方价": 7499,
         "官方价_来源": "用户提供实采数据(2026-08-10),与苹果官网Mac mini M4 16G+512G定价一致",
         "京东国补到手价_参考": 6400,
         "京东国补到手价_参考来源": "用户提供实采数据(2026-08-10),国补参考价6400元",
-        "闲鱼中位价_二手同款": "无法搜索(M4为当前在售款,二手市场暂无大量流通)",
+        "闲鱼中位价_二手同款": "无法搜索(采集时点在售期二手流通少;M4已停产下架,二手价待M6发售后重新采集)",
         "京东拍拍价_二手": "无法搜索",
         "爱回收售价_二手": "无法搜索",
         "爱回收回收报价_下限": "无法搜索",
@@ -1584,7 +1671,7 @@
         "官方价": 8999,
         "官方价_来源": "用户提供实采数据(2026-08-10),与苹果官网Mac mini M4 16G+1T定价一致",
         "京东国补到手价": "无法搜索",
-        "闲鱼中位价_二手同款": "无法搜索(M4为当前在售款,二手市场暂无大量流通)",
+        "闲鱼中位价_二手同款": "无法搜索(采集时点在售期二手流通少;M4已停产下架,二手价待M6发售后重新采集)",
         "京东拍拍价_二手": "无法搜索",
         "爱回收售价_二手": "无法搜索",
         "爱回收回收报价_下限": "无法搜索",
@@ -3265,7 +3352,7 @@
       }
     },
     "_快照使用注意事项": [
-      "Mac mini M4为当前在售款,基础配置16G+256G官方价5999元(WebFetch直接搜索)",
+      "Mac mini当前在售款已换代(v4.0,2026-08-25):M6基础款(16G/256G)6999元,9-22发售;M4全系已停产下架(仅翻新渠道),原5999元作历史分母保留于M4条目",
       "本快照搜索于2026-07-26,正值2026年6月25日苹果官方大幅调价+2026年7月16日返校季政策+2026年5月15日iPhone 17降价后",
       "**重要现实约束**:v3.6实测发现,WebFetch仅能直接搜索苹果官网静态页面;京东需登录、闲鱼/爱回收为JS动态渲染,均无法直接搜索。因此本快照中:'官方价'为高置信度(WebFetch直接搜索);'参考价'为中低置信度(WebSearch交叉验证,来自论坛/文章/实付晒单,需按5项标准筛选)",
       "**已搜索9个品类**:Mac_mini/MacBook_Air/MacBook_Pro/iMac/Mac_Studio/Mac_Pro/iPhone_proMax/iPhone_Pro/iPhone_标准",
@@ -3803,7 +3890,7 @@
         "官方价_来源": "https://www.apple.com.cn/shop/buy-ipad/ipad-air (WebFetch直接搜索),11寸M4 128GB起价5999元",
         "京东自营价": "无法搜索(京东页面需登录)",
         "京东国补到手价": "无法搜索(未找到符合5项标准的M4 iPad Air实付晒单)",
-        "闲鱼中位价_二手同款": "无法搜索(M4为当前在售款,二手市场暂无大量流通)",
+        "闲鱼中位价_二手同款": "无法搜索(采集时点在售期二手流通少;M4已停产下架,二手价待M6发售后重新采集)",
         "京东拍拍价_二手": "无法搜索",
         "爱回收售价_二手": "无法搜索",
         "爱回收回收报价_下限": "无法搜索",
@@ -3988,7 +4075,7 @@
         "C_ACCENT_SOFT": "#E6F2FF",
         "C_MUTED": "#86868F",
         "C_BORDER": "#D2D2D8",
-        "C_GRAY": "#B9B9C1",
+        "C_GRAY": "#C7C7CC",
         "C_SUCCESS": "#2A8A61",
         "C_WARNING": "#E09500",
         "C_ERROR": "#F24B4B",
@@ -4001,7 +4088,7 @@
           "#5856D6"
         ]
       },
-      "baseOption": "var C_PRIMARY = '#007AFF', C_ACCENT_SOFT = '#E6F2FF';\nvar C_MUTED = '#86868F', C_BORDER = '#D2D2D8', C_GRAY = '#B9B9C1';\nvar C_SUCCESS = '#2A8A61', C_WARNING = '#E09500', C_ERROR = '#F24B4B';\nvar PALETTE = ['#007AFF', '#8E8E93', '#2A8A61', '#E09500', '#AF52DE', '#5856D6'];\n\nvar baseOption = {\n  backgroundColor: 'transparent',\n  color: PALETTE,\n  textStyle: { fontFamily: 'Inter, -apple-system, \"PingFang SC\", sans-serif', color: '#1D1D1F' },\n  grid: { left: 60, right: 24, top: 50, bottom: 60, containLabel: true },\n  tooltip: {\n    trigger: 'item',\n    backgroundColor: '#FFFFFF',\n    borderColor: '#D2D2D8', borderWidth: 1,\n    textStyle: { color: '#1D1D1F', fontSize: 13 },\n    extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;'\n  },\n  legend: { top: 8, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },\n  xAxis: {\n    type: 'value',\n    nameLocation: 'middle', nameGap: 32, nameTextStyle: { color: C_MUTED, fontSize: 12 },\n    axisLine: { lineStyle: { color: C_BORDER } },\n    axisLabel: { color: C_MUTED, fontSize: 12 },\n    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }\n  },\n  yAxis: {\n    type: 'value',\n    nameLocation: 'middle', nameGap: 40, nameTextStyle: { color: C_MUTED, fontSize: 12 },\n    axisLine: { lineStyle: { color: C_BORDER } },\n    axisLabel: { color: C_MUTED, fontSize: 12 },\n    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }\n  }\n};\n// 使用:var opt = Object.assign({}, baseOption, { xAxis:{name:'...'}, yAxis:{name:'...'}, series:[...] });",
+      "baseOption": "var C_PRIMARY = '#007AFF', C_ACCENT_SOFT = '#E6F2FF';\nvar C_MUTED = '#86868F', C_BORDER = '#D2D2D8', C_GRAY = '#C7C7CC';\nvar C_SUCCESS = '#2A8A61', C_WARNING = '#E09500', C_ERROR = '#F24B4B';\nvar PALETTE = ['#007AFF', '#8E8E93', '#2A8A61', '#E09500', '#AF52DE', '#5856D6'];\n\nvar baseOption = {\n  backgroundColor: 'transparent',\n  color: PALETTE,\n  textStyle: { fontFamily: 'Inter, -apple-system, \"PingFang SC\", sans-serif', color: '#1D1D1F' },\n  grid: { left: 60, right: 24, top: 50, bottom: 60, containLabel: true },\n  tooltip: {\n    trigger: 'item',\n    backgroundColor: '#FFFFFF',\n    borderColor: '#D2D2D8', borderWidth: 1,\n    textStyle: { color: '#1D1D1F', fontSize: 13 },\n    extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;'\n  },\n  legend: { top: 8, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },\n  xAxis: {\n    type: 'value',\n    nameLocation: 'middle', nameGap: 32, nameTextStyle: { color: C_MUTED, fontSize: 12 },\n    axisLine: { lineStyle: { color: C_BORDER } },\n    axisLabel: { color: C_MUTED, fontSize: 12 },\n    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }\n  },\n  yAxis: {\n    type: 'value',\n    nameLocation: 'middle', nameGap: 40, nameTextStyle: { color: C_MUTED, fontSize: 12 },\n    axisLine: { lineStyle: { color: C_BORDER } },\n    axisLabel: { color: C_MUTED, fontSize: 12 },\n    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } }\n  }\n};\n// 使用:var opt = Object.assign({}, baseOption, { xAxis:{name:'...'}, yAxis:{name:'...'}, series:[...] });",
       "帕累托前沿图模板": "var paretoOption = Object.assign({}, baseOption, {\n  xAxis: { name: '月均成本(元/月)→ 越低越省', min: 30 },\n  yAxis: { name: '平均性能满足度%→ 越高越好', min: 20, max: 75 },\n  tooltip: { trigger: 'item', formatter: function(p){\n    return p.name + '<br>月均:' + p.value[0] + '元  性能:' + p.value[1] + '%<br>净支出:' + p.value[2] + '元';\n  }},\n  legend: { data: ['台式前沿','便携前沿','台式已排除','便携已排除'] },\n  series: [\n    { name: '台式前沿', type: 'scatter', symbol: 'circle', symbolSize: 16, itemStyle: { color: C_PRIMARY }, data: frontDesk },\n    { name: '便携前沿', type: 'scatter', symbol: 'diamond', symbolSize: 16, itemStyle: { color: C_PRIMARY }, data: frontPortable },\n    { name: '台式已排除', type: 'scatter', symbol: 'circle', symbolSize: 8, itemStyle: { color: C_GRAY, opacity: 0.5 }, data: domDesk },\n    { name: '便携已排除', type: 'scatter', symbol: 'diamond', symbolSize: 8, itemStyle: { color: C_GRAY, opacity: 0.5 }, data: domPortable },\n    { type: 'line', data: frontLine, symbol: 'none', lineStyle: { color: C_PRIMARY, type: 'dashed', width: 1.5 }, tooltip: { show: false } }\n  ]\n});\n// 气泡大小映射净支出(可选):symbolSize: function(data){ return Math.sqrt(data[2]) / 3 + 6; }\n// 超支持期点加橙色边框:itemStyle: { borderColor: C_WARNING, borderWidth: 2 }",
       "多持有期成本曲线模板": "var costCurveOption = Object.assign({}, baseOption, {\n  xAxis: { name: '持有月数', min: 12 },\n  yAxis: { name: '月均成本(元)' },\n  tooltip: { trigger: 'axis', formatter: function(pts){ var s = ''; pts.forEach(function(i){ s += i.seriesName + ':' + i.data[0] + '月 ' + i.data[1] + '元/月<br>'; }); return s; }},\n  legend: { type: 'scroll', top: 0, textStyle: { color: C_MUTED, fontSize: 10 }, height: 30 },\n  series: machineData.map(function(s, i) {\n    return { name: s.name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, data: s.data,\n      lineStyle: { width: 2, color: PALETTE[i % PALETTE.length] }, itemStyle: { color: PALETTE[i % PALETTE.length] } };\n  })\n});",
       "保值率曲线模板": "var valueCurveSeries = curves.map(function(c, i) {\n  return { name: c.name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, data: c.data,\n    lineStyle: { color: PALETTE[i % PALETTE.length], width: 2.5 }, itemStyle: { color: PALETTE[i % PALETTE.length] } };\n});\nvalueCurveSeries.push({\n  type: 'line', data: [], symbol: 'none',\n  markLine: { symbol: 'none', silent: true, lineStyle: { color: C_WARNING, type: 'dashed' },\n    data: [{ xAxis: 60, label: { formatter: 'macOS支持期~72月', color: C_WARNING } }] }\n});\nvar valueCurveOption = Object.assign({}, baseOption, {\n  xAxis: { name: '机龄(发布后月数)', min: 0, max: 60 },\n  yAxis: { name: '保值率%', min: 0, max: 100 },\n  tooltip: { trigger: 'axis' },\n  series: valueCurveSeries\n});",
