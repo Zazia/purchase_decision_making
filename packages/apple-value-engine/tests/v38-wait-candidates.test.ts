@@ -55,15 +55,45 @@ describe('v3.8 wait candidates', () => {
     expect(typeC.length).toBeGreaterThan(0);
   });
 
-  it('Mac_mini confidence=低 → shouldGenerate=false', () => {
+  it('Mac_mini confidence=高(已官宣) → shouldGenerate=true (P1 修复: 复合格式前缀匹配)', () => {
+    // constants v4.0 (2026-08-25) 已回填 "高(已官宣)"; 旧断言 low 是把 P1 bug 固化进用例
     const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro);
     expect(plan).not.toBeNull();
-    expect(plan!.releaseConfidence).toBe('low');
-    expect(shouldGenerateWaitCandidates(plan!, defaultMacro)).toBe(false);
+    expect(plan!.releaseConfidence).toBe('high');
+    expect(shouldGenerateWaitCandidates(plan!, defaultMacro)).toBe(true);
   });
 
-  it('Mac_mini confidence=low → 不生成 B/C 候选', () => {
+  it('Mac_mini confidence=高(已官宣) → 生成 B/C 候选', () => {
     const result = computeParetoFrontier(constants, {
+      category: 'mac-mini',
+      budget: 100000,
+      holdingYears: [2, 3],
+      buyTiming: 'both',
+      performanceFloor: 0,
+      considerWait: true,
+      macroContext: defaultMacro,
+    });
+    const allPoints = [...result.frontier, ...result.dominated];
+    const typeB = allPoints.filter((p) => p.candidateType === 'B');
+    const typeC = allPoints.filter((p) => p.candidateType === 'C');
+    expect(typeB.length).toBeGreaterThan(0);
+    expect(typeC.length).toBeGreaterThan(0);
+  });
+
+  it('confidence=低 → 不生成 B/C 候选 (构造变异 constants 验证 low 分支)', () => {
+    // 当前真实数据无纯"低"品类, 深拷贝并改写 Mac_mini 置信度以覆盖 low 分支
+    const cloned = structuredClone(constants) as Constants;
+    const validation = cloned.releaseTimeValidation as Record<string, unknown>;
+    for (const [k, v] of Object.entries(validation)) {
+      if (k.startsWith('_当前校验结果_') && v && typeof v === 'object') {
+        (v as Record<string, Record<string, string>>)['Mac_mini']['置信度'] = '低';
+        break;
+      }
+    }
+    const plan = parseReleasePlan(cloned, 'Mac_mini', defaultMacro);
+    expect(plan!.releaseConfidence).toBe('low');
+    expect(shouldGenerateWaitCandidates(plan!, defaultMacro)).toBe(false);
+    const result = computeParetoFrontier(cloned, {
       category: 'mac-mini',
       budget: 100000,
       holdingYears: [2, 3],

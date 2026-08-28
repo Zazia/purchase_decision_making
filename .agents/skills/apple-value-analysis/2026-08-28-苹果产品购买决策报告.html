@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-08-28 Mac mini 购买决策报告</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root {
+  --bg: #F5F5F7;  --surface: #FFFFFF;  --rule: #D2D2D8;
+  --muted: #86868F;  --fg: #1D1D1F;
+  --accent: #007AFF;  --accent-hover: #0063D4;  --accent-soft: #E6F2FF;
+  --success: #2A8A61;  --success-soft: #D9F0E3;
+  --warning: #E09500;  --warning-soft: #FFF0C2;
+  --error: #F24B4B;  --error-soft:   #FFD9D9;
+  --font-display: 'DM Sans', -apple-system, 'SF Pro Display', 'PingFang SC', sans-serif;
+  --font-body: 'Inter', -apple-system, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6; margin: 0; padding: 24px 16px 48px; }
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.kicker { color: var(--muted); font-size: 13px; }
+.card { background: var(--surface); border-radius: 20px; box-shadow: 0 1px 2px rgba(29,29,31,0.06), 0 1px 1px rgba(29,29,31,0.04); padding: 16px; display: flex; flex-direction: column; gap: 12px; transition: filter 0.15s; }
+.card:hover { filter: brightness(0.97); }
+.card-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+h1 { font-family: var(--font-display); font-size: 32px; font-weight: 600; margin: 0; }
+h2 { font-family: var(--font-display); font-size: 24px; font-weight: 600; margin: 24px 0 4px; }
+.mono { font-family: var(--font-mono); }
+.num { text-align: right; }
+.badge { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 9999px; font-size: 12px; font-weight: 400; line-height: 1; white-space: nowrap; margin: 1px 2px 1px 0; }
+.badge-default { background: var(--bg); color: var(--muted); }
+.badge-success { background: var(--success-soft); color: var(--success); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
+.badge-error   { background: var(--error-soft);   color: var(--error); }
+.report-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; }
+.report-table th, .report-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--rule); font-size: 14px; vertical-align: top; }
+.report-table thead th { color: var(--muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.report-table tbody tr:last-child td { border-bottom: none; }
+.report-table tbody tr:hover { filter: brightness(.97); }
+.note { color: var(--muted); font-size: 12px; }
+.tbl-scroll { overflow-x: auto; border-radius: 16px; }
+.concl { font-size: 20px; font-weight: 600; font-family: var(--font-display); }
+.big-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.big-num { background: var(--bg); border-radius: 16px; padding: 16px; }
+.big-num .v { font-family: var(--font-display); font-size: 32px; font-weight: 600; color: var(--accent); }
+.big-num .k { color: var(--muted); font-size: 13px; }
+.chart { width: 100%; height: 430px; }
+.chart-aux { width: 100%; height: 330px; }
+p { margin: 4px 0; }
+ul { padding-left: 20px; }
+li { margin: 4px 0; }
+.src { color: var(--muted); font-size: 12px; }
+@media (max-width: 720px) {
+  h1 { font-size: 24px; } .concl { font-size: 17px; }
+  .report-table th, .report-table td { font-size: 13px; padding: 10px 8px; white-space: nowrap; }
+  .chart { height: 360px; } .chart-aux { height: 360px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Mac mini 购买决策报告</h1>
+<p class="kicker">分析时点 2026-08-28 · 预算 5000 元左右(购入价口径) · 品类 Mac mini · 持有期由帕累托前沿筛选 · 数据:constants.json v4.2(2026-08-26)+ 2026-08-28 京东国补价补搜 · 方法:apple-value-engine 引擎路径 + SOP v5.1 人工补齐(三情景加权/分档锚涨幅/推算跑分区间)</p>
+
+<h2>一、结论与推荐</h2>
+<div class="card">
+  <div class="concl">预算 5000 左右买 Mac mini:<b>首选 M6(16G/256G)新品——京东国补参考价 5949 元(8-27 起预购、9-22 发售),持有 1 年月均成本仅 38 元、平均性能满足度 97%,在成本与性能双维度上支配全部 5000 元内方案</b>,多付的约 950 元会在一年后卖出时几乎全部收回;有教育优惠可压到 5269、叠以旧换新最低约 4969,直接落入预算内。若严格卡死 5000 现金:买 <b>M4 16G/256G 二手(闲鱼中位 4200,成交可再谈低 5-10%),持有约 2 年,月均约 50 元</b>。<b>不要等降价</b>——M6 是涨价发布(+16.7%),发售后老款不降反涨,「等捡漏」已失效。</div>
+  <div class="big-nums">
+    <div class="big-num"><div class="v">38<small>元/月</small></div><div class="k">M6 新品(国补价)持有 12 个月月均成本,全场最低的高性能方案</div></div>
+    <div class="big-num"><div class="v">5949<small>元</small></div><div class="k">M6 国补到手参考价(官网 6999;教育 5269 / 以旧换新最低约 4969)</div></div>
+    <div class="big-num"><div class="v">50<small>元/月</small></div><div class="k">预算内主推:M4 二手 4200 · 持有 24 月月均成本</div></div>
+    <div class="big-num"><div class="v">4449<small>元</small></div><div class="k">M4 二手「等 M6 发售再买」加权预估 &gt; 现价 4200(类型 C 失效)</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">推荐方案(按预算态度分档,均为「现在买入」)</div>
+  <div class="tbl-scroll"><table class="report-table">
+    <thead><tr><th>档位</th><th>方案</th><th>买入价</th><th>持有期</th><th>月均成本</th><th>平均性能 S̄</th><th>推荐理由与注意</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--accent-soft)"><td>首选·需上浮预算</td><td class="mono">M6 16G/256G 新品</td><td class="num mono">5949<br><span class="note">国补参考</span></td><td class="num mono">12 月(短周转)<br>或 24 月</td><td class="num mono"><b>38 / 67 元</b></td><td class="num mono">97% / 91%</td><td class="note">2nm 新旗舰,支配预算内全部方案;12 月后残值预估 5599(80% 保值率),净支出仅约 450 元。⚠ 国补价为资讯稿口径(三源一致、非实付晒单),国补有时效性与地区额度风险;跑分为推算值</td></tr>
+      <tr style="background:var(--accent-soft)"><td>主推·严格预算内</td><td class="mono">M4 16G/256G 二手</td><td class="num mono">4200<br><span class="note">闲鱼中位挂价</span></td><td class="num mono">24 月</td><td class="num mono"><b>50 元</b></td><td class="num mono">65%</td><td class="note">5000 内唯一的高性能非劣解;M4 已停产稀缺+涨价锚定,叫价坚挺;成交通常可谈低 5-10%(约 3900-4000,月均再降约 5 元);买入需验机(序列号/通电时长/拆修痕)</td></tr>
+      <tr><td>经济档</td><td class="mono">M2 8G/256G 二手</td><td class="num mono">2675</td><td class="num mono">12 月</td><td class="num mono"><b>19 元</b></td><td class="num mono">29%</td><td class="note">全场月均最低(净支出仅 223 元);但 8G 内存对 AI/多任务明显偏弱,M4 起全系 16G 起,8G 属淘汰配置,慎选</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">预算语义:用户预算「5000 左右」按购入价口径取容差约 ±10%。M4 新品尾货 5099(京东国补)在容差内,但被二手同款支配(同性能贵 900 元)——其溢价买到「全新+1 年保修+渠道发票」,看重保修可接受,且「售完即止」,决策宜快;M6 5949 超出容差(+19%),列为需用户确认上浮的首选。</p>
+</div>
+
+<div class="card">
+  <div class="card-title">前沿备选(非劣方案,按偏好选择)</div>
+  <div class="tbl-scroll"><table class="report-table">
+    <thead><tr><th>方案</th><th>买入价</th><th>持有期</th><th>月均成本</th><th>平均性能 S̄</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">M6 16G/256G 新品</td><td class="num mono">5949(国补参考)</td><td class="num mono">18 月</td><td class="num mono"><b>59 元</b></td><td class="num mono">94%</td><td class="note">比 12 月持有多摊半年,月均略升但净支出摊薄</td></tr>
+      <tr><td class="mono">M6 16G/256G 新品</td><td class="num mono">5949(国补参考)</td><td class="num mono">24 月</td><td class="num mono"><b>67 元</b></td><td class="num mono">91%</td><td class="note">不想一年一换的稳健持有期;⚠ 卖出点临近 M8 发布(约 2028 年中),已按未计 M8 冲击的保守口径</td></tr>
+      <tr><td class="mono">M4 16G/256G 二手</td><td class="num mono">4200</td><td class="num mono">18 月</td><td class="num mono"><b>52 元</b></td><td class="num mono">67%</td><td class="note">预算内前沿:比 24 月持有平均性能略高、月均略贵</td></tr>
+      <tr><td class="mono">M4 16G/256G 二手</td><td class="num mono">4200</td><td class="num mono">12 月</td><td class="num mono"><b>67 元</b></td><td class="num mono">69%</td><td class="note">预算内前沿:短持有拿最高平均性能,一年后可再换 M6/M8 二手</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<div class="card">
+  <div class="card-title">等待方案判定(类型 B/C)——本报告核心结论之一</div>
+  <ul>
+    <li><b>类型 C(等 M6 发售后买降价老款):全线失效。</b>M6 定价 6999 较 M4 现行官方价 5999 上涨 16.7%,属「涨价发布」:锚点上移抬升老款替代价值,代际冲击被涨价对冲(35%→26.25%)。三情景加权(30%/45%/25%)后,M4 二手预估 4449 &gt; 现价 4200,其余老款同样全部预估高于现价——<b>等待的期望收益为负</b>。实证参照:iPhone 17 涨价发布后老款一周仅跌 2-4%、两月归零;2026-06 全线涨价后 Mac mini M4 二手 3-8 月反涨约 20%。</li>
+    <li><b>类型 B(等 M6 买新品):被国补价口径支配。</b>官网价 6999 买 M6 持有 12 月月均 125 元、S̄97%;若能拿到国补 5949,同样的机器月均降到 38 元——「等」没有意义,「找国补渠道」才有意义。国补不可得时,M6 退为纯性能档(月均 84-125 元),M4 二手仍是价值档,结论方向不变。</li>
+    <li><b>唯一反转风险是情景 A(约 30% 概率)</b>:若冲击全额传导,发售后 1-3 月 M4 二手或短暂下探 3615-3804(闲鱼成交口径或再低 5-10%)。赌这个约一个月的窗口,不如按主推方案直接成交——期望值为负,且 M4 停产后供应只减不增。</li>
+  </ul>
+</div>
+
+<h2>二、支撑证据</h2>
+
+<div class="card">
+  <div class="card-title">帕累托前沿图(核心图表)</div>
+  <div id="pareto" class="chart"></div>
+  <p class="src">每个点 = (机型 × 持有期 × 买入时机) 方案;横轴月均成本越低越省,纵轴持有期平均性能满足度越高越好;气泡大小 ≈ 持有期净支出(买入价−残值+维修)。实心蓝 = 预算内前沿;空心蓝 = M6 国补价(超预算参考,其 12 月点为全量前沿顶点);蓝三角 = M6 官网价敏感性(国补不可得);灰点 = 被支配方案。数据:constants.json v4.2 + 2026-08-28 补搜。</p>
+</div>
+
+<div class="card">
+  <div class="card-title">前沿方案表(按月均成本升序)</div>
+  <div class="tbl-scroll"><table class="report-table">
+    <thead><tr><th>方案</th><th>机型</th><th>月均成本</th><th>S̄</th><th>买入价</th><th>持有期</th><th>预期残值</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--accent-soft)"><td class="mono">M2 8G·12月</td><td>M2 8G/256G 二手</td><td class="num mono"><b>19</b></td><td class="num mono">29%</td><td class="num mono">2675</td><td class="num mono">12月</td><td class="num mono">2552</td><td><span class="badge badge-success">预算内前沿</span></td></tr>
+      <tr><td class="mono">M6·12月</td><td>M6 16G/256G 新品</td><td class="num mono"><b>38</b></td><td class="num mono">97%</td><td class="num mono">5949</td><td class="num mono">12月</td><td class="num mono">5599</td><td><span class="badge badge-warning">超预算·全量前沿</span></td></tr>
+      <tr style="background:var(--accent-soft)"><td class="mono">M4二手·24月</td><td>M4 16G/256G 二手</td><td class="num mono"><b>50</b></td><td class="num mono">65%</td><td class="num mono">4200</td><td class="num mono">24月</td><td class="num mono">3203</td><td><span class="badge badge-success">预算内前沿</span></td></tr>
+      <tr style="background:var(--accent-soft)"><td class="mono">M4二手·18月</td><td>M4 16G/256G 二手</td><td class="num mono"><b>52</b></td><td class="num mono">67%</td><td class="num mono">4200</td><td class="num mono">18月</td><td class="num mono">3408</td><td><span class="badge badge-success">预算内前沿</span></td></tr>
+      <tr style="background:var(--accent-soft)"><td class="mono">M4二手·12月</td><td>M4 16G/256G 二手</td><td class="num mono"><b>67</b></td><td class="num mono">69%</td><td class="num mono">4200</td><td class="num mono">12月</td><td class="num mono">3493</td><td><span class="badge badge-success">预算内前沿</span></td></tr>
+      <tr><td class="mono">M6·18月</td><td>M6 16G/256G 新品</td><td class="num mono"><b>59</b></td><td class="num mono">94%</td><td class="num mono">5949</td><td class="num mono">18月</td><td class="num mono">5039</td><td><span class="badge badge-warning">超预算备选</span></td></tr>
+      <tr><td class="mono">M6·24月</td><td>M6 16G/256G 新品</td><td class="num mono"><b>67</b></td><td class="num mono">91%</td><td class="num mono">5949</td><td class="num mono">24月</td><td class="num mono">4549</td><td><span class="badge badge-warning">超预算备选</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">「全量前沿」仅两点:M2 8G·12月(19 元,29%)与 M6·12月(38 元,97%)——M6 以低于所有 M4 方案的月均成本拿到高 28pp 的平均性能,故支配中间全部方案;预算内(≤5100 容差)前沿为 M4 二手 1/1.5/2 年三点 + M2 8G·12月。M6 持有 18/24 月方案在全量口径被 M6·12月支配,列为超预算备选供偏好长持有者参考。</p>
+</div>
+
+<div class="card">
+  <div class="card-title">类型 C 三情景预估(等 M6 发售后 1-3 月买老款,锚定-冲击双因子模型)</div>
+  <div class="tbl-scroll"><table class="report-table">
+    <thead><tr><th>机型</th><th>现价</th><th>情景A 全额传导(30%)</th><th>情景B 实证口径(45%)</th><th>情景C 零冲击(25%)</th><th>加权预估</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td>M1 8G/256G</td><td class="num mono">2244</td><td class="num mono">1966</td><td class="num mono">2544</td><td class="num mono">2619</td><td class="num mono"><b>2389</b></td><td><span class="badge badge-error">失效·等待无收益</span></td></tr>
+      <tr><td>M1 16G/256G</td><td class="num mono">2650</td><td class="num mono">2321</td><td class="num mono">3004</td><td class="num mono">3093</td><td class="num mono"><b>2822</b></td><td><span class="badge badge-error">失效·等待无收益</span></td></tr>
+      <tr><td>M2 8G/256G</td><td class="num mono">2675</td><td class="num mono">2343</td><td class="num mono">3033</td><td class="num mono">3122</td><td class="num mono"><b>2848</b></td><td><span class="badge badge-error">失效·等待无收益</span></td></tr>
+      <tr><td>M2 16G/256G</td><td class="num mono">3566</td><td class="num mono">3124</td><td class="num mono">4044</td><td class="num mono">4160</td><td class="num mono"><b>3797</b></td><td><span class="badge badge-error">失效·等待无收益</span></td></tr>
+      <tr><td>M4 16G/256G 二手</td><td class="num mono">4200</td><td class="num mono">3615</td><td class="num mono">4754</td><td class="num mono">4901</td><td class="num mono"><b>4449</b></td><td><span class="badge badge-error">失效·等待无收益</span></td></tr>
+      <tr><td>M4 16G/256G 尾货新品</td><td class="num mono">5099</td><td class="num mono">4467</td><td class="num mono">5781</td><td class="num mono">5951</td><td class="num mono"><b>5429</b></td><td><span class="badge badge-error">失效·且尾货售完即止</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">公式:预估价 = 现价 × (1+16.7% 锚涨幅) × (1−冲击×0.95 时变因子)。情景A 冲击 = 26.25%(品类均值 35% × 涨价传导因子 −25%);情景B 取 iPhone 17 涨价发布实测冲击 ≈3%;情景C = 0(缺货+惜售)。概率赋值四问:①M4 已停产稀缺 ✓ ②M6 缺货概率高(2nm 首发+存储周期+限购 2 台)✓ ③本地 AI 需求增量 ✓ ④涨价前二手已部分透支(M4 较国补期低点 +40%)——四问中三个半指向锚定占优,B/C 情景权重高,失效结论稳健。</p>
+</div>
+
+<div class="card">
+  <div class="card-title">宏观因素分析</div>
+  <ul>
+    <li><b>存储超级周期·进行中</b>:AI/HBM 挤压消费级产能;2026-06-25 苹果中国全线调价,二手水涨船高(M4 丐版二手从国补期约 3000 涨至 4200,+40%)。生效机制:①Mac_mini 冲击均值按价格传导因子向下修正(35%→26.25%);②缺货等待期 = 基线 14 天 × 2.0 宏观因子;③M6 预购已开(8-27),发售 9-22,悲观情形到货延迟 45 天×2。</li>
+    <li><b>M6 涨价发布(2026-08-25 官宣)分档分化</b>:基础档 6999 较 M4 现行 5999 上涨 16.7%(涨价发布,二手老款利多);Pro 档 M5 Pro 12999 较 M4 Pro 12499 仅 +4%(近平价换代,Pro 二手利空)——本报告预算只涉及基础档。M4 全系已于 2026-04 停产,渠道尾货售完即止。</li>
+    <li><b>国补窗口</b>:15% 数码国补后 M6 到手参考 5949.2(新浪科技/什么值得买/IT之家三源一致,资讯稿口径);教育优惠 6199 再叠国补 ≈5269;以旧换新至高再减 300 → 最低约 4969。国补有时效性与地区额度风险,下单前以京东页面实付价为准。</li>
+    <li><b>M8 风险(低置信度)</b>:按 M4→M6 实测 22 月周期外推,下次发布约 2028 年中。M6 持有 ≥24 月的方案卖出点临近 M8,本报告未对 M6 施加 M8 冲击(M8 定价未知,锚定与冲击两股力量方向相反),该段预测不确定性高,已在图表中以半透明标注。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title">常量校验与数据置信度</div>
+  <ul>
+    <li><b>常量级别:绿色免检</b>(constants.json v4.2 于 2026-08-26 更新,M6 官宣数据已入库;快照日期 2026-08-26,距今 2 天)。</li>
+    <li><b>快照定向补搜(2026-08-28)</b>:近 14 天有 M6 官宣事件,按规则对受影响机型补搜——M6 京东国补参考 5949.2、M4 尾货国补 5099,均三源一致(中置信度:资讯稿口径非实付晒单);M1/M2 闲鱼挂牌中位采集于 7-27(中置信度),挂价口径成交通常低 5-10%。</li>
+    <li><b>残值分母</b>:Mac mini 品类统一用 M6 基础款官方价 6999 元(v4.0 起;M4 官方价 5999 为停产前历史值,仅作对比锚)。</li>
+    <li><b>实测偏差提示</b>:M4 二手现价 4200 隐含保值率 60%(对 6999 分母),曲线理论值 67.3%(22 月),偏差 −7.3pp(容差 ±10pp 内,不触发曲线更新);M1/M2 现价反而高于曲线——当前残值估计整体偏保守,实际月均成本或更低。</li>
+    <li><b>M6 跑分为推算值</b>:多核 21000(区间 20500-21700),S(0) = 21000/17100(M5 实测基准)×1.0×0.85 = 104.4%,区间 101.9%-107.9%;区间两端不改变前沿结构。⚠ 2026-09-22 发售后须实测回填并触发基准切换。</li>
+    <li><b>维修成本</b>:Mac mini 无电池(更换费 0),年均故障维修 100 元已按持有年数计入;口径为不含 AC+ 裸机。</li>
+    <li><b>未应用场景修正</b>:用户未指定使用场景,轻度办公 ×1.2 / 专业工作流 ×0.9 修正未应用;若主要用途为重度视频剪辑/AI 推理,M2 档满足度会进一步下调,M6/M4 优势扩大。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title">完整候选方案计算表(7 机型 × 6 持有期,含被支配点)</div>
+  <div class="tbl-scroll"><table class="report-table">
+    <thead><tr><th>方案</th><th>机型</th><th>买入时机</th><th>买入价</th><th>持有月</th><th>卖出机龄</th><th>月均成本</th><th>S̄</th><th>残值</th><th>维修</th><th>状态</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">M6·12月</td><td>M6 16G/256G</td><td>现在预购(9-22发货)</td><td class="num mono">5949</td><td class="num mono">12</td><td class="num mono">12</td><td class="num mono"><b>38</b></td><td class="num mono">97%</td><td class="num mono">5599</td><td class="num mono">100</td><td><span class="badge badge-warning">超预算·全量前沿</span></td><td class="note">跑分推算值;残值=80%×6999</td></tr>
+      <tr><td class="mono">M6·18月</td><td>M6 16G/256G</td><td>现在预购</td><td class="num mono">5949</td><td class="num mono">18</td><td class="num mono">18</td><td class="num mono"><b>59</b></td><td class="num mono">94%</td><td class="num mono">5039</td><td class="num mono">150</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M6·12月 支配</td></tr>
+      <tr><td class="mono">M6·24月</td><td>M6 16G/256G</td><td>现在预购</td><td class="num mono">5949</td><td class="num mono">24</td><td class="num mono">24</td><td class="num mono"><b>67</b></td><td class="num mono">91%</td><td class="num mono">4549</td><td class="num mono">200</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M6·12月 支配;⚠卖出临近M8</td></tr>
+      <tr><td class="mono">M6·36月</td><td>M6 16G/256G</td><td>现在预购</td><td class="num mono">5949</td><td class="num mono">36</td><td class="num mono">36</td><td class="num mono"><b>73</b></td><td class="num mono">86%</td><td class="num mono">3639</td><td class="num mono">300</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M6·12月 支配;⚠临近M8</td></tr>
+      <tr><td class="mono">M6·48月</td><td>M6 16G/256G</td><td>现在预购</td><td class="num mono">5949</td><td class="num mono">48</td><td class="num mono">48</td><td class="num mono"><b>65</b></td><td class="num mono">81%</td><td class="num mono">3220</td><td class="num mono">400</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M6·12月 支配;长持有置信度低</td></tr>
+      <tr><td class="mono">M6·60月</td><td>M6 16G/256G</td><td>现在预购</td><td class="num mono">5949</td><td class="num mono">60</td><td class="num mono">60</td><td class="num mono"><b>67</b></td><td class="num mono">77%</td><td class="num mono">2450</td><td class="num mono">500</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 临近支持期尾声;长持有置信度低</td></tr>
+      <tr><td class="mono">M4新·12月</td><td>M4 16G/256G 尾货</td><td>现在买</td><td class="num mono">5099</td><td class="num mono">12</td><td class="num mono">34</td><td class="num mono"><b>142</b></td><td class="num mono">69%</td><td class="num mono">3493</td><td class="num mono">100</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M4二手·12月 支配(贵900)</td></tr>
+      <tr><td class="mono">M4新·18月</td><td>M4 16G/256G 尾货</td><td>现在买</td><td class="num mono">5099</td><td class="num mono">18</td><td class="num mono">40</td><td class="num mono"><b>102</b></td><td class="num mono">67%</td><td class="num mono">3408</td><td class="num mono">150</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M4二手·18月 支配</td></tr>
+      <tr><td class="mono">M4新·24月</td><td>M4 16G/256G 尾货</td><td>现在买</td><td class="num mono">5099</td><td class="num mono">24</td><td class="num mono">46</td><td class="num mono"><b>87</b></td><td class="num mono">65%</td><td class="num mono">3203</td><td class="num mono">200</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M4二手·24月 支配</td></tr>
+      <tr><td class="mono">M4新·36月</td><td>M4 16G/256G 尾货</td><td>现在买</td><td class="num mono">5099</td><td class="num mono">36</td><td class="num mono">58</td><td class="num mono"><b>80</b></td><td class="num mono">61%</td><td class="num mono">2510</td><td class="num mono">300</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M4二手·24月 支配</td></tr>
+      <tr><td class="mono">M4新·48月</td><td>M4 16G/256G 尾货</td><td>现在买</td><td class="num mono">5099</td><td class="num mono">48</td><td class="num mono">70</td><td class="num mono"><b>76</b></td><td class="num mono">58%</td><td class="num mono">1872</td><td class="num mono">400</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 临近支持期尾声;长持有置信度低</td></tr>
+      <tr><td class="mono">M4新·60月</td><td>M4 16G/256G 尾货</td><td>现在买</td><td class="num mono">5099</td><td class="num mono">60</td><td class="num mono">82</td><td class="num mono"><b>70</b></td><td class="num mono">55%</td><td class="num mono">1424</td><td class="num mono">500</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期10月;置信度低</td></tr>
+      <tr><td class="mono">M4二手·12月</td><td>M4 16G/256G</td><td>现在买</td><td class="num mono">4200</td><td class="num mono">12</td><td class="num mono">34</td><td class="num mono"><b>67</b></td><td class="num mono">69%</td><td class="num mono">3493</td><td class="num mono">100</td><td><span class="badge badge-success">预算内前沿</span></td><td class="note">残值已计M6发布冲击(f=0.30)</td></tr>
+      <tr><td class="mono">M4二手·18月</td><td>M4 16G/256G</td><td>现在买</td><td class="num mono">4200</td><td class="num mono">18</td><td class="num mono">40</td><td class="num mono"><b>52</b></td><td class="num mono">67%</td><td class="num mono">3408</td><td class="num mono">150</td><td><span class="badge badge-success">预算内前沿</span></td><td class="note"></td></tr>
+      <tr style="background:var(--accent-soft)"><td class="mono">M4二手·24月</td><td>M4 16G/256G</td><td>现在买</td><td class="num mono">4200</td><td class="num mono">24</td><td class="num mono">46</td><td class="num mono"><b>50</b></td><td class="num mono">65%</td><td class="num mono">3203</td><td class="num mono">200</td><td><span class="badge badge-success">预算内前沿·主推</span></td><td class="note">预算内月均最低点</td></tr>
+      <tr><td class="mono">M4二手·36月</td><td>M4 16G/256G</td><td>现在买</td><td class="num mono">4200</td><td class="num mono">36</td><td class="num mono">58</td><td class="num mono"><b>55</b></td><td class="num mono">61%</td><td class="num mono">2510</td><td class="num mono">300</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M4二手·24月 支配</td></tr>
+      <tr><td class="mono">M4二手·48月</td><td>M4 16G/256G</td><td>现在买</td><td class="num mono">4200</td><td class="num mono">48</td><td class="num mono">70</td><td class="num mono"><b>57</b></td><td class="num mono">58%</td><td class="num mono">1872</td><td class="num mono">400</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 临近支持期尾声</td></tr>
+      <tr><td class="mono">M4二手·60月</td><td>M4 16G/256G</td><td>现在买</td><td class="num mono">4200</td><td class="num mono">60</td><td class="num mono">82</td><td class="num mono"><b>55</b></td><td class="num mono">55%</td><td class="num mono">1424</td><td class="num mono">500</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期10月;置信度低</td></tr>
+      <tr><td class="mono">M2-16·12月</td><td>M2 16G/256G</td><td>现在买</td><td class="num mono">3566</td><td class="num mono">12</td><td class="num mono">55</td><td class="num mono"><b>93</b></td><td class="num mono">45%</td><td class="num mono">2552</td><td class="num mono">100</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M4二手·24月 支配</td></tr>
+      <tr><td class="mono">M2-16·18月</td><td>M2 16G/256G</td><td>现在买</td><td class="num mono">3566</td><td class="num mono">18</td><td class="num mono">61</td><td class="num mono"><b>77</b></td><td class="num mono">43%</td><td class="num mono">2327</td><td class="num mono">150</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M4二手·24月 支配</td></tr>
+      <tr><td class="mono">M2-16·24月</td><td>M2 16G/256G</td><td>现在买</td><td class="num mono">3566</td><td class="num mono">24</td><td class="num mono">67</td><td class="num mono"><b>73</b></td><td class="num mono">42%</td><td class="num mono">2011</td><td class="num mono">200</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 临近支持期尾声</td></tr>
+      <tr><td class="mono">M2-16·36月</td><td>M2 16G/256G</td><td>现在买</td><td class="num mono">3566</td><td class="num mono">36</td><td class="num mono">79</td><td class="num mono"><b>65</b></td><td class="num mono">40%</td><td class="num mono">1522</td><td class="num mono">300</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期7月</td></tr>
+      <tr><td class="mono">M2-16·48月</td><td>M2 16G/256G</td><td>现在买</td><td class="num mono">3566</td><td class="num mono">48</td><td class="num mono">91</td><td class="num mono"><b>58</b></td><td class="num mono">37%</td><td class="num mono">1176</td><td class="num mono">400</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期19月;置信度低</td></tr>
+      <tr><td class="mono">M2-16·60月</td><td>M2 16G/256G</td><td>现在买</td><td class="num mono">3566</td><td class="num mono">60</td><td class="num mono">103</td><td class="num mono"><b>52</b></td><td class="num mono">36%</td><td class="num mono">931</td><td class="num mono">500</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期31月;置信度低</td></tr>
+      <tr><td class="mono">M2-8·12月</td><td>M2 8G/256G</td><td>现在买</td><td class="num mono">2675</td><td class="num mono">12</td><td class="num mono">55</td><td class="num mono"><b>19</b></td><td class="num mono">29%</td><td class="num mono">2552</td><td class="num mono">100</td><td><span class="badge badge-success">全量前沿</span></td><td class="note">8G淘汰配置风险</td></tr>
+      <tr><td class="mono">M2-8·18月</td><td>M2 8G/256G</td><td>现在买</td><td class="num mono">2675</td><td class="num mono">18</td><td class="num mono">61</td><td class="num mono"><b>28</b></td><td class="num mono">28%</td><td class="num mono">2327</td><td class="num mono">150</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M2-8·12月 支配</td></tr>
+      <tr><td class="mono">M2-8·24月</td><td>M2 8G/256G</td><td>现在买</td><td class="num mono">2675</td><td class="num mono">24</td><td class="num mono">67</td><td class="num mono"><b>36</b></td><td class="num mono">27%</td><td class="num mono">2011</td><td class="num mono">200</td><td><span class="badge badge-default">被支配</span></td><td class="note">被 M2-8·12月 支配</td></tr>
+      <tr><td class="mono">M2-8·36月</td><td>M2 8G/256G</td><td>现在买</td><td class="num mono">2675</td><td class="num mono">36</td><td class="num mono">79</td><td class="num mono"><b>40</b></td><td class="num mono">26%</td><td class="num mono">1522</td><td class="num mono">300</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期7月</td></tr>
+      <tr><td class="mono">M2-8·48月</td><td>M2 8G/256G</td><td>现在买</td><td class="num mono">2675</td><td class="num mono">48</td><td class="num mono">91</td><td class="num mono"><b>40</b></td><td class="num mono">24%</td><td class="num mono">1176</td><td class="num mono">400</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期19月;置信度低</td></tr>
+      <tr><td class="mono">M2-8·60月</td><td>M2 8G/256G</td><td>现在买</td><td class="num mono">2675</td><td class="num mono">60</td><td class="num mono">103</td><td class="num mono"><b>37</b></td><td class="num mono">23%</td><td class="num mono">931</td><td class="num mono">500</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期31月;置信度低</td></tr>
+      <tr><td class="mono">M1-16·12月</td><td>M1 16G/256G</td><td>现在买</td><td class="num mono">2650</td><td class="num mono">12</td><td class="num mono">81</td><td class="num mono"><b>114</b></td><td class="num mono">34%</td><td class="num mono">1377</td><td class="num mono">100</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期9月;被 M4二手·24月 支配</td></tr>
+      <tr><td class="mono">M1-16·18月</td><td>M1 16G/256G</td><td>现在买</td><td class="num mono">2650</td><td class="num mono">18</td><td class="num mono">87</td><td class="num mono"><b>85</b></td><td class="num mono">33%</td><td class="num mono">1278</td><td class="num mono">150</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期15月</td></tr>
+      <tr><td class="mono">M1-16·24月</td><td>M1 16G/256G</td><td>现在买</td><td class="num mono">2650</td><td class="num mono">24</td><td class="num mono">93</td><td class="num mono"><b>72</b></td><td class="num mono">32%</td><td class="num mono">1129</td><td class="num mono">200</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期21月</td></tr>
+      <tr><td class="mono">M1-16·36月</td><td>M1 16G/256G</td><td>现在买</td><td class="num mono">2650</td><td class="num mono">36</td><td class="num mono">105</td><td class="num mono"><b>57</b></td><td class="num mono">30%</td><td class="num mono">898</td><td class="num mono">300</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期33月;置信度低</td></tr>
+      <tr><td class="mono">M1-16·48月</td><td>M1 16G/256G</td><td>现在买</td><td class="num mono">2650</td><td class="num mono">48</td><td class="num mono">117</td><td class="num mono"><b>48</b></td><td class="num mono">29%</td><td class="num mono">735</td><td class="num mono">400</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期45月;置信度低</td></tr>
+      <tr><td class="mono">M1-16·60月</td><td>M1 16G/256G</td><td>现在买</td><td class="num mono">2650</td><td class="num mono">60</td><td class="num mono">129</td><td class="num mono"><b>42</b></td><td class="num mono">27%</td><td class="num mono">619</td><td class="num mono">500</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期57月;置信度低</td></tr>
+      <tr><td class="mono">M1-8·12月</td><td>M1 8G/256G</td><td>现在买</td><td class="num mono">2244</td><td class="num mono">12</td><td class="num mono">81</td><td class="num mono"><b>81</b></td><td class="num mono">22%</td><td class="num mono">1377</td><td class="num mono">100</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期9月;被 M2-8·12月 支配</td></tr>
+      <tr><td class="mono">M1-8·18月</td><td>M1 8G/256G</td><td>现在买</td><td class="num mono">2244</td><td class="num mono">18</td><td class="num mono">87</td><td class="num mono"><b>62</b></td><td class="num mono">22%</td><td class="num mono">1278</td><td class="num mono">150</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期15月</td></tr>
+      <tr><td class="mono">M1-8·24月</td><td>M1 8G/256G</td><td>现在买</td><td class="num mono">2244</td><td class="num mono">24</td><td class="num mono">93</td><td class="num mono"><b>55</b></td><td class="num mono">21%</td><td class="num mono">1129</td><td class="num mono">200</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期21月</td></tr>
+      <tr><td class="mono">M1-8·36月</td><td>M1 8G/256G</td><td>现在买</td><td class="num mono">2244</td><td class="num mono">36</td><td class="num mono">105</td><td class="num mono"><b>46</b></td><td class="num mono">20%</td><td class="num mono">898</td><td class="num mono">300</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期33月;置信度低</td></tr>
+      <tr><td class="mono">M1-8·48月</td><td>M1 8G/256G</td><td>现在买</td><td class="num mono">2244</td><td class="num mono">48</td><td class="num mono">117</td><td class="num mono"><b>40</b></td><td class="num mono">19%</td><td class="num mono">735</td><td class="num mono">400</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期45月;置信度低</td></tr>
+      <tr><td class="mono">M1-8·60月</td><td>M1 8G/256G</td><td>现在买</td><td class="num mono">2244</td><td class="num mono">60</td><td class="num mono">129</td><td class="num mono"><b>35</b></td><td class="num mono">18%</td><td class="num mono">619</td><td class="num mono">500</td><td><span class="badge badge-default">被支配</span></td><td class="note">⚠ 超出支持期57月;置信度低</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">未列出:M2 16G/512G(4799,被 M4 二手支配)、M1 512G 变体(被支配)、M4 512G/1T 与 M4 Pro/M5 Pro 新品(买价 6400-12999,超预算 28% 以上且被 M6 支配或深度被支配)。残值均含 M6 发布冲击调整(M6 自身除外);持有 ≥36 月的残值为曲线外推,置信度低。买入时机「现在预购」指 M6 已开预购、9-22 发货,等待期约 1 个月已计入类型 B/C 口径而非买价。</p>
+</div>
+
+<h2>三、图表说明</h2>
+<div class="card">
+  <ul>
+    <li><b>帕累托前沿图阅读方法</b>:左下角方向(低月均、高性能)是「更好的方向」。一个点若在它的左上方存在其他点(更便宜且更快),即被支配,不值得选;前沿(虚线连线)上的点互有取舍,均为非劣解。本报告的全量前沿只有两端:M2 8G·12月(最省钱)与 M6·12月(性能上限且成本低于全部 M4 方案)。</li>
+    <li><b>气泡大小</b>≈持有期净支出(买入价−残值+维修),反映资金占用规模:M6·12月净支出仅约 450 元(小气泡),M4 二手·24月约 1197 元,M4 新品·60月约 4175 元(大气泡)。</li>
+    <li><b>不确定性标注</b>:持有 &gt;36 月的点半透明(保值率外推+性能衰减假设,预测置信度低);⚠ 橙色边框点为卖出时超出 macOS 支持期(约 72 月)的方案,存在无法获取安全更新风险;M6 各点跑分为推算值(9-22 发售后实测回填,届时品类基准切换、全系 S(0) 口径下移但排序不变)。</li>
+    <li><b>保值率曲线图</b>:实线为 2026-08-10 中国市场实测修订曲线(8 样本,MAE 8.7pp),60 月后为指数外推(虚线);标注点为 M4/M2/M1 当前市场位置——M4 实测(60%)低于曲线(67.3%)7.3pp,容差内;M1/M2 实测高于曲线,当前老款残值估计整体偏保守。</li>
+    <li><b>多持有期成本曲线图</b>:横轴持有月数,纵轴月均成本。M6(国补价)曲线全程低于 M4 新品与 M2 16G;M4 二手曲线在 24 月出现月均洼点(约 50 元)——预算内方案的最优持有期。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title">保值率曲线(Mac_mini 品类)与当前机型位置</div>
+  <div id="valueCurve" class="chart-aux"></div>
+  <p class="src">数据来源:constants.json 保值率曲线.Mac_mini(v3.9.1 中国市场实测修订);M4 实测点 = 闲鱼中位 4200 ÷ 残值分母 6999。</p>
+</div>
+
+<div class="card">
+  <div class="card-title">各机型多持有期月均成本曲线</div>
+  <div id="costCurve" class="chart-aux"></div>
+  <p class="src">数据来源:本报告计算表(引擎 + SOP 人工补齐修正后口径);M6 为国补参考价口径。</p>
+</div>
+
+<h2>四、更新提示</h2>
+<div class="card">
+  <ul>
+    <li><b>触发重新分析的条件</b>:① M6 发售后 2 周(2026-10 上旬)实测渠道/二手价偏离加权中枢 ±10% → 快照红色全更新并重分析;② M6 Geekbench 实测回填(9-22 后)→ 品类基准切换复核;③ 国补政策变化(时效截止/地区额度耗尽)→ M6 买价重算;④ 实测保值率与曲线偏差 &gt;10pp → 标注实测偏差提示。</li>
+    <li><b>对卖方的时间提示</b>:官宣至发售后首月为老款二手高位窗口——若您手上有旧 Mac mini 计划出手,9-22 前后是较好的卖出时点。</li>
+    <li><b>下次建议分析时间</b>:2026-10(M6 发售、实测数据落地后)或实际下单前。若按主推方案购买 M4 二手,建议成交前以本报告价格表核对当时行情。</li>
+    <li><b>本报告口径备忘</b>:引擎路径(apple-value-engine)+ 三项人工补齐(类型 C 三情景失效判定、M6 推算跑分修正、老款残值冲击调整);分析事实与中间值存于 scripts/debug/analysis-facts.md。</li>
+  </ul>
+</div>
+
+</div>
+<script>
+var C_PRIMARY = '#007AFF', C_ACCENT_SOFT = '#E6F2FF';
+var C_MUTED = '#86868F', C_BORDER = '#D2D2D8', C_GRAY = '#C7C7CC';
+var C_SUCCESS = '#2A8A61', C_WARNING = '#E09500', C_ERROR = '#F24B4B';
+var PALETTE = ['#007AFF', '#8E8E93', '#2A8A61', '#E09500', '#AF52DE', '#5856D6'];
+var baseOption = {
+  backgroundColor: 'transparent', color: PALETTE,
+  textStyle: { fontFamily: 'Inter, -apple-system, "PingFang SC", sans-serif', color: '#1D1D1F' },
+  grid: { left: 60, right: 24, top: 50, bottom: 60, containLabel: true },
+  tooltip: { trigger: 'item', backgroundColor: '#FFFFFF', borderColor: '#D2D2D8', borderWidth: 1,
+    textStyle: { color: '#1D1D1F', fontSize: 13 }, extraCssText: 'box-shadow: 0 4px 8px -2px rgba(29,29,31,0.08); border-radius: 8px;' },
+  legend: { top: 8, textStyle: { color: C_MUTED, fontSize: 12 }, itemWidth: 14, itemHeight: 10 },
+  xAxis: { type: 'value', nameLocation: 'middle', nameGap: 32, nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } }, axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } } },
+  yAxis: { type: 'value', nameLocation: 'middle', nameGap: 40, nameTextStyle: { color: C_MUTED, fontSize: 12 },
+    axisLine: { lineStyle: { color: C_BORDER } }, axisLabel: { color: C_MUTED, fontSize: 12 },
+    splitLine: { lineStyle: { color: C_BORDER, type: 'solid' } } }
+};
+function size(d) { return Math.min(28, Math.sqrt(d[2]) / 3 + 6); }
+
+/* 图1:帕累托前沿 */
+var frontBudget = [
+  { name: 'M2 8G·12月', value: [18.6, 29, 223] },
+  { name: 'M4二手·24月', value: [49.9, 65, 1197] },
+  { name: 'M4二手·18月', value: [52.4, 67, 942] },
+  { name: 'M4二手·12月', value: [67.3, 69, 807] }
+];
+var frontStretch = [
+  { name: 'M6·12月(全量前沿顶点)', value: [37.5, 97, 450] },
+  { name: 'M6·18月', value: [58.9, 94, 1060] },
+  { name: 'M6·24月', value: [66.7, 91, 1600] },
+  { name: 'M6·36月', value: [72.5, 86, 2610] },
+  { name: 'M6·48月', value: [65.2, 81, 3129], itemStyle: { opacity: 0.6 } },
+  { name: 'M6·60月', value: [66.7, 77, 3999], itemStyle: { opacity: 0.6 } }
+];
+var m6Official = [
+  { name: 'M6官网价6999·12月', value: [125.0, 97, 1500] },
+  { name: 'M6官网价·24月', value: [110.4, 91, 2650] },
+  { name: 'M6官网价·36月', value: [101.7, 86, 3660] },
+  { name: 'M6官网价·48月', value: [86.8, 81, 4179], itemStyle: { opacity: 0.6 } },
+  { name: 'M6官网价·60月', value: [84.2, 77, 5049], itemStyle: { opacity: 0.6 } }
+];
+var dominated = [
+  { name: 'M4新·12月', value: [142.2, 69, 1706] },
+  { name: 'M4新·18月', value: [102.3, 67, 1841] },
+  { name: 'M4新·24月', value: [87.3, 65, 2096] },
+  { name: 'M4新·36月', value: [80.2, 61, 2889] },
+  { name: 'M4新·48月', value: [75.6, 58, 3627], itemStyle: { opacity: 0.5 } },
+  { name: 'M4新·60月', value: [69.6, 55, 4175], itemStyle: { opacity: 0.5 } },
+  { name: 'M2-16·12月', value: [92.8, 45, 1114] },
+  { name: 'M2-16·18月', value: [77.2, 43, 1389] },
+  { name: 'M2-16·24月', value: [73.1, 42, 1755] },
+  { name: 'M2-16·36月', value: [65.1, 40, 2344] },
+  { name: 'M2-16·48月', value: [58.1, 37, 2790], itemStyle: { opacity: 0.5 } },
+  { name: 'M2-16·60月', value: [52.2, 36, 3135], itemStyle: { opacity: 0.5 } },
+  { name: 'M2-8·18月', value: [27.7, 28, 498] },
+  { name: 'M2-8·24月', value: [36.0, 27, 864] },
+  { name: 'M2-8·36月', value: [40.4, 26, 1453] },
+  { name: 'M2-8·48月', value: [39.6, 24, 1899], itemStyle: { opacity: 0.5 } },
+  { name: 'M2-8·60月', value: [37.4, 23, 2244], itemStyle: { opacity: 0.5 } },
+  { name: 'M1-16·12月', value: [114.4, 34, 1373] },
+  { name: 'M1-16·18月', value: [84.5, 33, 1522] },
+  { name: 'M1-16·24月', value: [71.7, 32, 1721] },
+  { name: 'M1-16·36月', value: [57.0, 30, 2052] },
+  { name: 'M1-16·48月', value: [48.2, 29, 2315], itemStyle: { opacity: 0.5 } },
+  { name: 'M1-16·60月', value: [42.2, 27, 2531], itemStyle: { opacity: 0.5 } },
+  { name: 'M1-8·12月', value: [80.6, 22, 967] },
+  { name: 'M1-8·18月', value: [62.0, 22, 1116] },
+  { name: 'M1-8·24月', value: [54.8, 21, 1315] },
+  { name: 'M1-8·36月', value: [45.7, 20, 1646] },
+  { name: 'M1-8·48月', value: [39.8, 19, 1909], itemStyle: { opacity: 0.5 } },
+  { name: 'M1-8·60月', value: [35.4, 18, 2125], itemStyle: { opacity: 0.5 } }
+];
+var paretoOption = Object.assign({}, baseOption, {
+  xAxis: { name: '月均成本(元/月)→ 越低越省', min: 0, max: 160 },
+  yAxis: { name: '持有期平均性能满足度%→ 越高越好', min: 15, max: 105 },
+  tooltip: { trigger: 'item', formatter: function (p) {
+    return p.name + '<br>月均:' + p.value[0] + '元 · 性能:' + p.value[1] + '%<br>持有期净支出:' + p.value[2] + '元'; } },
+  legend: { data: ['预算内前沿', 'M6国补价·超预算参考', 'M6官网价·敏感性', '被支配点'] },
+  series: [
+    { name: '预算内前沿', type: 'scatter', symbol: 'circle', symbolSize: size, itemStyle: { color: C_PRIMARY }, data: frontBudget },
+    { name: 'M6国补价·超预算参考', type: 'scatter', symbol: 'circle', symbolSize: size,
+      itemStyle: { color: 'rgba(0,122,255,0.12)', borderColor: C_PRIMARY, borderWidth: 2 }, data: frontStretch },
+    { name: 'M6官网价·敏感性', type: 'scatter', symbol: 'triangle', symbolSize: 12,
+      itemStyle: { color: 'rgba(0,122,255,0.25)', borderColor: C_PRIMARY, borderWidth: 1.5 }, data: m6Official },
+    { name: '被支配点', type: 'scatter', symbol: 'circle', symbolSize: 8,
+      itemStyle: { color: C_GRAY, opacity: 0.5 }, data: dominated },
+    { type: 'line', data: [[18.6, 29], [37.5, 97]], symbol: 'none',
+      lineStyle: { color: C_PRIMARY, type: 'dashed', width: 1.5 }, tooltip: { show: false } }
+  ]
+});
+var c1 = echarts.init(document.getElementById('pareto'));
+c1.setOption(paretoOption);
+
+/* 图2:保值率曲线 */
+var curvePts = [[0,100],[3,90],[6,82],[12,80],[18,72],[24,65],[36,52],[48,46],[60,35]];
+var extrapPts = [[60,35],[72,26.2],[84,20],[96,15.6]];
+var valueCurveOption = Object.assign({}, baseOption, {
+  xAxis: { name: '机龄(发布后月数)', min: 0, max: 100 },
+  yAxis: { name: '保值率%(分母=M6官方价6999)', min: 0, max: 100 },
+  tooltip: { trigger: 'item', formatter: function (p) { return p.name + '<br>机龄:' + p.value[0] + '月 · 保值率:' + p.value[1] + '%'; } },
+  legend: { data: ['品类曲线(实测修订)', '60月后指数外推', '当前机型市场位置'] },
+  series: [
+    { name: '品类曲线(实测修订)', type: 'line', data: curvePts, symbol: 'circle', symbolSize: 6,
+      lineStyle: { width: 2, color: C_PRIMARY }, itemStyle: { color: C_PRIMARY } },
+    { name: '60月后指数外推', type: 'line', data: extrapPts, symbol: 'none',
+      lineStyle: { width: 2, color: C_PRIMARY, type: 'dashed', opacity: 0.6 } },
+    { name: '当前机型市场位置', type: 'scatter', symbolSize: 12,
+      itemStyle: { color: C_SUCCESS }, data: [
+        { name: 'M4·22月 曲线67.3%', value: [22, 67.3] },
+        { name: 'M2·43月 曲线48.5%', value: [43, 48.5] },
+        { name: 'M1·69月 外推26.2%', value: [69, 26.2] } ] },
+    { name: 'M4实测60%(4200/6999)', type: 'scatter', symbolSize: 12,
+      itemStyle: { color: C_WARNING, borderColor: C_WARNING }, data: [ { name: 'M4实测60%(4200/6999)', value: [22, 60] } ] }
+  ]
+});
+var c2 = echarts.init(document.getElementById('valueCurve'));
+c2.setOption(valueCurveOption);
+
+/* 图3:多持有期成本曲线 */
+var machineData = [
+  { name: 'M6新品(国补5949)', data: [[12,37.5],[18,58.9],[24,66.7],[36,72.5],[48,65.2],[60,66.7]] },
+  { name: 'M4新品尾货(5099)', data: [[12,142.2],[18,102.3],[24,87.3],[36,80.2],[48,75.6],[60,69.6]] },
+  { name: 'M4二手(4200)', data: [[12,67.3],[18,52.4],[24,49.9],[36,55.3],[48,56.8],[60,54.6]] },
+  { name: 'M2 16G二手(3566)', data: [[12,92.8],[18,77.2],[24,73.1],[36,65.1],[48,58.1],[60,52.2]] },
+  { name: 'M2 8G二手(2675)', data: [[12,18.6],[18,27.7],[24,36.0],[36,40.4],[48,39.6],[60,37.4]] },
+  { name: 'M1 16G二手(2650)', data: [[12,114.4],[18,84.5],[24,71.7],[36,57.0],[48,48.2],[60,42.2]] }
+];
+var costCurveOption = Object.assign({}, baseOption, {
+  xAxis: { name: '持有月数', min: 12 },
+  yAxis: { name: '月均成本(元)' },
+  tooltip: { trigger: 'axis', formatter: function (pts) { var s = ''; pts.forEach(function (i) { s += i.seriesName + ':' + i.data[0] + '月 ' + i.data[1] + '元/月<br>'; }); return s; } },
+  legend: { type: 'scroll', top: 0, textStyle: { color: C_MUTED, fontSize: 10 }, height: 30 },
+  series: machineData.map(function (s, i) {
+    return { name: s.name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, data: s.data,
+      lineStyle: { width: 2, color: PALETTE[i % PALETTE.length] }, itemStyle: { color: PALETTE[i % PALETTE.length] } };
+  })
+});
+var c3 = echarts.init(document.getElementById('costCurve'));
+c3.setOption(costCurveOption);
+
+window.addEventListener('resize', function () { c1.resize(); c2.resize(); c3.resize(); });
+</script>
+</body>
+</html>

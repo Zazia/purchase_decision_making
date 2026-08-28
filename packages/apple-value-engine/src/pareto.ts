@@ -889,13 +889,25 @@ function computeAgeMonths(constants: Constants, releaseDateKey: string): number 
     }
   }
 
-  // 模糊兜底 3: 按芯片名(最后一段)搜索其他尺寸/子品类的发布日期
+  // 模糊兜底 3: 按完整芯片名搜索其他尺寸/子品类的发布日期
   // (如 "MacBook_Pro_14_M3Pro" 不存在, 但 "MacBook_Pro_16_M3Pro" 存在)
+  // P2 修复 (2026-08-27): 原实现取最后一段作芯片名, "Mac_mini_M4_Pro" 的末段是裸 "Pro",
+  // endsWith("_Pro") 会错配任意 Pro 型号 (曾把 M4_Pro 错配到 M2_Pro, 机龄虚增 21 个月)。
+  // 现改为: 末段为裸 Pro/Max/Ultra 后缀时与前一段合并为完整芯片名 (M4_Pro),
+  // 且品类前缀同时去掉芯片段与屏幕尺寸段, 避免跨品类泄漏。
   if (!releaseDate) {
-    const chip = releaseDateKey.split('_').pop();
-    if (chip) {
-      // 优先匹配同品类前缀 + 同芯片后缀
-      const categoryPrefix = releaseDateKey.split('_').slice(0, -2).join('_'); // 如 "MacBook_Pro"
+    const segments = releaseDateKey.split('_');
+    // 芯片段: 末尾若为裸 Pro/Max/Ultra, 与前一段合并 (M4_Pro / M5_Max)
+    const chipSegCount = /^(Pro|Max|Ultra)$/.test(segments[segments.length - 1] ?? '') ? 2 : 1;
+    const chip = segments.slice(-chipSegCount).join('_');
+    // 品类前缀: 去掉芯片段; 若剩余末段是纯数字(屏幕尺寸)也去掉
+    const prefixSegments = segments.slice(0, -chipSegCount);
+    if (prefixSegments.length && /^\d+$/.test(prefixSegments[prefixSegments.length - 1] ?? '')) {
+      prefixSegments.pop();
+    }
+    const categoryPrefix = prefixSegments.join('_');
+    if (chip && categoryPrefix) {
+      // 优先匹配同品类前缀 + 同完整芯片后缀
       for (const [key, val] of Object.entries(constants.productReleaseDates)) {
         if (key.startsWith(categoryPrefix + '_') && key.endsWith('_' + chip) && typeof val === 'string') {
           releaseDate = val;

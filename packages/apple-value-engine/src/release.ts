@@ -333,8 +333,10 @@ function lookupConfidence(constants: Constants, categoryKey: string): 'high' | '
   if (!results) return 'low';
   const entry = lookupByCategory(results, categoryKey);
   const conf = entry?.置信度;
-  if (conf === '高') return 'high';
-  if (conf === '中') return 'medium';
+  // 前缀匹配: 数据侧存在复合格式如 "高(已官宣)"、"中(主流媒体爆料,非官宣)",
+  // 严格等值会把它们判为 low, 导致已官宣品类的类型 B/C 等待候选整体缺失
+  if (conf?.startsWith('高')) return 'high';
+  if (conf?.startsWith('中')) return 'medium';
   return 'low';
 }
 

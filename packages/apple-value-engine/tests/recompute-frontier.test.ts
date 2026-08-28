@@ -199,9 +199,11 @@ describe('recomputeFrontierFromPoints', () => {
     const recomputed = recomputeFrontierFromPoints(constants, baseParams, edited);
 
     // 排除/暂不考虑方案不出现在 frontier 与 dominated
+    // 注: P1 修复后 mac-mini 生成类型 B/C 候选, 类型 C 复用老款型号名,
+    // model+holdingYears 不再唯一标识一个方案, 需加 candidateType 区分
     const allPlans = [...recomputed.frontier, ...recomputed.dominated];
-    expect(allPlans.find((p) => p.model === first.model && p.holdingYears === first.holdingYears)).toBeUndefined();
-    expect(allPlans.find((p) => p.model === second.model && p.holdingYears === second.holdingYears)).toBeUndefined();
+    expect(allPlans.find((p) => p.model === first.model && p.holdingYears === first.holdingYears && p.candidateType === first.candidateType)).toBeUndefined();
+    expect(allPlans.find((p) => p.model === second.model && p.holdingYears === second.holdingYears && p.candidateType === second.candidateType)).toBeUndefined();
   });
 
   it('推荐区间仅按预算截取: 买入价 > 预算 的方案不进入推荐区间', () => {
