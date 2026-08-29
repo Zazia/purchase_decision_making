@@ -1,4 +1,4 @@
-﻿## 1. 锚定品识别与类型C排除
+## 1. 锚定品识别与类型C排除
 
 - [x] 1.1 在 `release.ts` 新增 `isAnchorCandidate`（或等价 helper）：候选发布月 ≥ `releasePlan.nextReleaseMonth` 判定为锚定品；发布月经既有 `computeAgeMonths`/productReleaseDates 路径解析，无法解析返回 false（保守保留）
 - [x] 1.2 `pareto.ts` `extractWaitCandidates` 类型C循环中跳过锚定品；导出该 helper 供 buildPlanPoint 复用
@@ -30,5 +30,5 @@
 
 ## 6. 文档与归档
 
-- [ ] 6.1 按 agents.md 约定提交（commit message 注明引擎口径修正与验收基准）；确认未引入根目录 `package-lock.json`（根 workspace 用 pnpm）
-- [ ] 6.2 归档变更（openspec archive），delta 同步回 `openspec/specs/apple-value-engine/spec.md`，删除 apply 阶段残留进度文件（如 `apply_instructions.json`）
+- [x] 6.1 按 agents.md 约定提交（commit message 注明引擎口径修正与验收基准）；确认未引入根目录 `package-lock.json`（根 workspace 用 pnpm）
+- [x] 6.2 归档变更（openspec archive），delta 同步回 `openspec/specs/apple-value-engine/spec.md`，删除 apply 阶段残留进度文件（如 `apply_instructions.json`）
