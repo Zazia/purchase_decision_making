@@ -541,108 +541,104 @@
         gsap.set(sel(".app-pill"), { scale: 0.85, opacity: 0 });
 
         // === Phase 0: The wish caption over clean background (0-2.5s) ===
-        tl.to(sel(".bg-glow"), { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.1);
-        tl.to(sel(".ghost-text"), { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.15);
+        tl.to(sel(".bg-glow"), { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.16);
+        tl.to(sel(".ghost-text"), { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.24);
 
         // Wish cards converge, then the stamp lands on "并不存在"
-        tl.to(sel(".intro-wish"), { opacity: 1, duration: 0.01 }, 0.3);
+        tl.to(sel(".intro-wish"), { opacity: 1, duration: 0.01 }, 0.49);
         tl.to(sel(".wish-card-l"), {
           x: 0, y: 0, opacity: 1,
           duration: 0.5, ease: "back.out(1.4)",
-        }, 0.35);
+        }, 0.57);
         tl.to(sel(".wish-card-r"), {
           x: 0, y: 0, opacity: 1,
           duration: 0.5, ease: "back.out(1.4)",
-        }, 0.6);
-        tl.to(sel(".wish-x"), { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 0.95);
+        }, 0.98);
+        tl.to(sel(".wish-x"), { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 1.54);
         tl.to(sel(".wish-stamp"), {
           opacity: 1, scale: 1,
           duration: 0.38, ease: "back.out(2.4)",
-        }, 1.45);
+        }, 2.36);
         tl.to([sel(".wish-card-l"), sel(".wish-card-r")], {
           opacity: 0.45, y: 8, duration: 0.3, ease: "power2.out",
-        }, 1.5);
-        tl.to(sel(".wish-x"), { opacity: 0.35, duration: 0.3, ease: "power2.out" }, 1.5);
-        tl.to(sel(".intro-wish"), { opacity: 0, y: -36, duration: 0.35, ease: "power2.in" }, 2.25);
+        }, 2.44);
+        tl.to(sel(".wish-x"), { opacity: 0.35, duration: 0.3, ease: "power2.out" }, 2.44);
+        tl.to(sel(".intro-wish"), { opacity: 0, y: -36, duration: 0.35, ease: "power2.in" }, 3.66);
 
         // === Phase 1: Chart enters after the wish caption (2.5-4.7s) ===
         tl.to(sel(".chart-card"), {
           y: 0, opacity: 1, scale: 1,
           duration: 0.6, ease: "back.out(1.1)",
-        }, 2.5);
+        }, 4.06);
 
-        tl.to(sel(".axis-x"), { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, 2.85);
-        tl.to(sel(".axis-y"), { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, 3.0);
-        tl.to([sel(".grid"), sel(".ticks")], { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.2);
-        tl.to([sel(".axis-x-label"), sel(".axis-y-label")], { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.3);
+        tl.to(sel(".axis-x"), { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, 4.62);
+        tl.to(sel(".axis-y"), { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, 4.85);
+        tl.to([sel(".grid"), sel(".ticks")], { opacity: 1, duration: 0.4, ease: "power2.out" }, 5.17);
+        tl.to([sel(".axis-x-label"), sel(".axis-y-label")], { opacity: 1, duration: 0.4, ease: "power2.out" }, 5.33);
 
-        tl.to(sel(".p1"), { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 2.9);
+        tl.to(sel(".p1"), { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 4.70);
 
         tl.to(sel(".zone"), {
           opacity: 1, scale: 1,
           duration: 0.5, ease: "back.out(1.6)",
-        }, 3.15);
+        }, 5.09);
 
         // === Phase 2: Pareto 1906 (4.7-7.5s) ===
-        tl.to(sel(".p1"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 4.5);
-        tl.to(sel(".p2"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 4.75);
-        tl.to(sel(".ghost-text-2"), { opacity: 1, duration: 0.6, ease: "power2.out" }, 4.9);
+        tl.to(sel(".p1"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 7.24);
+        tl.to(sel(".p2"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 7.65);
+        tl.to(sel(".ghost-text-2"), { opacity: 1, duration: 0.6, ease: "power2.out" }, 7.90);
 
         tl.to(sel(".d-dots circle"), {
           scale: 1, opacity: 0.55,
           duration: 0.35, ease: "back.out(1.7)", stagger: 0.07,
-        }, 4.9);
+        }, 7.90);
 
-        tl.to(sel(".zone"), { opacity: 0.3, duration: 0.4, ease: "power2.inOut" }, 5.8);
+        tl.to(sel(".zone"), { opacity: 0.3, duration: 0.4, ease: "power2.inOut" }, 9.40);
 
         // === Phase 3: Frontier reveal (5.3-10.4s) ===
         tl.to(sel(".f-dots circle"), {
           scale: 1, opacity: 1,
           duration: 0.4, ease: "back.out(2)", stagger: 0.09,
-        }, 5.3);
+        }, 8.57);
 
-        tl.to(sel(".fseg"), { opacity: 1, duration: 0.15, stagger: 0.12 }, 6.3);
-        tl.to(sel(".f-label"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 7.0);
-        tl.to(sel(".legend"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 7.1);
-        tl.to(sel(".d-dots circle"), { opacity: 0.32, duration: 0.35, ease: "power2.inOut" }, 7.3);
+        tl.to(sel(".fseg"), { opacity: 1, duration: 0.15, stagger: 0.12 }, 10.23);
+        tl.to(sel(".f-label"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 11.40);
+        tl.to(sel(".legend"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 11.57);
+        tl.to(sel(".d-dots circle"), { opacity: 0.32, duration: 0.35, ease: "power2.inOut" }, 11.90);
 
-        tl.to(sel(".p2"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 7.5);
-        tl.to(sel(".p3"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 7.65);
+        tl.to(sel(".p2"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 12.23);
+        tl.to(sel(".p3"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 12.48);
 
         // Zone punchline: does not exist
-        tl.to(sel(".zone-label"), { opacity: 0, duration: 0.15, ease: "power1.in" }, 7.6);
-        tl.to(sel(".zone-label-alt"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 7.6);
-        tl.to(sel(".zone"), { opacity: 0.55, duration: 0.3, ease: "power2.out" }, 7.6);
-        tl.to(sel(".zone-ring"), { attr: { stroke: "#B25000" }, duration: 0.3 }, 7.6);
+        tl.to(sel(".zone-label"), { opacity: 0, duration: 0.15, ease: "power1.in" }, 12.40);
+        tl.to(sel(".zone-label-alt"), { opacity: 1, duration: 0.3, ease: "power2.out" }, 12.40);
+        tl.to(sel(".zone"), { opacity: 0.55, duration: 0.3, ease: "power2.out" }, 12.40);
+        tl.to(sel(".zone-ring"), { attr: { stroke: "#B25000" }, duration: 0.3 }, 12.40);
 
         // Dominance arrow
-        tl.to(sel(".dom-arrow"), { opacity: 1, duration: 0.45, ease: "power2.out" }, 7.85);
-        tl.to([sel(".end-cheap"), sel(".end-strong")], { opacity: 1, duration: 0.35, ease: "power2.out" }, 8.1);
+        tl.to(sel(".dom-arrow"), { opacity: 1, duration: 0.45, ease: "power2.out" }, 12.78);
+        tl.to([sel(".end-cheap"), sel(".end-strong")], { opacity: 1, duration: 0.35, ease: "power2.out" }, 13.15);
 
         // Pulse on strongest frontier point
         tl.fromTo(sel(".pulse"),
           { attr: { r: 12 }, opacity: 0.9 },
-          { attr: { r: 38 }, opacity: 0, duration: 0.55, ease: "power2.out", immediateRender: false },
-          9.2
-        );
+          { attr: { r: 38 }, opacity: 0, duration: 0.55, ease: "power2.out", immediateRender: false }, 14.80);
         tl.fromTo(sel(".pulse"),
           { attr: { r: 12 }, opacity: 0.9 },
-          { attr: { r: 38 }, opacity: 0, duration: 0.55, ease: "power2.out", immediateRender: false },
-          9.8
-        );
+          { attr: { r: 38 }, opacity: 0, duration: 0.55, ease: "power2.out", immediateRender: false }, 15.70);
 
         // === Phase 4: Apply to Apple (10.4-15s) ===
-        tl.to(sel(".p3"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 10.35);
-        tl.to(sel(".p4"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 10.5);
+        tl.to(sel(".p3"), { x: -30, opacity: 0, duration: 0.3, ease: "power2.in" }, 16.52);
+        tl.to(sel(".p4"), { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 16.76);
 
         tl.to(sel(".app-pill"), {
           scale: 1, opacity: 1,
           duration: 0.5, ease: "back.out(1.5)",
-        }, 11.0);
+        }, 17.55);
 
         tl.to(sel(".app-pill"), {
           y: -6, duration: 0.8, ease: "sine.inOut", yoyo: true, repeat: 1,
-        }, 12.9);
+        }, 20.54);
 
         // === Exit wipe ===
         tl.to([
@@ -650,10 +646,10 @@
           sel(".panel"),
         ], {
           x: -2200, duration: 0.45, ease: "expo.in", stagger: 0.03,
-        }, 14.4);
+        }, 22.65);
         tl.to([sel(".ghost-text"), sel(".ghost-text-2"), sel(".bg-glow")], {
           opacity: 0, duration: 0.3, ease: "power2.in",
-        }, 14.4);
+        }, 22.65);
 
         window.__timelines = window.__timelines || {};
         window.__timelines["scene1-5-pareto-concept"] = tl;
