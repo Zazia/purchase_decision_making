@@ -49,6 +49,21 @@
 - 成本口径说明（用户确认拆分断言）：自添加方案（A 现在买）与等待类（B/C）快照方案存在等待月数的时点折旧差（实测约 1-2 元/36 个月持有期），源于买入时点不同（等待后买入 → 卖出时机龄多等待月数），非计算口径不一致；性能满足度与同配置快照方案完全一致（误差 0）。与「现在买」（A）语义的方案对比则完全一致（两路径等价单测验证）。
 - 引擎同步（tasks 2.6）后端内行为变化（用户已确认接受）：vendor 旧引擎无 B/C 候选（快照方案全是 A「现在买」），src 新引擎 v3.8 在距新品发布 ≤90 天时生成 B/C「等新品」候选（当前 Mac_mini 因 M6 于 2026-08 刚发布），端内快照方案会从「现在买」变为「等 1 个月买降价」，结果页已有 B/C 橙色徽章支持。
 
+### D2c：自添加方案品类取 `params.category`，芯片前缀推断降级为回退（残留修复）
+
+`resolveCategoryKeyFromPlanPoint` 对自添加方案（model 为自由文本，快照中查不到）按芯片前缀兜底：M 系列 → `Mac_mini`、A 系列 → `iPhone_Pro`。导致 macbook pro 品类添加 M3 Pro 时旗舰基准分母（17100 vs 28500）、内存权重表（Mac_基础 vs Mac_Pro）、保值率曲线、维修成本、残值分母、机龄匹配全部查错品类，性能虚高约 2.5×；此前 Mac mini M4 复现用例转绿纯属兜底值恰好等于正确品类。
+
+- 修复：`rebuildCustomPlanPoint` 与 `rebuildEditedPlanPoint`（自添加副本分支）的 categoryKey 优先取 `params.category`（端内值为 `macbook-pro` 等，经 `normalizeCategory` 转小写下划线后与 `getCategoryBenchmarkKey` / `getWeightTable` / `getRetentionRate` 查表键对齐）；`resolveCategoryKeyFromPlanPoint` 仅在 `params.category` 缺失/非法时作回退（保持 original/edited 快照方案现有行为不变——它们的 model 在快照中可精确命中第一分支，不走兜底）。
+- 备选方案：给 `EditedPlanPoint` 增加 `categoryKey` 字段由端内显式携带。弃用——`recomputeFrontierFromPoints` 已持有 `params.category`（编辑器入口与结果页共用同一 DecisionParams），再加字段引入两处同步负担且旧 draft 快照无此字段还需迁移。
+- 顺带记录（不修）：编辑器芯片下拉 `getKnownChips` 把 Mac 与 iPhone/iPad 芯片混在一个列表，用户在 Mac 品类下可选 A 系列芯片且不报错；修复品类解析后该场景已能算出合理结果（按所选品类查表），过滤属体验优化，超出本变更范围。
+
+### D2d：自添加方案机龄匹配的芯片前缀双写法容错（残留修复）
+
+`resolveReleaseDateKeyForCustomPlan` 用规范化芯片名构造前缀（`M3_Pro_`）匹配 marketSnapshots key，但快照 key 用紧凑写法（`M3Pro_14寸_16G_512G_二手`）——所有带 Pro/Max/Ultra 后缀的芯片即使品类正确（D2c 修复后）也匹配失败，机龄错按 0 兜底，残值（保值率按卖龄算）与系统支持风险全错。Mac mini M4（无后缀）不受影响，这是此前复现用例未暴露的原因。
+
+- 修复：前缀匹配同时尝试紧凑与规范化两种写法（与 `resolveProductReleaseDate` 兜底2「芯片名紧凑/展开互试」同款思路），即 `chipPrefix ∈ {${chip}_, ${compact(chip)}_}`，精确匹配与同芯片退化匹配两步均用双前缀。
+- 匹配成功后机龄链路不变：`resolveReleaseDateKeyFromModel` 从快照 key 推导 releaseDateKey（如 `MacBook_Pro_14_M3Pro`），`resolveProductReleaseDate` 已有跨尺寸同芯片模糊兜底（14 寸 M3Pro → 16 寸 M3Pro 的 2023-11），无需重复实现。
+
 ### D3：`onOpenReport` 在用户修改版视图下不带 `savedId`
 
 `result.ts` 的 `onOpenReport` 中，跳转 URL 仅在「非用户修改版」时携带 `savedId`：`viewMode === 'userModified'` 时写完 globalData 后直接跳 `/pages/report/report`（无 query），`report.ts` 的 `onLoad` 走既有 `loadReport` 路径读取 globalData 刚写入的重算数据。
@@ -67,6 +82,8 @@
 - [放宽态保存快照语义] 预算放宽态点「保存结果」会保存放宽方案集（原预算参数）——保存的快照回看时引擎按原参数重算可能再次为空 → 保存快照时连带存储当时的 `frontier/dominated` 数据（既有快照机制已存渲染数据，回看优先用缓存数据），验证保存→回看闭环。
 - [vendor 同步遗漏] 直接改 vendor 不生效或被下次 sync 覆盖 → tasks 中明确「改 src → `npm run build` → `node scripts/sync-engine.mjs`」顺序，并以 vendor 文件内容包含修复为验收点。
 - [isEmpty 语义收窄的回归] 其他 `wx:if` 分支（如空卡片 `wx:if="{{isEmpty}}"`、放宽方案卡片 `wx:if="{{isEmpty && plans.length > 0}}"`）依赖现有 `isEmpty` 组合 → 只改三处入口的 `wx:if`，不动 `isEmpty` 赋值逻辑，空卡片与放宽卡片渲染不变。
+- [品类改为 params.category 优先的回归] original/edited 快照方案的 model 可精确命中快照第一分支，品类解析行为不变；但 `params.category` 为父品类（如 `iphone`）时与快照子品类键（`iPhone_Pro`）不同名——性能/权重查表走 normalizeCategory 映射本就支持父品类，保值率曲线 `getRetentionRate` 需以单测确认父品类键可命中（任务 6.3 覆盖 iPhone 用例）。
+- [残留修复的 vendor 同步] 修复只改引擎 src，若遗漏 build + sync 则端内仍跑旧逻辑（M3 Pro 性能依旧虚高）→ 任务 6.5 以「vendor pareto.js 含 params.category 修复」为验收点。
 
 ## Migration Plan
 

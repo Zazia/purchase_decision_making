@@ -8,6 +8,10 @@
 
 **自定义方案机龄取值规则**：自添加方案（类型 A「现在买」）的机龄 MUST 按相同型号机型的真实发布日期计算（按芯片+内存+存储在 marketSnapshots 匹配同配置机型，解析其 releaseDateKey；匹配不到时按同芯片任意配置退化；仍匹配不到按机龄 0 兜底）。买入价 MUST 取用户输入值。函数 MUST 保持纯函数、零运行时依赖、三端可运行。
 
+**自定义方案品类取值规则**：自添加方案（含其复制副本）的品类 MUST 优先取决策参数的品类（`params.category`），用于旗舰基准分母、内存/存储权重表、保值率曲线、维修成本、残值分母与系统支持阈值查表；MUST NOT 仅按芯片名前缀推断品类（如 M 系列一律视为 Mac_mini）。仅当决策参数品类缺失或非法时，才允许从方案点 model 推导品类作回退。
+
+**机龄匹配的芯片写法规则**：自添加方案在 marketSnapshots 匹配同配置机型时，芯片前缀 MUST 同时兼容紧凑写法（`M3Pro_`）与规范化写法（`M3_Pro_`）；带 Pro/Max/Ultra 后缀的芯片 MUST NOT 因写法差异匹配失败而错按机龄 0 兜底。
+
 #### Scenario: 覆盖买入价后重算
 
 - **WHEN** 调用方传入 1 个方案点（机型 M2 Mac mini、二手、持有 3 年、原始买入价 2700）并将其买入价覆盖为 2500
@@ -32,6 +36,16 @@
 
 - **WHEN** 用户在编辑器复制一条自添加方案（副本 source='edited'，model 为自由文本不含 GB 段，携带显式 memoryGb/storageGb）并重算
 - **THEN** 副本 MUST 出现在重算结果中，且其性能满足度与月均成本 MUST 与原自添加方案完全一致（误差 ≤ 0.001 / ≤ 0.5 元）
+
+#### Scenario: 非 Mac_mini 品类自添加方案按正确品类查表
+
+- **WHEN** 用户在 macbook-pro 品类新增自添加方案（芯片 M3_Pro、内存 16G、存储 512G、二手、持有 3 年），快照中存在同配置方案「M3Pro_14寸_16G_512G_二手」且买入价相同
+- **THEN** 自添加方案的性能满足度 MUST 与该快照方案一致（误差 ≤ 0.001）——旗舰基准分母按 MacBook_Pro（M5 Pro 28500）、内存权重按 Mac_Pro 表查取；月均成本与「现在买」同价语义一致（误差 ≤ 0.5 元），机龄按 MacBook Pro 16 寸 M3Pro 发布月（2023-11）计算，MUST NOT 按 Mac_mini 品类查表或按机龄 0 兜底
+
+#### Scenario: 带 Pro 后缀芯片的机龄匹配双写法容错
+
+- **WHEN** 用户在 macbook-pro 品类新增自添加方案（芯片 M3_Pro，显式 memoryGb/storageGb），marketSnapshots 中同配置机型的 key 为紧凑写法（`M3Pro_14寸_16G_512G_二手`）而非规范化写法（`M3_Pro_...`）
+- **THEN** 机龄推导 MUST 成功匹配该快照条目并解析出真实 releaseDateKey（跨尺寸同芯片兜底后为 `MacBook_Pro_16_M3Pro` → 2023-11），MUST NOT 因芯片名紧凑/规范化写法差异匹配失败而错按机龄 0 兜底
 
 #### Scenario: 显式字段缺失时从 model 回退解析
 

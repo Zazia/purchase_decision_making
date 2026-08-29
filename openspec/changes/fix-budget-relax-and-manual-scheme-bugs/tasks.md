@@ -29,5 +29,16 @@
 ## 5. 回归与收尾
 
 - [x] 5.1 引擎全量测试（98/98 通过）+ 端内既有相关脚本（engine-esm-smoke PASS）回归通过；repro-manual-scheme-bugs.cjs 转绿
-- [ ] 5.2 微信开发者工具手动冒烟：低预算触发自动放宽 → 三个入口可见可点；正常路径结果页 → 报告 → 编辑器 → 重算 → 报告闭环（automator 因沙箱限制无法自动启动开发者工具，需手动或授权后执行）
+- [x] 5.2 微信开发者工具手动冒烟：低预算触发自动放宽 → 三个入口可见可点；正常路径结果页 → 报告 → 编辑器 → 重算 → 报告闭环（用户确认完成）
 - [x] 5.3 `openspec validate fix-budget-relax-and-manual-scheme-bugs` 通过；全部任务勾选后按用户指示提交
+
+## 6. 残留修复（Bug 2 深化：自添加方案品类误判 + 快照芯片名不容错）
+
+> 排查结论（见 design.md D2c/D2d）：`resolveCategoryKeyFromPlanPoint` 对自添加方案按芯片前缀兜底 M 系列 → `Mac_mini`，导致 macbook pro 品类添加 M3 Pro 时性能虚高约 2.5×（旗舰分母/权重表/保值率/维修/残值/机龄全查错品类）；`resolveReleaseDateKeyForCustomPlan` 用 `M3_Pro_` 规范化前缀匹配紧凑写法快照 key（`M3Pro_14寸_...`），带 Pro/Max/Ultra 后缀的芯片机龄错按 0 兜底。
+
+- [x] 6.1 `packages/apple-value-engine/src/pareto.ts`：`rebuildCustomPlanPoint` 与 `rebuildEditedPlanPoint`（自添加副本分支，`isCustomCopy` 为 true 时）的 categoryKey 优先取 `params.category`（经 `normalizeCategory` 对齐），缺失/非法时回退 `resolveCategoryKeyFromPlanPoint`；original/edited 快照方案行为保持不变
+- [x] 6.2 `packages/apple-value-engine/src/pareto.ts`：`resolveReleaseDateKeyForCustomPlan` 的 chipPrefix 匹配（精确 + 同芯片退化两步）同时兼容紧凑写法（`M3Pro_`）与规范化写法（`M3_Pro_`）
+- [x] 6.3 引擎单测：macbook pro 品类 + M3_Pro + 16G/512G 自添加方案与同配置快照方案（`M3Pro_14寸_16G_512G_二手`）性能满足度一致（误差 ≤ 0.001），机龄按 MacBook_Pro 16 寸 M3Pro 发布月（2023-11）计算（月均成本与「现在买」同价语义一致，误差 ≤ 0.5 元）；补 iphone 父品类自添加方案（A18）用例确认 `getRetentionRate` 父品类键可命中
+- [x] 6.4 引擎单测：复制副本（source='edited'）与原自添加方案在 macbook pro 品类下结果一致（误差 ≤ 0.001 / ≤ 0.5 元）
+- [x] 6.5 引擎全量测试通过后 `npm run build --workspace apple-value-engine` + `node scripts/sync-engine.mjs`，确认 vendor 的 pareto.js 含 `params.category` 修复
+- [x] 6.6 扩展 `scripts/debug/repro-manual-scheme-bugs.cjs`：新增 macbook pro M3 Pro 用例（修复前红：性能虚高；修复后绿：与快照方案一致），跑通确认转绿；微信开发者工具手动冒烟归入 5.2 一并执行（编辑器添加 MacBook Pro M3 Pro → 重算 → 性能与同配置快照方案一致）

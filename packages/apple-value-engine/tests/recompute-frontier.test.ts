@@ -9,6 +9,7 @@
  * 5. 未改价重算与 computeParetoFrontier 结果一致 (误差 ≤ 0.5 元 / ≤ 0.001)
  * 6. 推荐区间仅按预算截取 (性能地板不参与过滤)
  * 7. buildPlanPointFromInputs 芯片无法解析时抛 ConstantsValidationError
+ * 8. 自添加方案小数持有期 (1.5 年): " × 1.5年" 后缀正确剥离, model 不出现双重后缀
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -143,6 +144,49 @@ describe('recomputeFrontierFromPoints', () => {
     expect(found!.avgPerformance).toBeGreaterThan(0);
     // 买入价已被引擎写入
     expect(found!.buyPrice).toBe(2600);
+  });
+
+  it('自添加方案小数持有期 (1.5 年): " × 1.5年" 后缀正确剥离, model 不出现双重后缀', () => {
+    const original = computeParetoFrontier(constants, baseParams);
+    const originalEdited = toOriginalEditedPoints(original.frontier, original.dominated);
+
+    // 端内多持有期表单勾选 1.5 年时生成的方案点
+    const customPlan: EditedPlanPoint = {
+      ...({
+        model: 'M2_16G_256G_二手 × 1.5年',
+        chip: 'M2',
+        buyTiming: 'used',
+        holdingYears: 1.5,
+        monthlyCost: 0,
+        avgPerformance: 0,
+        buyPrice: 2600,
+        residual: 0,
+        maintenanceCost: 0,
+        holdingMonths: 18,
+        performanceS0: 0,
+        performanceSN: 0,
+        candidateType: 'A',
+        memoryGb: 16,
+        storageGb: 256,
+      } as EditedPlanPoint),
+      source: 'custom',
+      channel: '闲鱼',
+    };
+
+    const recomputed = recomputeFrontierFromPoints(constants, baseParams, [
+      ...originalEdited,
+      customPlan,
+    ]);
+
+    const allPlans = [...recomputed.frontier, ...recomputed.dominated];
+    const found = allPlans.find((p) => p.holdingYears === 1.5 && p.chip === 'M2');
+    expect(found).toBeDefined();
+    // 后缀剥离正确: model 不含双重 " × 1.5年" 尾巴
+    expect(found!.model).toBe('M2_16G_256G_二手 × 1.5年');
+    expect((found!.model.match(/×\s*[\d.]+年/g) || []).length).toBe(1);
+    // 月均成本按 18 个月口径计算 (非 0 占位)
+    expect(found!.monthlyCost).not.toBe(0);
+    expect(found!.holdingMonths).toBe(18);
   });
 
   it('新增不可解析方案被拒: 芯片无法匹配 → 不参与重算', () => {
@@ -396,6 +440,148 @@ describe('自添加方案显式 memoryGb/storageGb 字段 (Bug 2 修复)', () =>
     // 回退解析 (model 含 16G_256G 段) 与显式 16G/256G 完全一致
     expect(Math.abs(p1!.avgPerformance - p2!.avgPerformance)).toBeLessThanOrEqual(0.001);
     expect(Math.abs(p1!.monthlyCost - p2!.monthlyCost)).toBeLessThanOrEqual(0.5);
+  });
+});
+
+describe('自添加方案品类取 params.category + 芯片前缀双写法 (残留修复 D2c/D2d)', () => {
+  let constants: Constants;
+  beforeAll(() => {
+    constants = loadConstants(constantsJson);
+  });
+
+  const mbpParams: DecisionParams = {
+    category: 'macbook-pro',
+    budget: 30000,
+    buyTiming: 'used',
+    performanceFloor: 0.3,
+    holdingYears: [3],
+  };
+
+  it('macbook pro 品类 M3_Pro 自添加方案与同配置快照方案一致 (按 MacBook_Pro 品类查表)', () => {
+    const original = computeParetoFrontier(constants, mbpParams);
+    const allOrig = [...original.frontier, ...original.dominated];
+    const m3Orig = allOrig.find(
+      (p) => p.model.startsWith('M3Pro_14寸_16G_512G_二手') && p.candidateType === 'A',
+    );
+    expect(m3Orig).toBeDefined();
+
+    // 端内新增表单同款: model 自由文本 + 芯片下拉规范化写法 M3_Pro + 显式字段
+    const customPoint = {
+      ...m3Orig!,
+      candidateType: undefined,
+      waitMonths: undefined,
+      predictedPrice: undefined,
+      model: 'M3 Pro MacBook Pro_二手 × 3年',
+      chip: 'M3_Pro',
+      source: 'custom' as const,
+      memoryGb: 16,
+      storageGb: 512,
+      buyPrice: m3Orig!.buyPrice,
+      monthlyCost: 0,
+      avgPerformance: 0,
+      performanceS0: 0,
+      performanceSN: 0,
+      residual: 0,
+      maintenanceCost: 0,
+    };
+    const originalEdited = allOrig.map((p) => ({ ...p, source: 'original' as const }));
+    const recomputed = recomputeFrontierFromPoints(constants, mbpParams, [...originalEdited, customPoint]);
+    const allRec = [...recomputed.frontier, ...recomputed.dominated];
+    const customOut = allRec.find((p) => p.model === 'M3 Pro MacBook Pro_二手 × 3年');
+    expect(customOut).toBeDefined();
+
+    // 性能满足度与同配置快照方案一致 — 旗舰基准分母按 MacBook_Pro (M5 Pro) 查表,
+    // 修复前按芯片前缀误判 Mac_mini 导致性能虚高约 2.5×
+    expect(Math.abs(customOut!.avgPerformance - m3Orig!.avgPerformance)).toBeLessThanOrEqual(0.001);
+    expect(customOut!.candidateType).toBe('A');
+    // 机龄按 MacBook Pro M3Pro 发布月 (2023-11, 14寸 key 经跨尺寸兜底命中 16寸条目)
+    // 计算 → 月均成本与「现在买」(A) 同价语义一致 (修复前芯片前缀 M3_Pro_ 匹配不到
+    // 紧凑写法快照 key M3Pro_14寸_..., 机龄错按 0 兜底)
+    expect(Math.abs(customOut!.monthlyCost - m3Orig!.monthlyCost)).toBeLessThanOrEqual(0.5);
+  });
+
+  it('iphone 父品类自添加方案 (A18) 不被丢弃, 保值率查表键可命中', () => {
+    const iphoneParams: DecisionParams = {
+      category: 'iphone',
+      budget: 20000,
+      buyTiming: 'both',
+      performanceFloor: 0.3,
+      holdingYears: [2],
+    };
+    // 父品类 'iphone' 解析不到同名快照键 → 回退芯片前缀品类 (iPhone_Pro),
+    // 保值率曲线 iPhone_Pro 可命中, 方案不被静默丢弃
+    const customPoint = {
+      ...({
+        model: 'iPhone 18_二手 × 2年',
+        chip: 'A18',
+        buyTiming: 'used',
+        holdingYears: 2,
+        monthlyCost: 0,
+        avgPerformance: 0,
+        buyPrice: 5000,
+        residual: 0,
+        maintenanceCost: 0,
+        holdingMonths: 24,
+        performanceS0: 0,
+        performanceSN: 0,
+      } as EditedPlanPoint),
+      source: 'custom' as const,
+      memoryGb: 8,
+      storageGb: 256,
+    };
+
+    const recomputed = recomputeFrontierFromPoints(constants, iphoneParams, [customPoint]);
+    const allRec = [...recomputed.frontier, ...recomputed.dominated];
+    const customOut = allRec.find((p) => p.model === 'iPhone 18_二手 × 2年');
+    expect(customOut).toBeDefined();
+    expect(customOut!.avgPerformance).toBeGreaterThan(0);
+    expect(customOut!.monthlyCost).not.toBe(0);
+    // 保值率查表成功 (残值 = 保值率 × 同品类新品价 > 0, 若查表失败会抛错/被丢弃)
+    expect(customOut!.residual).toBeGreaterThan(0);
+  });
+
+  it('复制副本 (source="edited") 与原自添加方案在 macbook pro 品类下结果一致', () => {
+    const original = computeParetoFrontier(constants, mbpParams);
+    const allOrig = [...original.frontier, ...original.dominated];
+    const m3Orig = allOrig.find(
+      (p) => p.model.startsWith('M3Pro_14寸_16G_512G_二手') && p.candidateType === 'A',
+    );
+    expect(m3Orig).toBeDefined();
+
+    const base = {
+      ...m3Orig!,
+      candidateType: undefined,
+      waitMonths: undefined,
+      predictedPrice: undefined,
+      model: 'M3 Pro MacBook Pro_二手 × 3年',
+      chip: 'M3_Pro',
+      memoryGb: 16,
+      storageGb: 512,
+      buyPrice: m3Orig!.buyPrice,
+      monthlyCost: 0,
+      avgPerformance: 0,
+      performanceS0: 0,
+      performanceSN: 0,
+    };
+    const customPoint = { ...base, source: 'custom' as const };
+    // 编辑器「复制」自添加方案后副本 source='edited', model 同为自由文本
+    const copiedPoint = { ...base, source: 'edited' as const, editedBuyPrice: base.buyPrice };
+
+    const originalEdited = allOrig.map((p) => ({ ...p, source: 'original' as const }));
+    const rCustom = recomputeFrontierFromPoints(constants, mbpParams, [...originalEdited, customPoint]);
+    const rCopied = recomputeFrontierFromPoints(constants, mbpParams, [...originalEdited, copiedPoint]);
+    const customOut = [...rCustom.frontier, ...rCustom.dominated].find(
+      (p) => p.model === 'M3 Pro MacBook Pro_二手 × 3年',
+    );
+    const copiedOut = [...rCopied.frontier, ...rCopied.dominated].find(
+      (p) => p.model === 'M3 Pro MacBook Pro_二手 × 3年',
+    );
+
+    // 副本不被丢弃, 且与原自添加方案性能/月均成本完全一致
+    expect(customOut).toBeDefined();
+    expect(copiedOut).toBeDefined();
+    expect(Math.abs(copiedOut!.avgPerformance - customOut!.avgPerformance)).toBeLessThanOrEqual(0.001);
+    expect(Math.abs(copiedOut!.monthlyCost - customOut!.monthlyCost)).toBeLessThanOrEqual(0.5);
   });
 });
 

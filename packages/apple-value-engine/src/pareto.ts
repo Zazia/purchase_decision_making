@@ -159,13 +159,17 @@ function rebuildEditedPlanPoint(
   const editedBuyPrice = typeof ep.editedBuyPrice === 'number' ? ep.editedBuyPrice : ep.buyPrice;
   if (!(editedBuyPrice > 0)) return null; // 非法买入价拦截
 
-  const categoryKey = resolveCategoryKeyFromPlanPoint(constants, ep);
-  // releaseDateKey 解析: 优先从 model 解析 (original/edited 快照方案);
-  // 自添加方案的复制副本 (带显式内存字段, model 为自由文本) 解析无效时,
-  // 按 芯片+内存+存储 在 marketSnapshots 匹配同配置机型兜底 (机龄取相同型号)
   const memoryGb = ep.memoryGb ?? extractMemoryGb(ep);
   const storageGb = ep.storageGb ?? extractStorageGb(ep);
   const isCustomCopy = ep.memoryGb !== undefined || ep.storageGb !== undefined;
+  // 品类解析 (D2c): 自添加方案的复制副本优先取决策参数品类 (params.category),
+  // original/edited 快照方案保持 model 命中快照的既有行为不变
+  const categoryKey = isCustomCopy
+    ? resolveCustomPlanCategoryKey(constants, params, ep)
+    : resolveCategoryKeyFromPlanPoint(constants, ep);
+  // releaseDateKey 解析: 优先从 model 解析 (original/edited 快照方案);
+  // 自添加方案的复制副本 (带显式内存字段, model 为自由文本) 解析无效时,
+  // 按 芯片+内存+存储 在 marketSnapshots 匹配同配置机型兜底 (机龄取相同型号)
   let releaseDateKey = resolveReleaseDateKeyFromModel(ep, categoryKey);
   if (isCustomCopy && computeAgeMonths(constants, releaseDateKey) < 0) {
     releaseDateKey = resolveReleaseDateKeyForCustomPlan(
@@ -219,7 +223,7 @@ function rebuildCustomPlanPoint(
     chip: ep.chip,
     memoryGb: ep.memoryGb ?? extractMemoryGb(ep),
     storageGb: ep.storageGb ?? extractStorageGb(ep),
-    categoryKey: resolveCategoryKeyFromPlanPoint(constants, ep),
+    categoryKey: resolveCustomPlanCategoryKey(constants, params, ep),
     buyTiming: ep.buyTiming,
     buyPrice: ep.buyPrice,
     holdingYears: ep.holdingYears,
@@ -240,9 +244,9 @@ function rebuildCustomPlanPoint(
   }
 }
 
-/** 去掉 model 末尾 " × Ny年" 后缀, 得到 modelKey */
+/** 去掉 model 末尾 " × Ny年" 后缀, 得到 modelKey (支持小数持有期如 1.5 年) */
 function stripHoldingYearsSuffix(model: string): string {
-  return model.replace(/\s*×\s*\d+年$/, '');
+  return model.replace(/\s*×\s*[\d.]+年$/, '');
 }
 
 /** 从 PlanPoint 提取内存 GB (没有则回退默认 8) */
@@ -326,13 +330,21 @@ function resolveReleaseDateKeyForCustomPlan(
   if (!snaps || typeof snaps !== 'object') return '';
 
   const keys = Object.keys(snaps).filter((k) => !k.startsWith('_'));
-  const chipPrefix = `${chip}_`;
+  // 芯片前缀双写法容错 (D2d): 解析后的芯片名为规范化写法 (M3_Pro),
+  // 而快照 key 用紧凑写法 (M3Pro_14寸_...), 两种前缀互试避免带
+  // Pro/Max/Ultra 后缀的芯片因写法差异匹配失败而错按机龄 0 兜底
+  const chipPrefixes = Array.from(new Set([
+    `${chip}_`,
+    `${chip.replace(/_(Pro|Max|Ultra)/g, '$1')}_`,
+  ]));
   const memStorageSeg = `_${memoryGb}G_${storageGb}G`;
 
-  // 1. 精确匹配: 同芯片 + 同内存/存储 (如 "M4_16G_256G_二手" / "M5_Pro_14寸_24G_512G_新品")
-  const exact = keys.find((k) => k.startsWith(chipPrefix) && k.includes(memStorageSeg));
+  // 1. 精确匹配: 同芯片 + 同内存/存储 (如 "M4_16G_256G_二手" / "M3Pro_14寸_16G_512G_二手")
+  const exact = keys.find(
+    (k) => chipPrefixes.some((p) => k.startsWith(p)) && k.includes(memStorageSeg),
+  );
   // 2. 退化匹配: 同芯片任意配置 (机龄按芯片级, 与配置无关)
-  const fallback = exact ?? keys.find((k) => k.startsWith(chipPrefix));
+  const fallback = exact ?? keys.find((k) => chipPrefixes.some((p) => k.startsWith(p)));
   if (!fallback) return '';
 
   // 复用 model 解析规则推导 releaseDateKey (MacBook 带屏幕尺寸段也能处理)
@@ -356,6 +368,28 @@ function resolveCategoryKeyFromPlanPoint(constants: Constants, p: PlanPoint): st
   if (p.chip.startsWith('M')) return 'Mac_mini';
   if (p.chip.startsWith('A')) return 'iPhone_Pro';
   return 'Mac_mini';
+}
+
+/**
+ * 解析自添加方案 (及其复制副本) 的品类键 (D2c 残留修复)。
+ * 优先取决策参数品类 (params.category, 端内为 kebab-case 如 'macbook-pro'),
+ * 经 resolveCategoryKey 对齐到 marketSnapshots 键 (如 'MacBook_Pro'),
+ * 保证旗舰基准/权重表/保值率/维修成本/残值分母/机龄匹配全部按正确品类查表;
+ * 决策参数品类缺失、或解析结果不是有效快照品类 (父品类如 'iphone' 无同名
+ * 快照键) 时, 回退 resolveCategoryKeyFromPlanPoint (按芯片前缀推断)。
+ * original/edited 快照方案不走此函数 (model 可精确命中快照第一分支)。
+ */
+function resolveCustomPlanCategoryKey(
+  constants: Constants,
+  params: RecomputeParams,
+  ep: EditedPlanPoint,
+): string {
+  if (params.category) {
+    const resolved = resolveCategoryKey(constants, params.category);
+    const snaps = constants.marketSnapshots[resolved];
+    if (snaps && typeof snaps === 'object') return resolved;
+  }
+  return resolveCategoryKeyFromPlanPoint(constants, ep);
 }
 
 /**
