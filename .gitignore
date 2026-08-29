@@ -38,3 +38,6 @@ product-tour/renders/
 # 敏感密钥(小程序主体私钥等,严禁入库)
 *.key
 private.*
+
+# 云端发布凭证(AppSecret, 严禁入库)
+scripts/.wx-publish-credentials.json

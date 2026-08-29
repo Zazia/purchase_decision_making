@@ -9,7 +9,8 @@
   "scripts": {
     "test": "vitest run",
     "build": "npm run build --workspaces",
-    "sync:snapshot": "node scripts/sync-snapshot.mjs"
+    "sync:snapshot": "node scripts/sync-snapshot.mjs",
+    "publish:constants": "node scripts/publish-constants.mjs"
   },
   "license": "CC-BY-NC-4.0",
   "devDependencies": {

@@ -391,7 +391,7 @@
     <!-- Data freshness footer -->
     <view class="footer footer-{{freshnessLevel}}">
       <text class="footer-text">数据更新于 {{lastUpdated}}</text>
-      <text class="footer-hint" wx:if="{{freshnessLevel === 'stale'}}">数据已 {{days}} 天未更新，下次发版将刷新</text>
+      <text class="footer-hint" wx:if="{{freshnessLevel === 'stale'}}">数据已 {{days}} 天未更新，重启小程序可刷新</text>
       <block wx:if="{{freshnessLevel === 'expired'}}">
         <text class="footer-hint">数据较旧({{days}}天)，建议查看 GitHub 最新版</text>
         <text class="footer-link" bindtap="onOpenGitHub">复制 GitHub 链接</text>

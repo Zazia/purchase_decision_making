@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: 快照打包进小程序版本
 
@@ -42,34 +42,6 @@
 - **WHEN** 当前生效数据源的 `last_updated` 距今从 60 天变为 61 天
 - **THEN** 提示从「黄色」切换为「红色：数据较旧，建议查看 GitHub 最新版」+ GitHub 链接
 
-### Requirement: 快照同步脚本
-
-仓库 SHALL 提供同步脚本 `scripts/sync-snapshot.{js,mjs}`，将源 constants.json 拷贝到小程序快照目录，并校验：源文件存在、目标目录可写、拷贝后 hash 一致、`last_updated` 字段非空。脚本失败 MUST 退出非零码并指明失败步骤。
-
-#### Scenario: 同步成功
-
-- **WHEN** 维护者运行 `node scripts/sync-snapshot.mjs`
-- **THEN** 控制台输出「Snapshot synced: <hash>」，退出码 0
-
-#### Scenario: 源文件缺失
-
-- **WHEN** 源 constants.json 不存在
-- **THEN** 脚本输出「Source constants.json not found」，退出码 1
-
-### Requirement: 云开发升级接口预留
-
-快照访问层 SHALL 封装为 `getConstants()` 函数，当前实现返回本地打包快照。函数签名 MUST 兼容未来云开发实现（异步返回 Promise<Constants>），M2 升级时仅替换函数内部实现，MUST NOT 改动调用方代码。
-
-#### Scenario: MVP 阶段本地读取
-
-- **WHEN** 小程序调用 `getConstants()`
-- **THEN** 返回 `Promise.resolve(localSnapshot)`，无网络请求
-
-#### Scenario: M2 升级路径
-
-- **WHEN** M2 引入云函数周更
-- **THEN** `getConstants()` 内部改为先查云数据库缓存、失败回退本地快照，调用方代码零改动
-
 ### Requirement: 云端优先的 constants 加载链
 
 `getConstants()` SHALL 按以下顺序解析 constants 数据，且对外 API 签名（`Promise<Constants>`）与调用方代码 MUST 保持不变：
@@ -100,6 +72,8 @@
 
 - **WHEN** 会话启动后后台刷新拉到更新的云端数据
 - **THEN** 本次会话内存缓存保持不变，新数据仅写入本地存储，下次会话生效
+
+## ADDED Requirements
 
 ### Requirement: 云端 constants 文档契约
 
