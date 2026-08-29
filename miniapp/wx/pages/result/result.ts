@@ -78,6 +78,21 @@ let autoSaveTipTimer: ReturnType<typeof setTimeout> | null = null;
 /** 复制动画定时器 */
 let animateTipTimer: ReturnType<typeof setTimeout> | null = null;
 
+/** 新增/编辑自定义方案表单数据 */
+interface EditorAddFormState {
+  model: string;
+  chip: string;
+  memoryGb: number;
+  storageGb: number;
+  buyTiming: 'new' | 'used';
+  buyPrice: number;
+  /** 勾选的持有期 (可多选) */
+  holdingYearsList: number[];
+}
+
+/** 持有期多选基础选项 (与决策树页持有期选项一致) */
+const BASE_HOLDING_OPTIONS = [1, 1.5, 2, 3, 4, 5];
+
 Page({
   data: {
     loading: true,
@@ -129,7 +144,13 @@ Page({
     editorKnownChips: [] as string[],
     // 编辑器: 是否显示新增方案表单
     editorShowAddForm: false,
-    // 编辑器: 新增方案表单数据
+    // 编辑器: 表单模式 'add'=新增 'edit'=编辑已有自添加方案组
+    editorAddFormMode: 'add' as 'add' | 'edit',
+    // 编辑器: 编辑模式下的目标分组 key ('' = 非编辑模式)
+    editorEditingGroupKey: '',
+    // 编辑器: 持有期多选 chips (预计算 active 态, WXML 不支持方法调用)
+    editorHoldingChips: [] as Array<{ years: number; label: string; active: boolean }>,
+    // 编辑器: 新增/编辑方案表单数据
     editorAddForm: {
       model: '',
       chip: '',
@@ -137,8 +158,8 @@ Page({
       storageGb: 256,
       buyTiming: 'used' as 'new' | 'used',
       buyPrice: 0,
-      holdingYears: 3,
-    },
+      holdingYearsList: [3] as number[],
+    } as EditorAddFormState,
     // 编辑器: 买入价校验错误 (rowId -> 错误消息)
     editorPriceErrors: {} as Record<string, string>,
     // 条件筛选面板
@@ -1371,10 +1392,25 @@ Page({
     }
   },
 
+  /** 构建/刷新持有期 chips (预计算 active 态) */
+  rebuildHoldingChips(options: number[], selected: number[]) {
+    const chips = options
+      .slice()
+      .sort((a, b) => a - b)
+      .map((years) => ({
+        years,
+        label: `${years}年`,
+        active: selected.includes(years),
+      }));
+    this.setData({ editorHoldingChips: chips });
+  },
+
   /** 显示新增自定义方案表单 */
   onEditorShowAddForm() {
     this.setData({
       editorShowAddForm: true,
+      editorAddFormMode: 'add',
+      editorEditingGroupKey: '',
       editorAddForm: {
         model: '',
         chip: '',
@@ -1382,17 +1418,18 @@ Page({
         storageGb: 256,
         buyTiming: 'used' as 'new' | 'used',
         buyPrice: 0,
-        holdingYears: 3,
+        holdingYearsList: [3] as number[],
       },
     });
+    this.rebuildHoldingChips(BASE_HOLDING_OPTIONS, [3]);
   },
 
-  /** 取消新增表单 */
+  /** 取消新增/编辑表单 (不做任何数据变更) */
   onEditorCancelAddForm() {
-    this.setData({ editorShowAddForm: false });
+    this.setData({ editorShowAddForm: false, editorAddFormMode: 'add', editorEditingGroupKey: '' });
   },
 
-  /** 新增表单字段变更 */
+  /** 新增/编辑表单字段变更 */
   onEditorAddFormField(e: WechatMiniprogram.Input | WechatMiniprogram.Picker) {
     const field = e.currentTarget.dataset.field as string;
     const form = { ...this.data.editorAddForm };
@@ -1408,54 +1445,201 @@ Page({
     this.setData({ editorAddForm: form });
   },
 
-  /** 确认新增自定义方案 */
+  /** 新增/编辑表单: 持有期 chip 勾选切换 */
+  onEditorAddFormHoldingToggle(e: WechatMiniprogram.TouchEvent) {
+    const years = Number(e.currentTarget.dataset.years as number);
+    const form = { ...this.data.editorAddForm };
+    const list = form.holdingYearsList.slice();
+    const idx = list.indexOf(years);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.push(years);
+    }
+    form.holdingYearsList = list;
+    this.setData({ editorAddForm: form });
+    this.rebuildHoldingChips(
+      this.data.editorHoldingChips.map((c) => c.years),
+      list,
+    );
+  },
+
+  /** 编辑自添加方案: 打开表单并预填该组数据 */
+  onEditorEditCustomPlan(e: WechatMiniprogram.TouchEvent) {
+    const groupKey = e.currentTarget.dataset.groupKey as string;
+    const snap = this.cloneSnapshot();
+    if (!snap) return;
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    if (groupPoints.length === 0) return;
+
+    const first = groupPoints[0];
+    // 机型名 = baseModel (剥离 × Ny年 后缀) 再去掉尾部 _新品/_二手
+    const baseModel = first.model.replace(/\s*×\s*[\d.]+年$/, '');
+    const modelName = baseModel.replace(/_(新品|二手)$/, '');
+    const holdingList = groupPoints.map((p) => p.holdingYears);
+
+    this.setData({
+      editorShowAddForm: true,
+      editorAddFormMode: 'edit',
+      editorEditingGroupKey: groupKey,
+      editorAddForm: {
+        model: modelName,
+        chip: first.chip,
+        memoryGb: first.memoryGb ?? 8,
+        storageGb: first.storageGb ?? 256,
+        buyTiming: first.buyTiming,
+        buyPrice: first.editedBuyPrice ?? first.buyPrice,
+        holdingYearsList: holdingList.slice(),
+      },
+    });
+    // 选项 = 基础选项 ∪ 组内已有持有期 (兼容历史自由输入的非标准持有期)
+    const options = [...new Set([...BASE_HOLDING_OPTIONS, ...holdingList])];
+    this.rebuildHoldingChips(options, holdingList);
+  },
+
+  /** 表单公共校验: 通过返回 null, 否则返回错误消息 */
+  validateAddForm(form: EditorAddFormState): string | null {
+    if (!form.chip) return '请选择芯片';
+    if (!form.model.trim()) return '请输入机型名';
+    if (!(form.buyPrice > 0)) return '买入价需大于 0';
+    if (form.holdingYearsList.length === 0) return '请至少勾选一个持有期';
+    return null;
+  },
+
+  /** 确认新增/保存编辑自定义方案 (按 editorAddFormMode 分流) */
   onEditorAddPlan() {
     const form = this.data.editorAddForm;
-    if (!form.chip) {
-      wx.showToast({ title: '请选择芯片', icon: 'none' });
-      return;
-    }
-    if (!form.model.trim()) {
-      wx.showToast({ title: '请输入机型名', icon: 'none' });
-      return;
-    }
-    if (!(form.buyPrice > 0)) {
-      wx.showToast({ title: '买入价需大于 0', icon: 'none' });
+    const error = this.validateAddForm(form);
+    if (error) {
+      wx.showToast({ title: error, icon: 'none' });
       return;
     }
 
     const snap = this.cloneSnapshot();
     if (!snap) return;
 
-    // 方案数量上限防爆栈拦截 (task 5.4)
-    if (snap.points.length >= 500) {
+    if (this.data.editorAddFormMode === 'edit') {
+      this.saveEditCustomPlan(snap, form, this.data.editorEditingGroupKey);
+    } else {
+      this.addCustomPlan(snap, form);
+    }
+  },
+
+  /** 新增: 为每个勾选的持有期各生成一个方案点 (同组展示) */
+  addCustomPlan(snap: EditorSnapshot, form: EditorAddFormState) {
+    // 方案数量上限防爆栈拦截 (按新增点数计算)
+    if (snap.points.length + form.holdingYearsList.length > 500) {
       wx.showToast({ title: '最多支持同时比价 500 个方案，请先删除一些不需要的方案', icon: 'none' });
       return;
     }
 
-    const newPoint: EditedPlanPoint = {
-      model: `${form.model}_${form.buyTiming === 'new' ? '新品' : '二手'} × ${form.holdingYears}年`,
+    const timingLabel = form.buyTiming === 'new' ? '新品' : '二手';
+    for (const years of form.holdingYearsList) {
+      const newPoint: EditedPlanPoint = {
+        model: `${form.model}_${timingLabel} × ${years}年`,
+        chip: form.chip,
+        buyTiming: form.buyTiming,
+        holdingYears: years,
+        monthlyCost: 0, // 引擎重算时计算
+        avgPerformance: 0,
+        buyPrice: form.buyPrice,
+        residual: 0,
+        maintenanceCost: 0,
+        holdingMonths: years * 12,
+        performanceS0: 0,
+        performanceSN: 0,
+        source: 'custom',
+        rowId: `row-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        memoryGb: form.memoryGb,
+        storageGb: form.storageGb,
+        channel: form.buyTiming === 'new' ? '京东' : '闲鱼',
+        useSubsidy: form.buyTiming === 'new',
+      };
+      snap.points.push(newPoint);
+    }
+
+    this.setData({ editorShowAddForm: false, editorAddFormMode: 'add', editorEditingGroupKey: '' });
+    this.commitEdit(snap);
+  },
+
+  /** 保存编辑: 公共字段整组更新 + 持有期按勾选增删变体 */
+  saveEditCustomPlan(
+    snap: EditorSnapshot,
+    form: EditorAddFormState,
+    groupKey: string,
+  ) {
+    const groupPoints = this.findGroupPoints(snap, groupKey);
+    if (groupPoints.length === 0) return;
+
+    const first = groupPoints[0];
+    const timingLabel = form.buyTiming === 'new' ? '新品' : '二手';
+    const timingChanged = first.buyTiming !== form.buyTiming;
+    // 买入时机变化时渠道/国补重置默认; 不变则保留组内现值
+    const channel = timingChanged ? (form.buyTiming === 'new' ? '京东' : '闲鱼') : first.channel;
+    const useSubsidy = timingChanged ? form.buyTiming === 'new' : first.useSubsidy;
+    const copyKey = first._copyKey || '';
+
+    // 净增量 = 新勾选中组内尚不存在的持有期数
+    const existingYears = new Set(groupPoints.map((p) => p.holdingYears));
+    const addedYears = form.holdingYearsList.filter((y) => !existingYears.has(y));
+    if (snap.points.length + addedYears.length > 500) {
+      wx.showToast({ title: '最多支持同时比价 500 个方案，请先删除一些不需要的方案', icon: 'none' });
+      return;
+    }
+
+    // 1. 删除取消勾选的持有期变体 (同步清理 deferredRowIds)
+    const selectedYears = new Set(form.holdingYearsList);
+    const removedRowIds = new Set(
+      groupPoints.filter((p) => !selectedYears.has(p.holdingYears)).map((p) => p.rowId),
+    );
+    if (removedRowIds.size > 0) {
+      snap.points = snap.points.filter((p) => !removedRowIds.has(p.rowId));
+      snap.deferredRowIds = snap.deferredRowIds.filter((id) => !removedRowIds.has(id));
+    }
+
+    // 2. 整组更新公共字段 (保留持有期变体的 deferred/excluded 状态)
+    const keptPoints = groupPoints.filter((p) => selectedYears.has(p.holdingYears));
+    for (const point of keptPoints) {
+      point.model = `${form.model}_${timingLabel} × ${point.holdingYears}年`;
+      point.chip = form.chip;
+      point.buyTiming = form.buyTiming;
+      point.buyPrice = form.buyPrice;
+      point.editedBuyPrice = undefined; // 编辑保存直接写 buyPrice, 清空行内改价字段避免并存取错
+      point.memoryGb = form.memoryGb;
+      point.storageGb = form.storageGb;
+      point.holdingMonths = point.holdingYears * 12;
+      point.channel = channel;
+      point.useSubsidy = useSubsidy;
+      point._copyKey = copyKey || undefined; // 保持独立分组 (复制副本)
+    }
+
+    // 3. 新勾选的持有期在组尾插入新点 (deferred=false 参与重算)
+    const lastIdx = Math.max(...keptPoints.map((p) => snap.points.indexOf(p)));
+    const insertIdx = keptPoints.length > 0 ? lastIdx + 1 : snap.points.length;
+    const newPoints: EditedPlanPoint[] = addedYears.map((years) => ({
+      model: `${form.model}_${timingLabel} × ${years}年`,
       chip: form.chip,
       buyTiming: form.buyTiming,
-      holdingYears: form.holdingYears,
-      monthlyCost: 0, // 引擎重算时计算
+      holdingYears: years,
+      monthlyCost: 0,
       avgPerformance: 0,
       buyPrice: form.buyPrice,
       residual: 0,
       maintenanceCost: 0,
-      holdingMonths: form.holdingYears * 12,
+      holdingMonths: years * 12,
       performanceS0: 0,
       performanceSN: 0,
       source: 'custom',
       rowId: `row-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       memoryGb: form.memoryGb,
       storageGb: form.storageGb,
-      channel: form.buyTiming === 'new' ? '京东' : '闲鱼',
-      useSubsidy: form.buyTiming === 'new',
-    };
+      channel,
+      useSubsidy,
+      _copyKey: copyKey || undefined,
+    }));
+    snap.points.splice(insertIdx, 0, ...newPoints);
 
-    snap.points.push(newPoint);
-    this.setData({ editorShowAddForm: false });
+    this.setData({ editorShowAddForm: false, editorAddFormMode: 'add', editorEditingGroupKey: '' });
     this.commitEdit(snap);
   },
 

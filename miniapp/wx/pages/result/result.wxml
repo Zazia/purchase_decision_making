@@ -167,6 +167,7 @@
               </label>
               <view class="action-btn defer-btn" data-group-key="{{item.groupKey}}" bindtap="onEditorDefer">移到末尾</view>
               <view class="row-icon-actions">
+                <image wx:if="{{item.source === 'custom'}}" src="/assets/icons/edit.svg" mode="aspectFit" class="row-icon edit-icon" data-group-key="{{item.groupKey}}" bindtap="onEditorEditCustomPlan" />
                 <image src="/assets/icons/copy.svg" mode="aspectFit" class="row-icon copy-icon" data-group-key="{{item.groupKey}}" bindtap="onEditorCopyPlan" />
                 <image src="/assets/icons/delete.svg" mode="aspectFit" class="row-icon delete-icon" data-group-key="{{item.groupKey}}" bindtap="onEditorDeletePlan" />
               </view>
@@ -178,12 +179,12 @@
         <!-- 新增自定义方案入口 -->
         <view class="add-plan-entry" bindtap="onEditorShowAddForm" wx:if="{{!editorShowAddForm}}">+ 新增自定义方案</view>
 
-        <!-- 新增自定义方案表单 -->
+        <!-- 新增/编辑自定义方案表单 -->
         <view class="add-plan-form" wx:if="{{editorShowAddForm}}">
-          <view class="form-title">新增自定义方案</view>
+          <view class="form-title">{{editorAddFormMode === 'edit' ? '编辑自添加方案' : '新增自定义方案'}}</view>
           <view class="form-row">
             <text class="form-label">机型名</text>
-            <input class="form-input" type="text" placeholder="如 M2 Mac mini" data-field="model" bindinput="onEditorAddFormField" />
+            <input class="form-input" type="text" placeholder="如 M2 Mac mini" value="{{editorAddForm.model}}" data-field="model" bindinput="onEditorAddFormField" />
           </view>
           <view class="form-row">
             <text class="form-label">芯片</text>
@@ -201,25 +202,31 @@
               <input class="form-input" type="digit" value="{{editorAddForm.storageGb}}" data-field="storageGb" bindinput="onEditorAddFormField" />
             </view>
           </view>
-          <view class="form-row-group">
-            <view class="form-row">
-              <text class="form-label">买入时机</text>
-              <picker mode="selector" range="{{['新品', '二手']}}" data-field="buyTiming" bindchange="onEditorAddFormField">
-                <view class="picker-text">{{editorAddForm.buyTiming === 'new' ? '新品' : '二手'}}</view>
-              </picker>
-            </view>
-            <view class="form-row">
-              <text class="form-label">持有期(年)</text>
-              <input class="form-input" type="digit" value="{{editorAddForm.holdingYears}}" data-field="holdingYears" bindinput="onEditorAddFormField" />
+          <view class="form-row">
+            <text class="form-label">买入时机</text>
+            <picker mode="selector" range="{{['新品', '二手']}}" data-field="buyTiming" bindchange="onEditorAddFormField">
+              <view class="picker-text">{{editorAddForm.buyTiming === 'new' ? '新品' : '二手'}}</view>
+            </picker>
+          </view>
+          <view class="form-row form-row-holding">
+            <text class="form-label">持有期(可多选)</text>
+            <view class="form-chips">
+              <view
+                class="form-chip {{item.active ? 'active' : ''}}"
+                wx:for="{{editorHoldingChips}}"
+                wx:key="years"
+                data-years="{{item.years}}"
+                bindtap="onEditorAddFormHoldingToggle"
+              >{{item.label}}</view>
             </view>
           </view>
           <view class="form-row">
             <text class="form-label">买入价</text>
-            <input class="form-input" type="digit" placeholder=">0" data-field="buyPrice" bindinput="onEditorAddFormField" />
+            <input class="form-input" type="digit" placeholder=">0" value="{{editorAddFormMode === 'edit' ? editorAddForm.buyPrice : ''}}" data-field="buyPrice" bindinput="onEditorAddFormField" />
           </view>
           <view class="form-actions">
             <view class="form-btn form-cancel" bindtap="onEditorCancelAddForm">取消</view>
-            <view class="form-btn form-confirm" bindtap="onEditorAddPlan">添加</view>
+            <view class="form-btn form-confirm" bindtap="onEditorAddPlan">{{editorAddFormMode === 'edit' ? '保存' : '添加'}}</view>
           </view>
         </view>
 

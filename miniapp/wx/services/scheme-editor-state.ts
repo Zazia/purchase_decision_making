@@ -43,6 +43,8 @@ export interface EditedPlanPoint {
   storageGb?: number;
   /** 行唯一 id (用于稳定 keying, 避免编辑后 model 变化丢同步) */
   rowId: string;
+  /** 复制方案共享的副本标记 (空 = 非副本; 分组 key 组成部分, 使复制组独立成组) */
+  _copyKey?: string;
 }
 
 /** 决策参数 (与 saved-results DecisionParams 对齐) */

@@ -16,7 +16,9 @@ Launcher.prototype.connect = async function (opts) {
   return await this.connectTool(opts);
 };
 
-const WS_ENDPOINT = 'ws://127.0.0.1:9420';
+// 端口可用环境变量 AUTOTEST_PORT 覆盖 (默认 9420), 如: AUTOTEST_PORT=25040 node xxx.js
+const PORT = Number(process.env.AUTOTEST_PORT) || 9420;
+const WS_ENDPOINT = `ws://127.0.0.1:${PORT}`;
 const CLI_BAT = 'C:\\Program Files (x86)\\Tencent\\微信web开发者工具\\cli.bat';
 const PROJECT_PATH = 'd:\\_Projects\\1-small-tools\\purchase_decision_making\\miniapp\\wx';
 
@@ -31,7 +33,7 @@ function checkPort(host, port) {
 /** 启动开发者工具自动化模式 (同步阻塞直到 cli.bat 返回) */
 function launchDevtools() {
   try {
-    execFileSync('cmd.exe', ['/c', CLI_BAT, 'auto', '--project', PROJECT_PATH, '--auto-port', '9420'], { stdio: 'ignore', timeout: 60000 });
+    execFileSync('cmd.exe', ['/c', CLI_BAT, 'auto', '--project', PROJECT_PATH, '--auto-port', String(PORT)], { stdio: 'ignore', timeout: 60000 });
   } catch {
     // cli.bat 返回非 0 也可能只是 "已启动" 的提示, 不阻塞
   }
@@ -41,7 +43,7 @@ function launchDevtools() {
 async function waitForPort(maxWaitMs = 30000) {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
-    if (await checkPort('127.0.0.1', 9420)) return true;
+    if (await checkPort('127.0.0.1', PORT)) return true;
     await new Promise((r) => setTimeout(r, 1000));
   }
   return false;
@@ -49,11 +51,11 @@ async function waitForPort(maxWaitMs = 30000) {
 
 /** 连接到已开启自动化的小程序 (端口未就绪时自动启动) */
 async function connect() {
-  if (!(await checkPort('127.0.0.1', 9420))) {
-    console.log('[helper] 端口 9420 未就绪, 启动开发者工具自动化...');
+  if (!(await checkPort('127.0.0.1', PORT))) {
+    console.log(`[helper] 端口 ${PORT} 未就绪, 启动开发者工具自动化...`);
     launchDevtools();
     if (!(await waitForPort(30000))) {
-      throw new Error('开发者工具自动化端口 9420 启动失败');
+      throw new Error(`开发者工具自动化端口 ${PORT} 启动失败`);
     }
     // 端口就绪后再等 2s 让 ws 服务完全 ready
     await new Promise((r) => setTimeout(r, 2000));

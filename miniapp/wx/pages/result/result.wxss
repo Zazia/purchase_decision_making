@@ -869,6 +869,38 @@
   min-width: 140rpx;
 }
 
+/* 持有期多选 chips (设计令牌约束: 小程序持有期按钮使用灰色系, 不使用品牌蓝) */
+.form-row-holding {
+  align-items: flex-start;
+}
+
+.form-chips {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.form-chip {
+  padding: 10rpx 28rpx;
+  border-radius: 999rpx;
+  border: 2rpx solid #D1D1D6;
+  background: #F5F5F7;
+  font-size: 26rpx;
+  color: #1D1D1F;
+  transition: all 0.15s ease;
+}
+
+.form-chip.active {
+  background: #86868F;
+  border-color: #86868F;
+  color: #FFFFFF;
+}
+
+.form-chip:active {
+  opacity: 0.8;
+}
+
 .form-input {
   flex: 1;
   padding: 12rpx 16rpx;
