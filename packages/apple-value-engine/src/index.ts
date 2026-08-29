@@ -46,6 +46,10 @@ export {
   predictDiscountedOldPrice,
   lookupImpactTimeVaryingFactor,
   shouldGenerateWaitCandidates,
+  isAnchorCandidate,
+  computeAdjustedImpact,
+  computeResidualImpactFactor,
+  resolveProductReleaseDate,
 } from './release.js';
 export {
   ConstantsValidationError,

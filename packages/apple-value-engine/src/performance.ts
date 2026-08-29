@@ -20,11 +20,11 @@ import type { Constants } from './types.js';
 
 /** 性能满足度计算结果 */
 export interface PerformanceResult {
-  /** S(0), 初始性能满足度 (0-1) */
+  /** S(0), 初始性能满足度; 推算跑分超实测基准的新芯片可 >1 (v4.2 起不截断) */
   s0: number;
-  /** S(N), 持有期末性能满足度 (0-1) */
+  /** S(N), 持有期末性能满足度 */
   sN: number;
-  /** S̄(N), 持有期平均性能满足度 (0-1) */
+  /** S̄(N), 持有期平均性能满足度 */
   avgS: number;
   /** 使用的有效 r 值 */
   effectiveR: number;
@@ -60,7 +60,9 @@ export function computePerformance(
   const memWeight = getMemoryWeight(constants, category, memoryGb);
   const storageWeight = getStorageWeight(constants, category, storageGb);
 
-  const s0 = Math.min(1, chipCoeff * memWeight * storageWeight);
+  // v4.2: 不再截断于 1 —— 推算跑分高于实测基准的新芯片系数允许 >100%
+  // (SOP performance-models.md §1.2 规则2); 老款跑分天然 ≤ 旗舰基准, 系数 ≤ 1 不受影响
+  const s0 = chipCoeff * memWeight * storageWeight;
 
   // 默认使用基础 r 值(CAGR), 不自动应用代际跃升调整。
   // 跃升调整(r×1.5 / r×0.5)是对下一代新品性能预测的可选修正,

@@ -1,7 +1,7 @@
 import { ConstantsValidationError } from './types.js';
 import { computePerformance, computePerformanceForNewProduct } from './performance.js';
 import { computeMonthlyCost, computeMonthlyCostForWaitCandidate, getCurrentNewPrice, getBuyPrice } from './cost.js';
-import { parseReleasePlan, computeWaitMonths, predictNewProductPrice, predictDiscountedOldPrice, shouldGenerateWaitCandidates, } from './release.js';
+import { parseReleasePlan, computeWaitMonths, predictNewProductPrice, predictDiscountedOldPrice, shouldGenerateWaitCandidates, isAnchorCandidate, computeResidualImpactFactor, resolveProductReleaseDate, } from './release.js';
 /**
  * 计算帕累托前沿
  *
@@ -130,7 +130,7 @@ function rebuildEditedPlanPoint(constants, params, ep) {
     if ((ep.candidateType ?? 'A') === 'A'
         && isCustomCopy
         && computeAgeMonths(constants, cand.releaseDateKey) < 0) {
-        return buildPlanPointFromCandidateWithAgeOverride(constants, cand, ep.holdingYears, 0, getCurrentNewPrice(constants, categoryKey), params.mSeriesCAGR, params.aSeriesCAGR);
+        return buildPlanPointFromCandidateWithAgeOverride(constants, cand, ep.holdingYears, 0, getCurrentNewPrice(constants, categoryKey), params.mSeriesCAGR, params.aSeriesCAGR, params.macroContext, cand.releaseDateKey);
     }
     return buildPlanPoint(constants, cand, ep.holdingYears, params);
 }
@@ -158,6 +158,7 @@ function rebuildCustomPlanPoint(constants, params, ep) {
         useSubsidy: ep.useSubsidy,
         mSeriesCAGR: params.mSeriesCAGR,
         aSeriesCAGR: params.aSeriesCAGR,
+        macroContext: params.macroContext,
     };
     try {
         return buildPlanPointFromInputs(constants, inputs);
@@ -382,6 +383,11 @@ function extractWaitCandidates(constants, categoryKey, releasePlan, macroContext
     // 复用 extractCandidates 获取当前在售机型, 对每个施加冲击时变价格下降
     const oldCandidates = extractCandidates(constants, categoryKey, buyTiming);
     for (const oldCand of oldCandidates) {
+        // v4.2: 锚定品 (属于本次待发布批次, 如已官宣未发售) 跳过 —— 锚定品自身价
+        // 不得套用「老款 × (1+锚涨幅) × (1−冲击)」公式, 它作为类型 A 买入时残值
+        // 也不施加本场发布的冲击 (贬值由保值率曲线覆盖)
+        if (isAnchorCandidate(constants, oldCand.releaseDateKey, releasePlan))
+            continue;
         const discountedPrice = predictDiscountedOldPrice(constants, oldCand.buyPrice, releasePlan, macroContext);
         if (discountedPrice <= 0)
             continue;
@@ -539,7 +545,7 @@ export function buildPlanPointFromInputs(constants, inputs) {
         const releaseDateKey = resolveReleaseDateKeyForCustomPlan(constants, inputs.categoryKey, resolvedChip, inputs.memoryGb, inputs.storageGb);
         const ageMonths = releaseDateKey ? computeAgeMonths(constants, releaseDateKey) : -1;
         return buildPlanPointFromCandidateWithAgeOverride(constants, cand, inputs.holdingYears, ageMonths >= 0 ? ageMonths : 0, // currentAgeMonths 兜底为 0
-        getCurrentNewPrice(constants, inputs.categoryKey), inputs.mSeriesCAGR, inputs.aSeriesCAGR);
+        getCurrentNewPrice(constants, inputs.categoryKey), inputs.mSeriesCAGR, inputs.aSeriesCAGR, inputs.macroContext, releaseDateKey);
     }
     // 类型 B/C 走原 buildPlanPoint (不依赖机龄解析的兜底分支)
     // 注: 类型 C 需要 releaseDateKey 计算机龄, 用户新增方案没有, 可能返回 null
@@ -551,10 +557,14 @@ export function buildPlanPointFromInputs(constants, inputs) {
 /**
  * 类型 A 的兜底构建: 用显式 currentAgeMonths + currentNewPrice 计算,
  * 跳过 computeAgeMonths 的发布日期查找 (用户新增方案没有发布日期)。
+ * v4.2: 与 buildPlanPoint 类型 A 分支同口径施加残值冲击调整
+ * (保证自添加方案 source='custom' 与其复制副本 source='edited' 结果一致)。
  */
-function buildPlanPointFromCandidateWithAgeOverride(constants, cand, holdingYears, currentAgeMonths, currentNewPrice, mSeriesCAGR, aSeriesCAGR) {
+function buildPlanPointFromCandidateWithAgeOverride(constants, cand, holdingYears, currentAgeMonths, currentNewPrice, mSeriesCAGR, aSeriesCAGR, macroContext, releaseDateKey) {
     const holdingMonths = holdingYears * 12;
-    const cost = computeMonthlyCost(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
+    let cost = computeMonthlyCost(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
+    // 残值冲击: releaseDateKey 缺省时用 cand.releaseDateKey (自添加方案可能为 '')
+    cost = applyResidualImpact(constants, { ...cand, releaseDateKey: releaseDateKey ?? cand.releaseDateKey }, holdingMonths, macroContext, cost);
     const perf = computePerformance(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, mSeriesCAGR, aSeriesCAGR);
     const supportRisk = computeSystemSupportRiskForAge(cand, currentAgeMonths, holdingMonths);
     return {
@@ -600,6 +610,24 @@ function computeSystemSupportRiskForAge(cand, currentAgeMonths, holdingMonths) {
     }
     return { risk: 'normal' };
 }
+/**
+ * v4.2 类型 A 残值冲击调整 (spec「月均成本计算」):
+ * 持有期内有新品发布且候选非锚定品时,
+ * 残值 × (1 − 调整后冲击 × 残值调整时变因子(卖出点距发布整月数))。
+ * computeResidualImpactFactor 内部含全部触发条件, 不满足时返回 1 → cost 原样返回。
+ */
+function applyResidualImpact(constants, cand, holdingMonths, macroContext, cost) {
+    const resolved = resolveMacroContext(constants, macroContext);
+    const releasePlan = parseReleasePlan(constants, cand.categoryKey, resolved);
+    if (!releasePlan)
+        return cost;
+    const factor = computeResidualImpactFactor(constants, cand.releaseDateKey, releasePlan, resolved, holdingMonths);
+    if (factor >= 1)
+        return cost;
+    const residual = cost.residual * factor;
+    const monthlyCost = (cand.buyPrice - residual + cost.maintenanceCost) / holdingMonths;
+    return { ...cost, residual, monthlyCost };
+}
 function buildPlanPoint(constants, cand, holdingYears, params) {
     const holdingMonths = holdingYears * 12;
     const waitMonths = cand.waitMonths ?? 0;
@@ -629,6 +657,9 @@ function buildPlanPoint(constants, cand, holdingYears, params) {
             return null;
         const currentNewPrice = getCurrentNewPrice(constants, cand.categoryKey);
         cost = computeMonthlyCost(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
+        // v4.2: 残值冲击调整 — 持有期内有新品发布且候选非锚定品时,
+        // 残值 × (1 − 调整后冲击 × 残值调整时变因子(卖出点距发布整月数))
+        cost = applyResidualImpact(constants, cand, holdingMonths, params.macroContext, cost);
         perf = computePerformance(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
     }
     // ---- 系统支持期风险标注 ----
@@ -686,56 +717,9 @@ function getSystemSupportThreshold(categoryKey) {
         return 60;
     return 72; // Mac 系列 (含 Vision Pro 等)
 }
-/** 计算机龄(月) = (分析日期 - 发布日期) × 12 */
+/** 计算机龄(月) = (分析日期 - 发布日期) × 12; 发布日期解析复用 release.ts 的共享实现 */
 function computeAgeMonths(constants, releaseDateKey) {
-    let releaseDate = constants.productReleaseDates[releaseDateKey];
-    // 模糊兜底 1: 去掉屏幕尺寸段再试 (MacBook_Pro_14_M3Pro → MacBook_Pro_M3Pro)
-    if (!releaseDate) {
-        const withoutScreen = releaseDateKey.replace(/_\d+_(?=[^_]+$)/, '_');
-        if (withoutScreen !== releaseDateKey) {
-            releaseDate = constants.productReleaseDates[withoutScreen];
-        }
-    }
-    // 模糊兜底 2: 芯片名紧凑/展开互试 (A17_Pro → A17Pro, M1_Pro → M1Pro)
-    if (!releaseDate) {
-        const compactKey = releaseDateKey.replace(/_(Pro|Max|Ultra)/g, '$1');
-        if (compactKey !== releaseDateKey) {
-            releaseDate = constants.productReleaseDates[compactKey];
-        }
-    }
-    if (!releaseDate) {
-        const expandedKey = releaseDateKey.replace(/(?<!_)(Pro|Max|Ultra)/g, '_$1');
-        if (expandedKey !== releaseDateKey) {
-            releaseDate = constants.productReleaseDates[expandedKey];
-        }
-    }
-    // 模糊兜底 3: 按完整芯片名搜索其他尺寸/子品类的发布日期
-    // (如 "MacBook_Pro_14_M3Pro" 不存在, 但 "MacBook_Pro_16_M3Pro" 存在)
-    // P2 修复 (2026-08-27): 原实现取最后一段作芯片名, "Mac_mini_M4_Pro" 的末段是裸 "Pro",
-    // endsWith("_Pro") 会错配任意 Pro 型号 (曾把 M4_Pro 错配到 M2_Pro, 机龄虚增 21 个月)。
-    // 现改为: 末段为裸 Pro/Max/Ultra 后缀时与前一段合并为完整芯片名 (M4_Pro),
-    // 且品类前缀同时去掉芯片段与屏幕尺寸段, 避免跨品类泄漏。
-    if (!releaseDate) {
-        const segments = releaseDateKey.split('_');
-        // 芯片段: 末尾若为裸 Pro/Max/Ultra, 与前一段合并 (M4_Pro / M5_Max)
-        const chipSegCount = /^(Pro|Max|Ultra)$/.test(segments[segments.length - 1] ?? '') ? 2 : 1;
-        const chip = segments.slice(-chipSegCount).join('_');
-        // 品类前缀: 去掉芯片段; 若剩余末段是纯数字(屏幕尺寸)也去掉
-        const prefixSegments = segments.slice(0, -chipSegCount);
-        if (prefixSegments.length && /^\d+$/.test(prefixSegments[prefixSegments.length - 1] ?? '')) {
-            prefixSegments.pop();
-        }
-        const categoryPrefix = prefixSegments.join('_');
-        if (chip && categoryPrefix) {
-            // 优先匹配同品类前缀 + 同完整芯片后缀
-            for (const [key, val] of Object.entries(constants.productReleaseDates)) {
-                if (key.startsWith(categoryPrefix + '_') && key.endsWith('_' + chip) && typeof val === 'string') {
-                    releaseDate = val;
-                    break;
-                }
-            }
-        }
-    }
+    const releaseDate = resolveProductReleaseDate(constants, releaseDateKey);
     if (!releaseDate)
         return -1;
     // 解析 "YYYY-MM" 或 "YYYY-MM(预计)"

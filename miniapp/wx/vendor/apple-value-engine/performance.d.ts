@@ -19,11 +19,11 @@
 import type { Constants } from './types.js';
 /** 性能满足度计算结果 */
 export interface PerformanceResult {
-    /** S(0), 初始性能满足度 (0-1) */
+    /** S(0), 初始性能满足度; 推算跑分超实测基准的新芯片可 >1 (v4.2 起不截断) */
     s0: number;
-    /** S(N), 持有期末性能满足度 (0-1) */
+    /** S(N), 持有期末性能满足度 */
     sN: number;
-    /** S̄(N), 持有期平均性能满足度 (0-1) */
+    /** S̄(N), 持有期平均性能满足度 */
     avgS: number;
     /** 使用的有效 r 值 */
     effectiveR: number;

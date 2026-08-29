@@ -43,6 +43,40 @@ export declare function predictNewProductPrice(constants: Constants, categoryKey
  */
 export declare function predictDiscountedOldPrice(constants: Constants, oldCandBuyPrice: number, releasePlan: ReleasePlan, macroContext?: MacroContext): number;
 /**
+ * 解析 releaseDateKey 对应的发布日期字符串 (productReleaseDates 查找, 含模糊兜底)。
+ * 查找顺序: 精确键 → 去屏幕尺寸段 → 芯片名紧凑/展开互试 → 同品类前缀+完整芯片后缀搜索。
+ * (从 pareto.ts computeAgeMonths 抽出共享: v4.2 锚定品识别复用同一解析路径)
+ * @returns 发布日期字符串 (如 "2026-08"), 未找到返回 undefined
+ */
+export declare function resolveProductReleaseDate(constants: Constants, releaseDateKey: string): string | undefined;
+/**
+ * 锚定品识别 (v4.2): 候选的 productReleaseDates 发布月 ≥ releasePlan.nextReleaseMonth
+ * 即视为「属于本次待发布批次」的锚定品 (如已官宣未发售、快照已录入官宣价的新品)。
+ * - 类型 C 生成时跳过锚定品 (锚定品自身价不得套用「老款 × (1+锚涨幅) × (1−冲击)」公式);
+ * - 锚定品自身作为类型 A 买入时, 残值不施加本场发布的冲击 (贬值由保值率曲线覆盖)。
+ * 发布月无法解析时返回 false (保守保留旧行为, 不因识别失败丢弃候选)。
+ */
+export declare function isAnchorCandidate(constants: Constants, releaseDateKey: string, releasePlan: ReleasePlan): boolean;
+/**
+ * 调整后冲击幅度 = 品类冲击历史均值 × (1 + 价格传导因子) (v4.1, SOP §9.4)
+ * 传导因子: 锚涨幅>0 (已官宣) 时按锚涨幅查表 (官宣价是事实, 不依赖宏观触发);
+ * 否则沿用 v3.8 逻辑 (宏观触发的预测涨幅, 未触发为 0)。
+ * 从 predictDiscountedOldPrice 抽出共享 (v4.2 类型 A 残值冲击复用同一口径)。
+ */
+export declare function computeAdjustedImpact(constants: Constants, releasePlan: ReleasePlan, macroContext?: MacroContext): number;
+/**
+ * 类型 A 残值冲击调整乘数 (v4.2, SKILL.md 步骤5.4-4 / spec「月均成本计算」)
+ *
+ * 触发条件全部满足时返回 保值率乘数 = 1 − 调整后冲击 × 残值调整时变因子, 否则返回 1:
+ *   1. 存在 nextReleaseMonth, 且 分析月 ≤ 发布月 ≤ 分析月 + 持有月数 (持有期内有新品发布);
+ *   2. 候选非锚定品 (买新品的人不受「新品发布」冲击; 新品自身贬值由保值率曲线覆盖);
+ *   3. 品类冲击均值 > 0。
+ * 残值调整时变因子按「卖出点距新品发布的整月数」= (分析月 + 持有月数) − 发布月 查
+ * `_冲击时变曲线_v3.8` 的「残值调整因子」。只计下一次已知发布一次, 更远期换代贬值
+ * 由保值率曲线 (经验曲线, 含平均换代贬值) 覆盖。
+ */
+export declare function computeResidualImpactFactor(constants: Constants, releaseDateKey: string, releasePlan: ReleasePlan, macroContext: MacroContext | undefined, holdingMonths: number): number;
+/**
  * 查冲击时变曲线, 返回 { 残值调整因子, 买入价下降因子 }
  * 按「距新品发布的月数」查表: 1月内/3月内/6月内/12月内/12月后
  *

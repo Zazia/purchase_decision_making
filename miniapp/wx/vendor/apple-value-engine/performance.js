@@ -17,7 +17,9 @@ export function computePerformance(constants, chipName, memoryGb, storageGb, cat
     const chipCoeff = getChipCoefficient(constants, chipName, category);
     const memWeight = getMemoryWeight(constants, category, memoryGb);
     const storageWeight = getStorageWeight(constants, category, storageGb);
-    const s0 = Math.min(1, chipCoeff * memWeight * storageWeight);
+    // v4.2: 不再截断于 1 —— 推算跑分高于实测基准的新芯片系数允许 >100%
+    // (SOP performance-models.md §1.2 规则2); 老款跑分天然 ≤ 旗舰基准, 系数 ≤ 1 不受影响
+    const s0 = chipCoeff * memWeight * storageWeight;
     // 默认使用基础 r 值(CAGR), 不自动应用代际跃升调整。
     // 跃升调整(r×1.5 / r×0.5)是对下一代新品性能预测的可选修正,
     // SKILL.md 示例均使用基础 r。调用方可通过 getEffectiveR() 获取调整后 r 再传入。

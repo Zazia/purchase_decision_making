@@ -20,6 +20,6 @@ export { getRetentionRate, } from './retention.js';
 export { computePerformance, computePerformanceForNewProduct, getChipCoefficient, getChipMultiCoreScore, getCategoryFlagshipScore, getMemoryWeight, getStorageWeight, getEffectiveR, } from './performance.js';
 export { computeMonthlyCost, computeMonthlyCostForWaitCandidate, computeMaintenanceCost, getCurrentNewPrice, getBuyPrice, } from './cost.js';
 export { computeParetoFrontier, recomputeFrontierFromPoints, buildPlanPointFromInputs } from './pareto.js';
-export { parseReleasePlan, computeWaitMonths, predictNewProductPrice, predictDiscountedOldPrice, lookupImpactTimeVaryingFactor, shouldGenerateWaitCandidates, } from './release.js';
+export { parseReleasePlan, computeWaitMonths, predictNewProductPrice, predictDiscountedOldPrice, lookupImpactTimeVaryingFactor, shouldGenerateWaitCandidates, isAnchorCandidate, computeAdjustedImpact, computeResidualImpactFactor, resolveProductReleaseDate, } from './release.js';
 export { ConstantsValidationError, } from './types.js';
 //# sourceMappingURL=index.js.map

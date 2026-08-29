@@ -165,7 +165,11 @@ function mapCategoryToMaintenanceKey(category: string): string {
 
 /**
  * 从市场快照中提取当前同品类新品价(残值分母)
- * 优先取 新品官方价, 其次取快照 _说明 中的残值分母
+ *
+ * v4.2 规则 (spec「月均成本计算」残值分母选择): 在「新品」且含官方价的条目中,
+ * 取 productReleaseDates 发布月最晚者; 发布月并列时优先基础款 (芯片名不含
+ * Pro/Max/Ultra 后缀)。MUST NOT 依赖快照键的插入顺序。
+ * 无可解析条目时兜底旧行为: 首个含官方价的新品条目, 再退任意含官方价条目。
  */
 export function getCurrentNewPrice(
   constants: Constants,
@@ -174,7 +178,25 @@ export function getCurrentNewPrice(
   const snapshots = constants.marketSnapshots[category];
   if (!snapshots) return 0;
 
-  // 优先: 新品机型的官方价
+  // v4.2: 发布月最晚 + 同月基础款优先 (不依赖键顺序)
+  let best: { price: number; month: string; isBase: boolean } | null = null;
+  for (const [key, entry] of Object.entries(snapshots)) {
+    if (!key.includes('新品')) continue;
+    if (typeof entry.官方价 !== 'number' || entry.官方价 <= 0) continue;
+    const month = resolveSnapshotReleaseMonth(constants, category, key);
+    if (!month) continue;
+    const isBase = !/(Pro|Max|Ultra)/.test(extractSnapshotChip(key));
+    if (
+      !best
+      || month > best.month
+      || (month === best.month && isBase && !best.isBase)
+    ) {
+      best = { price: entry.官方价, month, isBase };
+    }
+  }
+  if (best) return best.price;
+
+  // 兜底: 首个含官方价的新品条目 (旧行为)
   for (const [key, entry] of Object.entries(snapshots)) {
     if (key.includes('新品') && typeof entry.官方价 === 'number' && entry.官方价 > 0) {
       return entry.官方价;
@@ -189,6 +211,57 @@ export function getCurrentNewPrice(
   }
 
   return 0;
+}
+
+/**
+ * 从快照 modelKey 推导 productReleaseDates 键并解析发布月 (YYYY-MM)。
+ * 推导规则与 pareto.ts parseModelKey 的 releaseDateKey 部分同款:
+ *   - iPhone: "iPhone_16_Pro_256G_新品" → "iPhone_16" (前两段)
+ *   - Mac 无屏幕尺寸: "M6_16G_256G_新品" → "${category}_${rawChip}"
+ *   - Mac 带屏幕尺寸: "M5_Pro_14寸_16G_512G_新品" → "${category}_${屏幕}_${rawChip}"
+ * 解析失败返回 null。
+ */
+function resolveSnapshotReleaseMonth(
+  constants: Constants,
+  category: string,
+  modelKey: string,
+): string | null {
+  const withoutCondition = modelKey.replace(/_(新品|二手)(_.*)?$/, '');
+  const segments = withoutCondition.split('_');
+
+  let releaseDateKey: string;
+  if (segments[0] === 'iPhone') {
+    releaseDateKey = segments.slice(0, 2).join('_');
+  } else {
+    const gbIndex = segments.findIndex((s) => /^(\d+)G$/i.test(s));
+    const chipEnd = gbIndex >= 0 ? gbIndex : segments.length;
+    const rawChip = segments.slice(0, chipEnd).filter((s) => !/^\d+寸$/.test(s)).join('_');
+    if (!rawChip) return null;
+    const screenMatch = segments.find((s) => /^\d+寸$/.test(s));
+    releaseDateKey = screenMatch
+      ? `${category}_${screenMatch.replace('寸', '')}_${rawChip}`
+      : `${category}_${rawChip}`;
+  }
+
+  let date: string | undefined = constants.productReleaseDates[releaseDateKey];
+  if (!date) {
+    date = constants.productReleaseDates[releaseDateKey.replace(/_(Pro|Max|Ultra)/g, '$1')];
+  }
+  if (!date) {
+    date = constants.productReleaseDates[releaseDateKey.replace(/(?<!_)(Pro|Max|Ultra)/g, '_$1')];
+  }
+  if (typeof date !== 'string') return null;
+  const m = date.match(/^(\d{4})-(\d{1,2})/);
+  return m ? `${m[1]}-${m[2].padStart(2, '0')}` : null;
+}
+
+/** 从快照 modelKey 提取芯片段 (内存/存储段之前, 去屏幕尺寸段), 如 "M5_Pro_24G_512G_新品" → "M5_Pro" */
+function extractSnapshotChip(modelKey: string): string {
+  const withoutCondition = modelKey.replace(/_(新品|二手)(_.*)?$/, '');
+  const segments = withoutCondition.split('_');
+  const gbIndex = segments.findIndex((s) => /^(\d+)G$/i.test(s));
+  const chipEnd = gbIndex >= 0 ? gbIndex : segments.length;
+  return segments.slice(0, chipEnd).filter((s) => !/^\d+寸$/.test(s)).join('_');
 }
 
 /**

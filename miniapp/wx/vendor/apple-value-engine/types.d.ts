@@ -328,6 +328,8 @@ export interface CustomPlanInputs {
     mSeriesCAGR?: number;
     /** A 系列 CAGR (透传给 computePerformance, 缺省用引擎默认) */
     aSeriesCAGR?: number;
+    /** 宏观状态 (v4.2 类型 A 残值冲击调整用; 缺省按 none + lastUpdated 分析月处理) */
+    macroContext?: MacroContext;
 }
 /** recomputeFrontierFromPoints 的参数 (与 DecisionParams 同口径) */
 export type RecomputeParams = DecisionParams;

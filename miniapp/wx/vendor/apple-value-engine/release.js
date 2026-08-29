@@ -101,20 +101,143 @@ export function predictDiscountedOldPrice(constants, oldCandBuyPrice, releasePla
     const historicalMean = lookupImpactMean(constants, releasePlan.category);
     if (historicalMean <= 0)
         return oldCandBuyPrice;
-    // v4.1: 已官宣时传导因子按锚涨幅查表 (官宣价是事实, 不依赖宏观触发);
-    //       未官宣时沿用 v3.8 逻辑 (宏观触发的预测涨幅, 否则 0)
+    const adjustedImpact = computeAdjustedImpact(constants, releasePlan, macroContext);
     const anchorHike = releasePlan.anchorHike ?? 0;
-    const transmissionHike = anchorHike > 0
-        ? anchorHike
-        : resolveHikeForTransmission(releasePlan, macroContext);
-    const transmissionFactor = lookupTransmissionFactor(constants, transmissionHike);
-    const adjustedImpact = historicalMean * (1 + transmissionFactor);
     // 新品发布后到买入的月数 = 上市到货延迟(月) × 宏观产能因子
     const delayMonths = Math.ceil(releasePlan.baselineDelayDays / 30);
     const monthsSinceRelease = delayMonths * releasePlan.macroCapacityFactor;
     const timeVaryingFactor = lookupImpactTimeVaryingFactor(constants, Math.ceil(monthsSinceRelease - 1e-9)).buyPriceDropFactor;
     const drop = adjustedImpact * timeVaryingFactor;
     return oldCandBuyPrice * (1 + anchorHike) * (1 - drop);
+}
+// ============================================================================
+// v4.2 锚定品识别与类型 A 残值冲击调整
+// ============================================================================
+/**
+ * 解析 releaseDateKey 对应的发布日期字符串 (productReleaseDates 查找, 含模糊兜底)。
+ * 查找顺序: 精确键 → 去屏幕尺寸段 → 芯片名紧凑/展开互试 → 同品类前缀+完整芯片后缀搜索。
+ * (从 pareto.ts computeAgeMonths 抽出共享: v4.2 锚定品识别复用同一解析路径)
+ * @returns 发布日期字符串 (如 "2026-08"), 未找到返回 undefined
+ */
+export function resolveProductReleaseDate(constants, releaseDateKey) {
+    let releaseDate = constants.productReleaseDates[releaseDateKey];
+    // 模糊兜底 1: 去掉屏幕尺寸段再试 (MacBook_Pro_14_M3Pro → MacBook_Pro_M3Pro)
+    if (!releaseDate) {
+        const withoutScreen = releaseDateKey.replace(/_\d+_(?=[^_]+$)/, '_');
+        if (withoutScreen !== releaseDateKey) {
+            releaseDate = constants.productReleaseDates[withoutScreen];
+        }
+    }
+    // 模糊兜底 2: 芯片名紧凑/展开互试 (A17_Pro → A17Pro, M1_Pro → M1Pro)
+    if (!releaseDate) {
+        const compactKey = releaseDateKey.replace(/_(Pro|Max|Ultra)/g, '$1');
+        if (compactKey !== releaseDateKey) {
+            releaseDate = constants.productReleaseDates[compactKey];
+        }
+    }
+    if (!releaseDate) {
+        const expandedKey = releaseDateKey.replace(/(?<!_)(Pro|Max|Ultra)/g, '_$1');
+        if (expandedKey !== releaseDateKey) {
+            releaseDate = constants.productReleaseDates[expandedKey];
+        }
+    }
+    // 模糊兜底 3: 按完整芯片名搜索其他尺寸/子品类的发布日期
+    // (如 "MacBook_Pro_14_M3Pro" 不存在, 但 "MacBook_Pro_16_M3Pro" 存在)
+    // P2 修复 (2026-08-27): 原实现取最后一段作芯片名, "Mac_mini_M4_Pro" 的末段是裸 "Pro",
+    // endsWith("_Pro") 会错配任意 Pro 型号 (曾把 M4_Pro 错配到 M2_Pro, 机龄虚增 21 个月)。
+    // 现改为: 末段为裸 Pro/Max/Ultra 后缀时与前一段合并为完整芯片名 (M4_Pro),
+    // 且品类前缀同时去掉芯片段与屏幕尺寸段, 避免跨品类泄漏。
+    if (!releaseDate) {
+        const segments = releaseDateKey.split('_');
+        // 芯片段: 末尾若为裸 Pro/Max/Ultra, 与前一段合并 (M4_Pro / M5_Max)
+        const chipSegCount = /^(Pro|Max|Ultra)$/.test(segments[segments.length - 1] ?? '') ? 2 : 1;
+        const chip = segments.slice(-chipSegCount).join('_');
+        // 品类前缀: 去掉芯片段; 若剩余末段是纯数字(屏幕尺寸)也去掉
+        const prefixSegments = segments.slice(0, -chipSegCount);
+        if (prefixSegments.length && /^\d+$/.test(prefixSegments[prefixSegments.length - 1] ?? '')) {
+            prefixSegments.pop();
+        }
+        const categoryPrefix = prefixSegments.join('_');
+        if (chip && categoryPrefix) {
+            // 优先匹配同品类前缀 + 同完整芯片后缀
+            for (const [key, val] of Object.entries(constants.productReleaseDates)) {
+                if (key.startsWith(categoryPrefix + '_') && key.endsWith('_' + chip) && typeof val === 'string') {
+                    releaseDate = val;
+                    break;
+                }
+            }
+        }
+    }
+    return typeof releaseDate === 'string' ? releaseDate : undefined;
+}
+/**
+ * 锚定品识别 (v4.2): 候选的 productReleaseDates 发布月 ≥ releasePlan.nextReleaseMonth
+ * 即视为「属于本次待发布批次」的锚定品 (如已官宣未发售、快照已录入官宣价的新品)。
+ * - 类型 C 生成时跳过锚定品 (锚定品自身价不得套用「老款 × (1+锚涨幅) × (1−冲击)」公式);
+ * - 锚定品自身作为类型 A 买入时, 残值不施加本场发布的冲击 (贬值由保值率曲线覆盖)。
+ * 发布月无法解析时返回 false (保守保留旧行为, 不因识别失败丢弃候选)。
+ */
+export function isAnchorCandidate(constants, releaseDateKey, releasePlan) {
+    const next = releasePlan.nextReleaseMonth;
+    if (!next)
+        return false;
+    const releaseDate = resolveProductReleaseDate(constants, releaseDateKey);
+    if (!releaseDate)
+        return false;
+    const m = releaseDate.match(/^(\d{4})-(\d{1,2})/);
+    if (!m)
+        return false;
+    const releaseMonth = `${m[1]}-${m[2].padStart(2, '0')}`;
+    // 候选发布月 ≥ nextReleaseMonth (diffMonths(from, to) = to − from)
+    return diffMonths(next, releaseMonth) >= 0;
+}
+/**
+ * 调整后冲击幅度 = 品类冲击历史均值 × (1 + 价格传导因子) (v4.1, SOP §9.4)
+ * 传导因子: 锚涨幅>0 (已官宣) 时按锚涨幅查表 (官宣价是事实, 不依赖宏观触发);
+ * 否则沿用 v3.8 逻辑 (宏观触发的预测涨幅, 未触发为 0)。
+ * 从 predictDiscountedOldPrice 抽出共享 (v4.2 类型 A 残值冲击复用同一口径)。
+ */
+export function computeAdjustedImpact(constants, releasePlan, macroContext) {
+    const historicalMean = lookupImpactMean(constants, releasePlan.category);
+    if (historicalMean <= 0)
+        return 0;
+    const anchorHike = releasePlan.anchorHike ?? 0;
+    const transmissionHike = anchorHike > 0
+        ? anchorHike
+        : resolveHikeForTransmission(releasePlan, macroContext);
+    const transmissionFactor = lookupTransmissionFactor(constants, transmissionHike);
+    return historicalMean * (1 + transmissionFactor);
+}
+/**
+ * 类型 A 残值冲击调整乘数 (v4.2, SKILL.md 步骤5.4-4 / spec「月均成本计算」)
+ *
+ * 触发条件全部满足时返回 保值率乘数 = 1 − 调整后冲击 × 残值调整时变因子, 否则返回 1:
+ *   1. 存在 nextReleaseMonth, 且 分析月 ≤ 发布月 ≤ 分析月 + 持有月数 (持有期内有新品发布);
+ *   2. 候选非锚定品 (买新品的人不受「新品发布」冲击; 新品自身贬值由保值率曲线覆盖);
+ *   3. 品类冲击均值 > 0。
+ * 残值调整时变因子按「卖出点距新品发布的整月数」= (分析月 + 持有月数) − 发布月 查
+ * `_冲击时变曲线_v3.8` 的「残值调整因子」。只计下一次已知发布一次, 更远期换代贬值
+ * 由保值率曲线 (经验曲线, 含平均换代贬值) 覆盖。
+ */
+export function computeResidualImpactFactor(constants, releaseDateKey, releasePlan, macroContext, holdingMonths) {
+    const next = releasePlan.nextReleaseMonth;
+    if (!next)
+        return 1;
+    if (isAnchorCandidate(constants, releaseDateKey, releasePlan))
+        return 1;
+    const analysisMonth = resolveAnalysisMonth(macroContext, constants.lastUpdated);
+    if (!analysisMonth)
+        return 1;
+    const monthsToRelease = diffMonths(analysisMonth, next);
+    if (monthsToRelease < 0 || monthsToRelease > holdingMonths)
+        return 1;
+    const adjustedImpact = computeAdjustedImpact(constants, releasePlan, macroContext);
+    if (adjustedImpact <= 0)
+        return 1;
+    // 卖出点距新品发布的整月数
+    const monthsSinceReleaseAtSell = holdingMonths - monthsToRelease;
+    const { residualFactor } = lookupImpactTimeVaryingFactor(constants, monthsSinceReleaseAtSell);
+    return 1 - adjustedImpact * residualFactor;
 }
 /**
  * 查冲击时变曲线, 返回 { 残值调整因子, 买入价下降因子 }

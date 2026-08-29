@@ -59,7 +59,11 @@ export declare function computeMaintenanceCost(constants: Constants, category: s
 export declare function computeMonthlyCostForWaitCandidate(constants: Constants, category: string, buyPrice: number, holdingMonths: number, currentNewPrice: number, sellAgeMonths: number): CostBreakdown;
 /**
  * 从市场快照中提取当前同品类新品价(残值分母)
- * 优先取 新品官方价, 其次取快照 _说明 中的残值分母
+ *
+ * v4.2 规则 (spec「月均成本计算」残值分母选择): 在「新品」且含官方价的条目中,
+ * 取 productReleaseDates 发布月最晚者; 发布月并列时优先基础款 (芯片名不含
+ * Pro/Max/Ultra 后缀)。MUST NOT 依赖快照键的插入顺序。
+ * 无可解析条目时兜底旧行为: 首个含官方价的新品条目, 再退任意含官方价条目。
  */
 export declare function getCurrentNewPrice(constants: Constants, category: string): number;
 /**

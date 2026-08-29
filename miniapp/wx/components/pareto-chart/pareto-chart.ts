@@ -286,7 +286,8 @@ Component({
           nameGap: 28,
           nameTextStyle: { color: C_MUTED, fontSize: 11 },
           min: Math.max(0, Math.floor(minPerf - perfPadding)),
-          max: Math.min(100, Math.ceil(maxPerf + perfPadding)),
+          // avgPerformance 可 >100% (v4.2 起 S(0) 不截断), 仅在数据不超 100% 时才收口上限
+          max: maxPerf > 100 ? Math.ceil(maxPerf + perfPadding) : Math.min(100, Math.ceil(maxPerf + perfPadding)),
           axisLine: { lineStyle: { color: C_BORDER } },
           axisLabel: { color: C_MUTED, fontSize: 11 },
           splitLine: { lineStyle: { color: C_BORDER, type: 'dashed' } },
