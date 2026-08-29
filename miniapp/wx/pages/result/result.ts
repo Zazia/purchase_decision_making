@@ -519,8 +519,9 @@ Page({
         isUserModified: this.data.viewMode === 'userModified',
       } as unknown as Record<string, unknown>;
     }
-    // 回看模式带 savedId, 让 report 页复用同一份保存快照(含保存时数据日期)
-    const url = this.data.isReplay
+    // 回看模式且未编辑时带 savedId, 让 report 页复用同一份保存快照(含保存时数据日期);
+    // 重算后(viewMode='userModified')不带 savedId, 让 report 页读取刚写入 globalData 的重算数据
+    const url = this.data.isReplay && this.data.viewMode !== 'userModified'
       ? `/pages/report/report?savedId=${this.data.savedId}`
       : '/pages/report/report';
     wx.navigateTo({ url });

@@ -233,6 +233,172 @@ describe('recomputeFrontierFromPoints', () => {
   });
 });
 
+describe('自添加方案显式 memoryGb/storageGb 字段 (Bug 2 修复)', () => {
+  let constants: Constants;
+  beforeAll(() => {
+    constants = loadConstants(constantsJson);
+  });
+
+  // 与端内复现脚本 scripts/debug/repro-manual-scheme-bugs.cjs 同款参数
+  const params: DecisionParams = {
+    category: 'mac-mini',
+    budget: 10000,
+    buyTiming: 'both',
+    performanceFloor: 0.4,
+    holdingYears: [3],
+  };
+
+  it('同配置自添加方案 (model 不含 GB 段 + 显式字段) 与快照方案性能一致', () => {
+    const original = computeParetoFrontier(constants, params);
+    const allOrig = [...original.frontier, ...original.dominated];
+    const m4Orig = allOrig.find((p) => p.model.startsWith('M4_16G_256G_新品'));
+    expect(m4Orig).toBeDefined();
+
+    // 端内新增表单同款: 机型名不含 16G_256G 段, 显式填写 memoryGb/storageGb
+    const customPoint = {
+      ...m4Orig!,
+      candidateType: undefined,
+      model: 'M4 Mac mini_新品 × 3年',
+      source: 'custom' as const,
+      memoryGb: 16,
+      storageGb: 256,
+      buyPrice: m4Orig!.buyPrice,
+      monthlyCost: 0,
+      avgPerformance: 0,
+      performanceS0: 0,
+      performanceSN: 0,
+      residual: 0,
+      maintenanceCost: 0,
+    };
+    const originalEdited = allOrig.map((p) => ({ ...p, source: 'original' as const }));
+    const recomputed = recomputeFrontierFromPoints(constants, params, [...originalEdited, customPoint]);
+    const allRec = [...recomputed.frontier, ...recomputed.dominated];
+    const customOut = allRec.find((p) => p.model === 'M4 Mac mini_新品 × 3年');
+    expect(customOut).toBeDefined();
+
+    // 性能满足度与快照同配置方案完全一致 (误差 ≤ 0.001) — Bug 2 核心
+    expect(Math.abs(customOut!.avgPerformance - m4Orig!.avgPerformance)).toBeLessThanOrEqual(0.001);
+    // 自添加方案按类型 A「现在买」参与计算
+    expect(customOut!.candidateType).toBe('A');
+    // 月均成本已被引擎按真实机龄重算 (非 bug 态的机龄 0 口径);
+    // 与等待类 (B/C) 快照方案存在等待月数的时点折旧差 (约 1-2 元), 属买入时点语义差
+    expect(Math.abs(customOut!.monthlyCost - m4Orig!.monthlyCost)).toBeLessThanOrEqual(2);
+    expect(Math.abs(customOut!.monthlyCost - m4Orig!.monthlyCost)).toBeGreaterThan(0);
+  });
+
+  it('自添加方案月均成本与「现在买」(A) 语义一致: 显式字段与 model 回退两路径等价', () => {
+    // 同一配置 (M4 16G/256G 新品 同价), 一条 model 为自由文本 + 显式字段,
+    // 一条 model 含 GB 段走回退解析 — 两条路径应得到完全一致的结果
+    // (证明 mem/storage 取值正确 + 机龄均按相同型号真实机龄对齐)
+    const explicitPoint = {
+      ...({
+        model: 'M4 Mac mini_新品 × 3年',
+        chip: 'M4',
+        buyTiming: 'new',
+        holdingYears: 3,
+        monthlyCost: 0,
+        avgPerformance: 0,
+        buyPrice: 4388,
+        residual: 0,
+        maintenanceCost: 0,
+        holdingMonths: 36,
+        performanceS0: 0,
+        performanceSN: 0,
+      } as EditedPlanPoint),
+      source: 'custom' as const,
+      memoryGb: 16,
+      storageGb: 256,
+    };
+    const fallbackPoint = {
+      ...explicitPoint,
+      model: 'M4_16G_256G_新品 × 3年',
+      memoryGb: undefined,
+      storageGb: undefined,
+    };
+
+    const r1 = recomputeFrontierFromPoints(constants, params, [explicitPoint]);
+    const r2 = recomputeFrontierFromPoints(constants, params, [fallbackPoint]);
+    const p1 = [...r1.frontier, ...r1.dominated][0];
+    const p2 = [...r2.frontier, ...r2.dominated][0];
+    expect(p1).toBeDefined();
+    expect(p2).toBeDefined();
+
+    expect(Math.abs(p1!.avgPerformance - p2!.avgPerformance)).toBeLessThanOrEqual(0.001);
+    expect(Math.abs(p1!.monthlyCost - p2!.monthlyCost)).toBeLessThanOrEqual(0.5);
+  });
+
+  it('复制的自添加方案 (source="edited") 不被丢弃且与原自添加方案结果一致', () => {
+    const original = computeParetoFrontier(constants, params);
+    const allOrig = [...original.frontier, ...original.dominated];
+    const m4Orig = allOrig.find((p) => p.model.startsWith('M4_16G_256G_新品'));
+    expect(m4Orig).toBeDefined();
+
+    const base = {
+      candidateType: undefined,
+      model: 'M4 Mac mini_新品 × 3年',
+      chip: 'M4',
+      memoryGb: 16,
+      storageGb: 256,
+      buyPrice: m4Orig!.buyPrice,
+      monthlyCost: 0,
+      avgPerformance: 0,
+      performanceS0: 0,
+      performanceSN: 0,
+    };
+    const customPoint = { ...base, ...m4Orig!, candidateType: undefined, source: 'custom' as const, model: 'M4 Mac mini_新品 × 3年', memoryGb: 16, storageGb: 256 };
+    // 编辑器「复制」自添加方案后副本 source='edited', model 同样不含 GB 段
+    const copiedPoint = { ...customPoint, source: 'edited' as const, editedBuyPrice: customPoint.buyPrice };
+
+    const originalEdited = allOrig.map((p) => ({ ...p, source: 'original' as const }));
+    const rCustom = recomputeFrontierFromPoints(constants, params, [...originalEdited, customPoint]);
+    const rCopied = recomputeFrontierFromPoints(constants, params, [...originalEdited, copiedPoint]);
+    const customOut = [...rCustom.frontier, ...rCustom.dominated].find((p) => p.model === 'M4 Mac mini_新品 × 3年');
+    const copiedOut = [...rCopied.frontier, ...rCopied.dominated].find((p) => p.model === 'M4 Mac mini_新品 × 3年');
+
+    // 副本不被丢弃 (修复前 model 自由文本导致 releaseDateKey 解析垃圾值 → 被静默丢弃)
+    expect(copiedOut).toBeDefined();
+    expect(customOut).toBeDefined();
+
+    // 副本与原自添加方案性能/月均成本完全一致
+    expect(Math.abs(copiedOut!.avgPerformance - customOut!.avgPerformance)).toBeLessThanOrEqual(0.001);
+    expect(Math.abs(copiedOut!.monthlyCost - customOut!.monthlyCost)).toBeLessThanOrEqual(0.5);
+  });
+
+  it('显式字段缺失时从 model (M2_16G_256G_二手) 回退解析, 行为与既有版本一致', () => {
+    const fallbackPoint = {
+      ...({
+        model: 'M2_16G_256G_二手 × 3年',
+        chip: 'M2',
+        buyTiming: 'used',
+        holdingYears: 3,
+        monthlyCost: 0,
+        avgPerformance: 0,
+        buyPrice: 2600,
+        residual: 0,
+        maintenanceCost: 0,
+        holdingMonths: 36,
+        performanceS0: 0,
+        performanceSN: 0,
+        candidateType: 'A',
+      } as EditedPlanPoint),
+      source: 'custom' as const,
+    };
+    // 显式字段版本: 与回退解析应得到相同配置 (16G/256G)
+    const explicitPoint = { ...fallbackPoint, memoryGb: 16, storageGb: 256 };
+
+    const r1 = recomputeFrontierFromPoints(constants, params, [fallbackPoint]);
+    const r2 = recomputeFrontierFromPoints(constants, params, [explicitPoint]);
+    const p1 = [...r1.frontier, ...r1.dominated][0];
+    const p2 = [...r2.frontier, ...r2.dominated][0];
+    expect(p1).toBeDefined();
+    expect(p2).toBeDefined();
+
+    // 回退解析 (model 含 16G_256G 段) 与显式 16G/256G 完全一致
+    expect(Math.abs(p1!.avgPerformance - p2!.avgPerformance)).toBeLessThanOrEqual(0.001);
+    expect(Math.abs(p1!.monthlyCost - p2!.monthlyCost)).toBeLessThanOrEqual(0.5);
+  });
+});
+
 describe('buildPlanPointFromInputs', () => {
   let constants: Constants;
   beforeAll(() => {

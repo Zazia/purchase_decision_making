@@ -1,12 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.computeParetoFrontier = computeParetoFrontier;
-exports.recomputeFrontierFromPoints = recomputeFrontierFromPoints;
-exports.buildPlanPointFromInputs = buildPlanPointFromInputs;
-const types_js_1 = require("./types.js");
-const performance_js_1 = require("./performance.js");
-const cost_js_1 = require("./cost.js");
-const release_js_1 = require("./release.js");
+import { ConstantsValidationError } from './types.js';
+import { computePerformance, computePerformanceForNewProduct } from './performance.js';
+import { computeMonthlyCost, computeMonthlyCostForWaitCandidate, getCurrentNewPrice, getBuyPrice } from './cost.js';
+import { parseReleasePlan, computeWaitMonths, predictNewProductPrice, predictDiscountedOldPrice, shouldGenerateWaitCandidates, } from './release.js';
 /**
  * 计算帕累托前沿
  *
@@ -14,14 +9,14 @@ const release_js_1 = require("./release.js");
  * @param params 决策参数
  * @returns { frontier, dominated, recommendationRange }
  */
-function computeParetoFrontier(constants, params) {
+export function computeParetoFrontier(constants, params) {
     const categoryKey = resolveCategoryKey(constants, params.category);
     const candidates = extractCandidates(constants, categoryKey, params.buyTiming);
     // v3.8: 当 considerWait !== false 时, 自动判断是否生成类型 B/C 候选
     if (params.considerWait !== false) {
         const macroContext = resolveMacroContext(constants, params.macroContext);
-        const releasePlan = (0, release_js_1.parseReleasePlan)(constants, categoryKey, macroContext);
-        if (releasePlan && (0, release_js_1.shouldGenerateWaitCandidates)(releasePlan, macroContext)) {
+        const releasePlan = parseReleasePlan(constants, categoryKey, macroContext);
+        if (releasePlan && shouldGenerateWaitCandidates(releasePlan, macroContext)) {
             const waitCandidates = extractWaitCandidates(constants, categoryKey, releasePlan, macroContext, params.buyTiming);
             candidates.push(...waitCandidates);
         }
@@ -63,7 +58,7 @@ function computeParetoFrontier(constants, params) {
  * @param editedPoints 用户编辑后的方案集 (含 original/edited/custom/excluded/deferred 标记)
  * @returns { frontier, dominated, recommendationRange }
  */
-function recomputeFrontierFromPoints(constants, params, editedPoints) {
+export function recomputeFrontierFromPoints(constants, params, editedPoints) {
     // 1. 过滤 excluded / deferred
     const active = editedPoints.filter((p) => !p.excluded && !p.deferred);
     // 2. 逐个重建 PlanPoint (original 直接复用, edited 重算成本, custom 用 buildPlanPointFromInputs)
@@ -106,20 +101,37 @@ function rebuildEditedPlanPoint(constants, params, ep) {
     if (!(editedBuyPrice > 0))
         return null; // 非法买入价拦截
     const categoryKey = resolveCategoryKeyFromPlanPoint(constants, ep);
+    // releaseDateKey 解析: 优先从 model 解析 (original/edited 快照方案);
+    // 自添加方案的复制副本 (带显式内存字段, model 为自由文本) 解析无效时,
+    // 按 芯片+内存+存储 在 marketSnapshots 匹配同配置机型兜底 (机龄取相同型号)
+    const memoryGb = ep.memoryGb ?? extractMemoryGb(ep);
+    const storageGb = ep.storageGb ?? extractStorageGb(ep);
+    const isCustomCopy = ep.memoryGb !== undefined || ep.storageGb !== undefined;
+    let releaseDateKey = resolveReleaseDateKeyFromModel(ep, categoryKey);
+    if (isCustomCopy && computeAgeMonths(constants, releaseDateKey) < 0) {
+        releaseDateKey = resolveReleaseDateKeyForCustomPlan(constants, categoryKey, ep.chip, memoryGb, storageGb);
+    }
     // 构造 Candidate, 复用原方案的发布日期 key 与候选类型 (保证机龄计算口径一致)
     const cand = {
         modelKey: stripHoldingYearsSuffix(ep.model),
         chip: ep.chip,
-        memoryGb: extractMemoryGb(ep),
-        storageGb: extractStorageGb(ep),
+        memoryGb,
+        storageGb,
         buyTiming: ep.buyTiming,
         buyPrice: editedBuyPrice,
-        releaseDateKey: resolveReleaseDateKeyFromModel(ep, categoryKey),
+        releaseDateKey,
         categoryKey,
         candidateType: ep.candidateType ?? 'A',
         waitMonths: ep.waitMonths,
         predictedPrice: ep.predictedPrice,
     };
+    // 自添加方案的复制副本 (model 为自由文本): releaseDateKey 仍无效时
+    // 机龄按 0 兜底 (与 buildPlanPointFromInputs 的兜底行为一致), 不丢弃
+    if ((ep.candidateType ?? 'A') === 'A'
+        && isCustomCopy
+        && computeAgeMonths(constants, cand.releaseDateKey) < 0) {
+        return buildPlanPointFromCandidateWithAgeOverride(constants, cand, ep.holdingYears, 0, getCurrentNewPrice(constants, categoryKey), params.mSeriesCAGR, params.aSeriesCAGR);
+    }
     return buildPlanPoint(constants, cand, ep.holdingYears, params);
 }
 /**
@@ -133,8 +145,8 @@ function rebuildCustomPlanPoint(constants, params, ep) {
     const inputs = {
         model: stripHoldingYearsSuffix(ep.model),
         chip: ep.chip,
-        memoryGb: extractMemoryGb(ep),
-        storageGb: extractStorageGb(ep),
+        memoryGb: ep.memoryGb ?? extractMemoryGb(ep),
+        storageGb: ep.storageGb ?? extractStorageGb(ep),
         categoryKey: resolveCategoryKeyFromPlanPoint(constants, ep),
         buyTiming: ep.buyTiming,
         buyPrice: ep.buyPrice,
@@ -222,6 +234,30 @@ function resolveReleaseDateKeyFromModel(p, categoryKey) {
     return `${categoryKey}_${rawChip}`;
 }
 /**
+ * 为自添加方案解析 releaseDateKey (机龄取「相同型号的机器」的机龄)。
+ * 用户输入的 model 是自由文本 (如 "M4 Mac mini"), 无法从 model 解析,
+ * 改为在 marketSnapshots 中按 芯片+内存+存储 匹配同配置机型条目,
+ * 用该条目的 modelKey 推导 releaseDateKey (与 parseModelKey 同款规则)。
+ * - 精确配置匹配不到 → 按 chip 前缀匹配同芯片任意配置 (机龄按芯片级一致)
+ * - 都匹配不到 → 返回 '' (调用方按机龄 0 兜底)
+ */
+function resolveReleaseDateKeyForCustomPlan(constants, categoryKey, chip, memoryGb, storageGb) {
+    const snaps = constants.marketSnapshots[categoryKey];
+    if (!snaps || typeof snaps !== 'object')
+        return '';
+    const keys = Object.keys(snaps).filter((k) => !k.startsWith('_'));
+    const chipPrefix = `${chip}_`;
+    const memStorageSeg = `_${memoryGb}G_${storageGb}G`;
+    // 1. 精确匹配: 同芯片 + 同内存/存储 (如 "M4_16G_256G_二手" / "M5_Pro_14寸_24G_512G_新品")
+    const exact = keys.find((k) => k.startsWith(chipPrefix) && k.includes(memStorageSeg));
+    // 2. 退化匹配: 同芯片任意配置 (机龄按芯片级, 与配置无关)
+    const fallback = exact ?? keys.find((k) => k.startsWith(chipPrefix));
+    if (!fallback)
+        return '';
+    // 复用 model 解析规则推导 releaseDateKey (MacBook 带屏幕尺寸段也能处理)
+    return resolveReleaseDateKeyFromModel({ model: fallback }, categoryKey);
+}
+/**
  * 从 PlanPoint 推导 categoryKey (用于保值率/维修/性能查表)。
  * 优先用解析过的子品类 (如 "Mac_mini"); 找不到时回退品类前缀 (如 "iPhone")。
  */
@@ -292,7 +328,7 @@ function extractCandidates(constants, categoryKey, buyTiming) {
                 const parsed = parseModelKey(modelKey, snapKey);
                 if (!parsed)
                     continue;
-                const buyPrice = (0, cost_js_1.getBuyPrice)(entry, timing);
+                const buyPrice = getBuyPrice(entry, timing);
                 if (buyPrice === null || buyPrice <= 0)
                     continue;
                 candidates.push({
@@ -323,10 +359,10 @@ function extractCandidates(constants, categoryKey, buyTiming) {
  * @param buyTiming 用户选择的买入时机 (控制类型 C 收集哪些老款)
  */
 function extractWaitCandidates(constants, categoryKey, releasePlan, macroContext, buyTiming) {
-    const waitMonths = (0, release_js_1.computeWaitMonths)(releasePlan, macroContext);
+    const waitMonths = computeWaitMonths(releasePlan, macroContext);
     const candidates = [];
     // --- 类型 B: 等新品买新品 ---
-    const newProductPrice = (0, release_js_1.predictNewProductPrice)(constants, categoryKey, releasePlan);
+    const newProductPrice = predictNewProductPrice(constants, categoryKey, releasePlan);
     if (newProductPrice > 0) {
         candidates.push({
             modelKey: `${categoryKey}_下一代新品`,
@@ -346,7 +382,7 @@ function extractWaitCandidates(constants, categoryKey, releasePlan, macroContext
     // 复用 extractCandidates 获取当前在售机型, 对每个施加冲击时变价格下降
     const oldCandidates = extractCandidates(constants, categoryKey, buyTiming);
     for (const oldCand of oldCandidates) {
-        const discountedPrice = (0, release_js_1.predictDiscountedOldPrice)(constants, oldCand.buyPrice, releasePlan, macroContext);
+        const discountedPrice = predictDiscountedOldPrice(constants, oldCand.buyPrice, releasePlan, macroContext);
         if (discountedPrice <= 0)
             continue;
         candidates.push({
@@ -476,10 +512,10 @@ function resolveChipBenchmark(constants, chip) {
  * @throws ConstantsValidationError 当芯片无法在 chipBenchmarks 中匹配
  * @returns PlanPoint; 类型 C 且无 releaseDateKey 时返回 null (端内应在提交前避免此场景)
  */
-function buildPlanPointFromInputs(constants, inputs) {
+export function buildPlanPointFromInputs(constants, inputs) {
     const resolvedChip = resolveChipBenchmark(constants, inputs.chip);
     if (!resolvedChip) {
-        throw new types_js_1.ConstantsValidationError('chipBenchmarks', `无法识别该芯片: ${inputs.chip}, 无法重算`);
+        throw new ConstantsValidationError('chipBenchmarks', `无法识别该芯片: ${inputs.chip}, 无法重算`);
     }
     const candidateType = inputs.candidateType ?? 'A';
     // 复用 Candidate 接口, 内部走 buildPlanPoint 同款计算
@@ -498,10 +534,12 @@ function buildPlanPointFromInputs(constants, inputs) {
     };
     // 类型 A 需要 releaseDateKey 计算 currentAgeMonths; 类型 B 不需要机龄
     if (candidateType === 'A') {
-        // 用户新增方案无法提供发布日期, 机龄按 0 处理 (即视为当前刚发布机型)
-        // 这里直接走 buildPlanPoint 类型 A 分支, 但用 0 机龄兜底
-        return buildPlanPointFromCandidateWithAgeOverride(constants, cand, inputs.holdingYears, 0, // currentAgeMonths 兜底为 0
-        (0, cost_js_1.getCurrentNewPrice)(constants, inputs.categoryKey), inputs.mSeriesCAGR, inputs.aSeriesCAGR);
+        // 机龄取「相同型号的机器」的真实机龄 (按 芯片+内存+存储 在 marketSnapshots
+        // 匹配同配置机型, 解析其 releaseDateKey); 匹配不到时按 0 兜底 (视为刚发布机型)
+        const releaseDateKey = resolveReleaseDateKeyForCustomPlan(constants, inputs.categoryKey, resolvedChip, inputs.memoryGb, inputs.storageGb);
+        const ageMonths = releaseDateKey ? computeAgeMonths(constants, releaseDateKey) : -1;
+        return buildPlanPointFromCandidateWithAgeOverride(constants, cand, inputs.holdingYears, ageMonths >= 0 ? ageMonths : 0, // currentAgeMonths 兜底为 0
+        getCurrentNewPrice(constants, inputs.categoryKey), inputs.mSeriesCAGR, inputs.aSeriesCAGR);
     }
     // 类型 B/C 走原 buildPlanPoint (不依赖机龄解析的兜底分支)
     // 注: 类型 C 需要 releaseDateKey 计算机龄, 用户新增方案没有, 可能返回 null
@@ -516,8 +554,8 @@ function buildPlanPointFromInputs(constants, inputs) {
  */
 function buildPlanPointFromCandidateWithAgeOverride(constants, cand, holdingYears, currentAgeMonths, currentNewPrice, mSeriesCAGR, aSeriesCAGR) {
     const holdingMonths = holdingYears * 12;
-    const cost = (0, cost_js_1.computeMonthlyCost)(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
-    const perf = (0, performance_js_1.computePerformance)(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, mSeriesCAGR, aSeriesCAGR);
+    const cost = computeMonthlyCost(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
+    const perf = computePerformance(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, mSeriesCAGR, aSeriesCAGR);
     const supportRisk = computeSystemSupportRiskForAge(cand, currentAgeMonths, holdingMonths);
     return {
         model: `${cand.modelKey} × ${holdingYears}年`,
@@ -570,28 +608,28 @@ function buildPlanPoint(constants, cand, holdingYears, params) {
     let perf;
     if (cand.candidateType === 'B') {
         // 类型 B: 等新品买新品 — S(0)=1.0, 机龄 0, 残值分母 = 买入价(预测新品价)
-        perf = (0, performance_js_1.computePerformanceForNewProduct)(constants, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
+        perf = computePerformanceForNewProduct(constants, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
         const currentNewPrice = cand.buyPrice; // 新品自身即当前新品价
-        cost = (0, cost_js_1.computeMonthlyCostForWaitCandidate)(constants, cand.categoryKey, cand.buyPrice, holdingMonths, currentNewPrice, holdingMonths);
+        cost = computeMonthlyCostForWaitCandidate(constants, cand.categoryKey, cand.buyPrice, holdingMonths, currentNewPrice, holdingMonths);
     }
     else if (cand.candidateType === 'C') {
         // 类型 C: 等新品后买降价老款 — 同款老芯片, 卖出时机龄 = 当前机龄 + 等待月数 + 持有月数
         const currentAgeMonths = computeAgeMonths(constants, cand.releaseDateKey);
         if (currentAgeMonths < 0)
             return null;
-        const currentNewPrice = (0, cost_js_1.getCurrentNewPrice)(constants, cand.categoryKey);
+        const currentNewPrice = getCurrentNewPrice(constants, cand.categoryKey);
         const sellAgeMonths = currentAgeMonths + waitMonths + holdingMonths;
-        cost = (0, cost_js_1.computeMonthlyCostForWaitCandidate)(constants, cand.categoryKey, cand.buyPrice, holdingMonths, currentNewPrice, sellAgeMonths);
-        perf = (0, performance_js_1.computePerformance)(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
+        cost = computeMonthlyCostForWaitCandidate(constants, cand.categoryKey, cand.buyPrice, holdingMonths, currentNewPrice, sellAgeMonths);
+        perf = computePerformance(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
     }
     else {
         // 类型 A: 现在买 — 原有逻辑
         const currentAgeMonths = computeAgeMonths(constants, cand.releaseDateKey);
         if (currentAgeMonths < 0)
             return null;
-        const currentNewPrice = (0, cost_js_1.getCurrentNewPrice)(constants, cand.categoryKey);
-        cost = (0, cost_js_1.computeMonthlyCost)(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
-        perf = (0, performance_js_1.computePerformance)(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
+        const currentNewPrice = getCurrentNewPrice(constants, cand.categoryKey);
+        cost = computeMonthlyCost(constants, cand.categoryKey, cand.buyPrice, currentAgeMonths, holdingMonths, currentNewPrice);
+        perf = computePerformance(constants, cand.chip, cand.memoryGb, cand.storageGb, cand.categoryKey, holdingMonths, params.mSeriesCAGR, params.aSeriesCAGR);
     }
     // ---- 系统支持期风险标注 ----
     const supportRisk = computeSystemSupportRisk(constants, cand, holdingMonths);
@@ -671,13 +709,25 @@ function computeAgeMonths(constants, releaseDateKey) {
             releaseDate = constants.productReleaseDates[expandedKey];
         }
     }
-    // 模糊兜底 3: 按芯片名(最后一段)搜索其他尺寸/子品类的发布日期
+    // 模糊兜底 3: 按完整芯片名搜索其他尺寸/子品类的发布日期
     // (如 "MacBook_Pro_14_M3Pro" 不存在, 但 "MacBook_Pro_16_M3Pro" 存在)
+    // P2 修复 (2026-08-27): 原实现取最后一段作芯片名, "Mac_mini_M4_Pro" 的末段是裸 "Pro",
+    // endsWith("_Pro") 会错配任意 Pro 型号 (曾把 M4_Pro 错配到 M2_Pro, 机龄虚增 21 个月)。
+    // 现改为: 末段为裸 Pro/Max/Ultra 后缀时与前一段合并为完整芯片名 (M4_Pro),
+    // 且品类前缀同时去掉芯片段与屏幕尺寸段, 避免跨品类泄漏。
     if (!releaseDate) {
-        const chip = releaseDateKey.split('_').pop();
-        if (chip) {
-            // 优先匹配同品类前缀 + 同芯片后缀
-            const categoryPrefix = releaseDateKey.split('_').slice(0, -2).join('_'); // 如 "MacBook_Pro"
+        const segments = releaseDateKey.split('_');
+        // 芯片段: 末尾若为裸 Pro/Max/Ultra, 与前一段合并 (M4_Pro / M5_Max)
+        const chipSegCount = /^(Pro|Max|Ultra)$/.test(segments[segments.length - 1] ?? '') ? 2 : 1;
+        const chip = segments.slice(-chipSegCount).join('_');
+        // 品类前缀: 去掉芯片段; 若剩余末段是纯数字(屏幕尺寸)也去掉
+        const prefixSegments = segments.slice(0, -chipSegCount);
+        if (prefixSegments.length && /^\d+$/.test(prefixSegments[prefixSegments.length - 1] ?? '')) {
+            prefixSegments.pop();
+        }
+        const categoryPrefix = prefixSegments.join('_');
+        if (chip && categoryPrefix) {
+            // 优先匹配同品类前缀 + 同完整芯片后缀
             for (const [key, val] of Object.entries(constants.productReleaseDates)) {
                 if (key.startsWith(categoryPrefix + '_') && key.endsWith('_' + chip) && typeof val === 'string') {
                     releaseDate = val;

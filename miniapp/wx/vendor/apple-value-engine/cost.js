@@ -1,11 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.computeMonthlyCost = computeMonthlyCost;
-exports.computeMaintenanceCost = computeMaintenanceCost;
-exports.computeMonthlyCostForWaitCandidate = computeMonthlyCostForWaitCandidate;
-exports.getCurrentNewPrice = getCurrentNewPrice;
-exports.getBuyPrice = getBuyPrice;
-const retention_js_1 = require("./retention.js");
+import { getRetentionRate } from './retention.js';
 /**
  * 计算某机型在指定持有月数下的月均成本
  *
@@ -16,10 +9,10 @@ const retention_js_1 = require("./retention.js");
  * @param holdingMonths 持有月数
  * @param currentNewPrice 当前同品类新品价(残值分母)
  */
-function computeMonthlyCost(constants, category, buyPrice, currentAgeMonths, holdingMonths, currentNewPrice) {
+export function computeMonthlyCost(constants, category, buyPrice, currentAgeMonths, holdingMonths, currentNewPrice) {
     const sellAgeMonths = currentAgeMonths + holdingMonths;
     // 保值率(查表插值/外推)
-    const retentionRate = (0, retention_js_1.getRetentionRate)(constants.retentionCurves, category, sellAgeMonths);
+    const retentionRate = getRetentionRate(constants.retentionCurves, category, sellAgeMonths);
     const residual = (retentionRate / 100) * currentNewPrice;
     // 维修成本
     const maintenanceCost = computeMaintenanceCost(constants, category, holdingMonths);
@@ -39,7 +32,7 @@ function computeMonthlyCost(constants, category, buyPrice, currentAgeMonths, hol
  * 计算持有期预期维修成本
  * = floor(持有月数 / 电池寿命周期) × 单次电池更换费 + 持有年数 × 年均故障维修费
  */
-function computeMaintenanceCost(constants, category, holdingMonths) {
+export function computeMaintenanceCost(constants, category, holdingMonths) {
     const mc = constants.maintenanceCosts;
     const batteryCycleMonths = mc.电池寿命周期_月;
     const holdingYears = holdingMonths / 12;
@@ -63,8 +56,8 @@ function computeMaintenanceCost(constants, category, holdingMonths) {
  *
  * @param sellAgeMonths 卖出时机龄 (月), 由调用方按候选类型计算
  */
-function computeMonthlyCostForWaitCandidate(constants, category, buyPrice, holdingMonths, currentNewPrice, sellAgeMonths) {
-    const retentionRate = (0, retention_js_1.getRetentionRate)(constants.retentionCurves, category, sellAgeMonths);
+export function computeMonthlyCostForWaitCandidate(constants, category, buyPrice, holdingMonths, currentNewPrice, sellAgeMonths) {
+    const retentionRate = getRetentionRate(constants.retentionCurves, category, sellAgeMonths);
     const residual = (retentionRate / 100) * currentNewPrice;
     const maintenanceCost = computeMaintenanceCost(constants, category, holdingMonths);
     const monthlyCost = (buyPrice - residual + maintenanceCost) / holdingMonths;
@@ -110,7 +103,7 @@ function mapCategoryToMaintenanceKey(category) {
  * 从市场快照中提取当前同品类新品价(残值分母)
  * 优先取 新品官方价, 其次取快照 _说明 中的残值分母
  */
-function getCurrentNewPrice(constants, category) {
+export function getCurrentNewPrice(constants, category) {
     const snapshots = constants.marketSnapshots[category];
     if (!snapshots)
         return 0;
@@ -133,7 +126,7 @@ function getCurrentNewPrice(constants, category) {
  * - 新品: 优先 京东国补到手价, 其次 官方价
  * - 二手: 优先 闲鱼中位价_二手同款, 其次 _参考
  */
-function getBuyPrice(entry, buyTiming) {
+export function getBuyPrice(entry, buyTiming) {
     if (buyTiming === 'new') {
         if (typeof entry.京东国补到手价 === 'number' && entry.京东国补到手价 > 0) {
             return entry.京东国补到手价;

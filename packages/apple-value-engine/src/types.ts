@@ -301,6 +301,10 @@ export interface EditedPlanPoint extends PlanPoint {
   channel?: string;
   /** 是否使用国补 (端内众包回传用) */
   useSubsidy?: boolean;
+  /** 内存 GB (端内自添加方案显式填写, 优先于 model 字符串解析) */
+  memoryGb?: number;
+  /** 存储 GB (端内自添加方案显式填写, 优先于 model 字符串解析) */
+  storageGb?: number;
 }
 
 /**

@@ -157,20 +157,45 @@ function rebuildEditedPlanPoint(
   if (!(editedBuyPrice > 0)) return null; // 非法买入价拦截
 
   const categoryKey = resolveCategoryKeyFromPlanPoint(constants, ep);
+  // releaseDateKey 解析: 优先从 model 解析 (original/edited 快照方案);
+  // 自添加方案的复制副本 (带显式内存字段, model 为自由文本) 解析无效时,
+  // 按 芯片+内存+存储 在 marketSnapshots 匹配同配置机型兜底 (机龄取相同型号)
+  const memoryGb = ep.memoryGb ?? extractMemoryGb(ep);
+  const storageGb = ep.storageGb ?? extractStorageGb(ep);
+  const isCustomCopy = ep.memoryGb !== undefined || ep.storageGb !== undefined;
+  let releaseDateKey = resolveReleaseDateKeyFromModel(ep, categoryKey);
+  if (isCustomCopy && computeAgeMonths(constants, releaseDateKey) < 0) {
+    releaseDateKey = resolveReleaseDateKeyForCustomPlan(
+      constants, categoryKey, ep.chip, memoryGb, storageGb,
+    );
+  }
   // 构造 Candidate, 复用原方案的发布日期 key 与候选类型 (保证机龄计算口径一致)
   const cand: Candidate = {
     modelKey: stripHoldingYearsSuffix(ep.model),
     chip: ep.chip,
-    memoryGb: extractMemoryGb(ep),
-    storageGb: extractStorageGb(ep),
+    memoryGb,
+    storageGb,
     buyTiming: ep.buyTiming,
     buyPrice: editedBuyPrice,
-    releaseDateKey: resolveReleaseDateKeyFromModel(ep, categoryKey),
+    releaseDateKey,
     categoryKey,
     candidateType: ep.candidateType ?? 'A',
     waitMonths: ep.waitMonths,
     predictedPrice: ep.predictedPrice,
   };
+  // 自添加方案的复制副本 (model 为自由文本): releaseDateKey 仍无效时
+  // 机龄按 0 兜底 (与 buildPlanPointFromInputs 的兜底行为一致), 不丢弃
+  if (
+    (ep.candidateType ?? 'A') === 'A'
+    && isCustomCopy
+    && computeAgeMonths(constants, cand.releaseDateKey) < 0
+  ) {
+    return buildPlanPointFromCandidateWithAgeOverride(
+      constants, cand, ep.holdingYears, 0,
+      getCurrentNewPrice(constants, categoryKey),
+      params.mSeriesCAGR, params.aSeriesCAGR,
+    );
+  }
   return buildPlanPoint(constants, cand, ep.holdingYears, params);
 }
 
@@ -188,8 +213,8 @@ function rebuildCustomPlanPoint(
   const inputs: CustomPlanInputs = {
     model: stripHoldingYearsSuffix(ep.model),
     chip: ep.chip,
-    memoryGb: extractMemoryGb(ep),
-    storageGb: extractStorageGb(ep),
+    memoryGb: ep.memoryGb ?? extractMemoryGb(ep),
+    storageGb: ep.storageGb ?? extractStorageGb(ep),
     categoryKey: resolveCategoryKeyFromPlanPoint(constants, ep),
     buyTiming: ep.buyTiming,
     buyPrice: ep.buyPrice,
@@ -275,6 +300,38 @@ function resolveReleaseDateKeyFromModel(p: PlanPoint, categoryKey: string): stri
   if (!rawChip) return '';
   if (screenSize) return `${categoryKey}_${screenSize}_${rawChip}`;
   return `${categoryKey}_${rawChip}`;
+}
+
+/**
+ * 为自添加方案解析 releaseDateKey (机龄取「相同型号的机器」的机龄)。
+ * 用户输入的 model 是自由文本 (如 "M4 Mac mini"), 无法从 model 解析,
+ * 改为在 marketSnapshots 中按 芯片+内存+存储 匹配同配置机型条目,
+ * 用该条目的 modelKey 推导 releaseDateKey (与 parseModelKey 同款规则)。
+ * - 精确配置匹配不到 → 按 chip 前缀匹配同芯片任意配置 (机龄按芯片级一致)
+ * - 都匹配不到 → 返回 '' (调用方按机龄 0 兜底)
+ */
+function resolveReleaseDateKeyForCustomPlan(
+  constants: Constants,
+  categoryKey: string,
+  chip: string,
+  memoryGb: number,
+  storageGb: number,
+): string {
+  const snaps = constants.marketSnapshots[categoryKey];
+  if (!snaps || typeof snaps !== 'object') return '';
+
+  const keys = Object.keys(snaps).filter((k) => !k.startsWith('_'));
+  const chipPrefix = `${chip}_`;
+  const memStorageSeg = `_${memoryGb}G_${storageGb}G`;
+
+  // 1. 精确匹配: 同芯片 + 同内存/存储 (如 "M4_16G_256G_二手" / "M5_Pro_14寸_24G_512G_新品")
+  const exact = keys.find((k) => k.startsWith(chipPrefix) && k.includes(memStorageSeg));
+  // 2. 退化匹配: 同芯片任意配置 (机龄按芯片级, 与配置无关)
+  const fallback = exact ?? keys.find((k) => k.startsWith(chipPrefix));
+  if (!fallback) return '';
+
+  // 复用 model 解析规则推导 releaseDateKey (MacBook 带屏幕尺寸段也能处理)
+  return resolveReleaseDateKeyFromModel({ model: fallback } as PlanPoint, categoryKey);
 }
 
 /**
@@ -617,13 +674,17 @@ export function buildPlanPointFromInputs(
 
   // 类型 A 需要 releaseDateKey 计算 currentAgeMonths; 类型 B 不需要机龄
   if (candidateType === 'A') {
-    // 用户新增方案无法提供发布日期, 机龄按 0 处理 (即视为当前刚发布机型)
-    // 这里直接走 buildPlanPoint 类型 A 分支, 但用 0 机龄兜底
+    // 机龄取「相同型号的机器」的真实机龄 (按 芯片+内存+存储 在 marketSnapshots
+    // 匹配同配置机型, 解析其 releaseDateKey); 匹配不到时按 0 兜底 (视为刚发布机型)
+    const releaseDateKey = resolveReleaseDateKeyForCustomPlan(
+      constants, inputs.categoryKey, resolvedChip, inputs.memoryGb, inputs.storageGb,
+    );
+    const ageMonths = releaseDateKey ? computeAgeMonths(constants, releaseDateKey) : -1;
     return buildPlanPointFromCandidateWithAgeOverride(
       constants,
       cand,
       inputs.holdingYears,
-      0, // currentAgeMonths 兜底为 0
+      ageMonths >= 0 ? ageMonths : 0, // currentAgeMonths 兜底为 0
       getCurrentNewPrice(constants, inputs.categoryKey),
       inputs.mSeriesCAGR,
       inputs.aSeriesCAGR,

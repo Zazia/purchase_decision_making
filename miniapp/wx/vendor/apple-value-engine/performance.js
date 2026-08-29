@@ -1,13 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.computePerformance = computePerformance;
-exports.computePerformanceForNewProduct = computePerformanceForNewProduct;
-exports.getChipCoefficient = getChipCoefficient;
-exports.getChipMultiCoreScore = getChipMultiCoreScore;
-exports.getCategoryFlagshipScore = getCategoryFlagshipScore;
-exports.getMemoryWeight = getMemoryWeight;
-exports.getStorageWeight = getStorageWeight;
-exports.getEffectiveR = getEffectiveR;
 /** 默认 CAGR */
 const DEFAULT_M_CAGR = 0.16;
 const DEFAULT_A_CAGR = 0.15;
@@ -23,7 +13,7 @@ const DEFAULT_A_CAGR = 0.15;
  * @param mCAGR M 系列 CAGR(默认 0.16)
  * @param aCAGR A 系列 CAGR(默认 0.15)
  */
-function computePerformance(constants, chipName, memoryGb, storageGb, category, holdingMonths, mCAGR = DEFAULT_M_CAGR, aCAGR = DEFAULT_A_CAGR) {
+export function computePerformance(constants, chipName, memoryGb, storageGb, category, holdingMonths, mCAGR = DEFAULT_M_CAGR, aCAGR = DEFAULT_A_CAGR) {
     const chipCoeff = getChipCoefficient(constants, chipName, category);
     const memWeight = getMemoryWeight(constants, category, memoryGb);
     const storageWeight = getStorageWeight(constants, category, storageGb);
@@ -54,7 +44,7 @@ function computePerformance(constants, chipName, memoryGb, storageGb, category, 
  * @param aCAGR A 系列 CAGR (默认 0.15)
  * @param nextGenChipName 下一代芯片名 (如 "M6" / "A20_Pro"), 可选; 用于代际跃升识别
  */
-function computePerformanceForNewProduct(constants, category, holdingMonths, mCAGR = DEFAULT_M_CAGR, aCAGR = DEFAULT_A_CAGR, nextGenChipName) {
+export function computePerformanceForNewProduct(constants, category, holdingMonths, mCAGR = DEFAULT_M_CAGR, aCAGR = DEFAULT_A_CAGR, nextGenChipName) {
     const isMSeries = isMacCategory(category);
     const baseR = isMSeries ? mCAGR : aCAGR;
     // 若提供下一代芯片名, 用 getEffectiveR 识别代际跃升; 否则用基础 CAGR (普通代际假设)
@@ -74,7 +64,7 @@ function isMacCategory(category) {
 /**
  * 计算芯片性能系数 = 该芯片多核跑分 / 品类旗舰芯片多核跑分
  */
-function getChipCoefficient(constants, chipName, category) {
+export function getChipCoefficient(constants, chipName, category) {
     const chipScore = getChipMultiCoreScore(constants, chipName);
     const flagshipScore = getCategoryFlagshipScore(constants, category);
     if (flagshipScore <= 0)
@@ -82,7 +72,7 @@ function getChipCoefficient(constants, chipName, category) {
     return chipScore / flagshipScore;
 }
 /** 从 chipBenchmarks 查询芯片多核跑分 */
-function getChipMultiCoreScore(constants, chipName) {
+export function getChipMultiCoreScore(constants, chipName) {
     const benchmarks = constants.chipBenchmarks;
     // Mac 芯片
     const macChips = benchmarks.Mac芯片;
@@ -100,7 +90,7 @@ function getChipMultiCoreScore(constants, chipName) {
  * 从 performanceFormula.品类基准芯片 获取品类旗舰芯片多核跑分
  * 字段值格式如 "M5(多核17100)" 或 "A19 Pro(多核9500)"
  */
-function getCategoryFlagshipScore(constants, category) {
+export function getCategoryFlagshipScore(constants, category) {
     const base = constants.performanceFormula.品类基准芯片;
     if (!base)
         return 0;
@@ -135,12 +125,12 @@ function getCategoryBenchmarkKey(category) {
     return map[c] ?? 'MacBook_Air';
 }
 /** 获取内存权重 */
-function getMemoryWeight(constants, category, memoryGb) {
+export function getMemoryWeight(constants, category, memoryGb) {
     const table = getWeightTable(constants.memoryWeights, category);
     return lookupWeight(table, memoryGb);
 }
 /** 获取存储权重 */
-function getStorageWeight(constants, category, storageGb) {
+export function getStorageWeight(constants, category, storageGb) {
     const table = getWeightTable(constants.storageWeights, category);
     return lookupWeight(table, storageGb);
 }
@@ -181,7 +171,7 @@ function lookupWeight(table, value) {
  * - 节点首发: r × 0.5
  * - 常规: r
  */
-function getEffectiveR(constants, chipName, mCAGR, aCAGR) {
+export function getEffectiveR(constants, chipName, mCAGR, aCAGR) {
     const isMSeries = chipName.startsWith('M');
     const baseR = isMSeries ? mCAGR : aCAGR;
     const multiplier = getGenerationMultiplier(constants, chipName);

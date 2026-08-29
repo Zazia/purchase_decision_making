@@ -1,12 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseReleasePlan = parseReleasePlan;
-exports.computeWaitMonths = computeWaitMonths;
-exports.predictNewProductPrice = predictNewProductPrice;
-exports.predictDiscountedOldPrice = predictDiscountedOldPrice;
-exports.lookupImpactTimeVaryingFactor = lookupImpactTimeVaryingFactor;
-exports.shouldGenerateWaitCandidates = shouldGenerateWaitCandidates;
-const cost_js_1 = require("./cost.js");
+import { getCurrentNewPrice } from './cost.js';
 // ============================================================================
 // 公共解析函数
 // ============================================================================
@@ -16,7 +8,7 @@ const cost_js_1 = require("./cost.js");
  * @param macroContext 宏观状态 (缺省按 none 处理)
  * @returns ReleasePlan, 若品类无发布节奏信息返回 null
  */
-function parseReleasePlan(constants, categoryKey, macroContext) {
+export function parseReleasePlan(constants, categoryKey, macroContext) {
     let rhythm = lookupByCategory(constants.releaseRhythm, categoryKey);
     let resolvedCategoryKey = categoryKey;
     // 父品类兜底: lookupByCategory 找不到时, 搜索以 categoryKey 为前缀的子品类
@@ -66,7 +58,7 @@ function parseReleasePlan(constants, categoryKey, macroContext) {
  * 计算等待月数 = max(0, 预计发布月 - 分析月) + 上市到货延迟(月) × 宏观产能因子
  * 上市到货延迟(月) = ceil(baselineDelayDays / 30)
  */
-function computeWaitMonths(releasePlan, macroContext) {
+export function computeWaitMonths(releasePlan, macroContext) {
     if (!releasePlan.nextReleaseMonth)
         return 0;
     const analysisMonth = resolveAnalysisMonth(macroContext, undefined);
@@ -85,8 +77,8 @@ function computeWaitMonths(releasePlan, macroContext) {
  * - 否则: 当前同档老款官方价 × (1 + 预测涨幅中位数)
  *   未触发宏观事件时 predictedPriceHike=0, 即回退「同档同价假设」
  */
-function predictNewProductPrice(constants, categoryKey, releasePlan) {
-    const currentOfficialPrice = (0, cost_js_1.getCurrentNewPrice)(constants, categoryKey);
+export function predictNewProductPrice(constants, categoryKey, releasePlan) {
+    const currentOfficialPrice = getCurrentNewPrice(constants, categoryKey);
     if (releasePlan.hasHikeOccurred) {
         return currentOfficialPrice;
     }
@@ -105,7 +97,7 @@ function predictNewProductPrice(constants, categoryKey, releasePlan) {
  *
  * @param oldCandBuyPrice 老款当前市场价 (通常是二手闲鱼中位价)
  */
-function predictDiscountedOldPrice(constants, oldCandBuyPrice, releasePlan, macroContext) {
+export function predictDiscountedOldPrice(constants, oldCandBuyPrice, releasePlan, macroContext) {
     const historicalMean = lookupImpactMean(constants, releasePlan.category);
     if (historicalMean <= 0)
         return oldCandBuyPrice;
@@ -132,7 +124,7 @@ function predictDiscountedOldPrice(constants, oldCandBuyPrice, releasePlan, macr
  *   - 类型 A 残值调整: 距下次新品发布的剩余月数
  *   - 类型 C 买入价下降: 新品发布后到买入的月数
  */
-function lookupImpactTimeVaryingFactor(constants, monthsSinceRelease) {
+export function lookupImpactTimeVaryingFactor(constants, monthsSinceRelease) {
     const curve = constants.impactTimeVaryingCurve;
     const period = resolvePeriod(monthsSinceRelease);
     const fallback = TIME_VARYING_FALLBACK[period] ?? { residualFactor: 0.1, buyPriceDropFactor: 0.2 };
@@ -152,7 +144,7 @@ function lookupImpactTimeVaryingFactor(constants, monthsSinceRelease) {
  * 是否应生成类型 B/C 候选
  * 距下次发布 ≤ 90 天 (3 月) 且 releaseConfidence !== 'low' 时返回 true
  */
-function shouldGenerateWaitCandidates(releasePlan, macroContext) {
+export function shouldGenerateWaitCandidates(releasePlan, macroContext) {
     if (!releasePlan.nextReleaseMonth)
         return false;
     if (releasePlan.releaseConfidence === 'low')
@@ -302,9 +294,11 @@ function lookupConfidence(constants, categoryKey) {
         return 'low';
     const entry = lookupByCategory(results, categoryKey);
     const conf = entry?.置信度;
-    if (conf === '高')
+    // 前缀匹配: 数据侧存在复合格式如 "高(已官宣)"、"中(主流媒体爆料,非官宣)",
+    // 严格等值会把它们判为 low, 导致已官宣品类的类型 B/C 等待候选整体缺失
+    if (conf?.startsWith('高'))
         return 'high';
-    if (conf === '中')
+    if (conf?.startsWith('中'))
         return 'medium';
     return 'low';
 }

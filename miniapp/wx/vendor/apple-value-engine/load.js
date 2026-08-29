@@ -1,8 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadConstants = loadConstants;
-exports.getKeyMap = getKeyMap;
-const types_js_1 = require("./types.js");
+import { ConstantsValidationError } from './types.js';
 /** 中文键 → 英文字段名映射 */
 const KEY_MAP = {
     metadata: 'metadata',
@@ -39,19 +35,19 @@ const REQUIRED_FIELDS = [
  * @throws {ConstantsValidationError} 必需字段缺失时抛出, 错误信息含英文 spec 字段名
  * @throws {SyntaxError} JSON 解析失败
  */
-function loadConstants(jsonText) {
+export function loadConstants(jsonText) {
     const raw = JSON.parse(jsonText);
     // 校验 metadata.last_updated
     const metadata = raw['metadata'];
     if (!metadata || typeof metadata.last_updated !== 'string' || metadata.last_updated.length === 0) {
-        throw new types_js_1.ConstantsValidationError('last_updated', 'Missing required field: last_updated');
+        throw new ConstantsValidationError('last_updated', 'Missing required field: last_updated');
     }
     // 校验其余必需字段(检查中文键是否存在)
     for (const { english, chinese } of REQUIRED_FIELDS) {
         if (english === 'last_updated')
             continue;
         if (raw[chinese] === undefined) {
-            throw new types_js_1.ConstantsValidationError(english, `Missing required field: ${english}`);
+            throw new ConstantsValidationError(english, `Missing required field: ${english}`);
         }
     }
     // v3.8 子对象 (嵌套于现有顶层键内, 提取为独立英文字段便于 release.ts 解析)
@@ -81,7 +77,7 @@ function loadConstants(jsonText) {
     };
 }
 /** 供调试: 查看键映射表 */
-function getKeyMap() {
+export function getKeyMap() {
     return KEY_MAP;
 }
 //# sourceMappingURL=load.js.map

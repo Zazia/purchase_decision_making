@@ -369,7 +369,7 @@
     </view>
 
     <!-- Generate share card button (原始版且非回看模式) -->
-    <view class="share-btn-wrap" wx:if="{{!isEmpty && plans.length > 0 && !isReplay && viewMode === 'original'}}">
+    <view class="share-btn-wrap" wx:if="{{plans.length > 0 && !isReplay && viewMode === 'original'}}">
       <view class="share-btn" bindtap="onGenerateShareCard">保存结果</view>
     </view>
 
@@ -379,12 +379,12 @@
     </view>
 
     <!-- 查看完整报告入口 -->
-    <view class="report-entry-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
+    <view class="report-entry-wrap" wx:if="{{plans.length > 0}}">
       <view class="report-entry" bindtap="onOpenReport">查看完整报告 ›</view>
     </view>
 
     <!-- 手动修改方案入口 (空结果页隐藏) -->
-    <view class="report-entry-wrap" wx:if="{{!isEmpty && plans.length > 0}}">
+    <view class="report-entry-wrap" wx:if="{{plans.length > 0}}">
       <view class="report-entry" bindtap="onEnterEditor">手动修改方案 ›</view>
     </view>
 

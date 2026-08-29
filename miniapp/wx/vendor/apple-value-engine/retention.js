@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRetentionRate = getRetentionRate;
 /** 默认外推参数(常量中未指定时使用) */
 const DEFAULT_FLOOR = 3;
 const DEFAULT_HALF_LIFE = 24;
@@ -11,7 +8,7 @@ const DEFAULT_HALF_LIFE = 24;
  * @param months 发布后月数
  * @returns 保值率(%), 范围 [3, 100]
  */
-function getRetentionRate(curves, category, months) {
+export function getRetentionRate(curves, category, months) {
     let curve = curves[category];
     if (!curve) {
         // 大小写兜底: 快照键 iPhone_proMax vs 保值率曲线键 iPhone_ProMax
