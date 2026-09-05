@@ -173,32 +173,30 @@ describe('computeMonthlyCost', () => {
     constants = loadConstants(constantsJson);
   });
 
-  it('constants.json 示例: Mac mini M2 二手, 买入2400, 持24月(v3.9.1曲线修订+指数衰减)', () => {
+  it('constants.json 示例: Mac mini M2 二手, 买入2400, 持24月(v4.3 买入价锚定)', () => {
     // 示例: 买入价2400, 当前机龄42月, 持24月→卖出66月
-    // Mac_mini: 60月=35%(v3.9.1修订), floor=5, half_life=24 (v3.9 指数衰减外推)
-    // R(66) = 5 + (35-5) × 0.5^((66-60)/24) = 5 + 30 × 0.8409 ≈ 30.23%
-    // 残值 = 5999 × 30.23% ≈ 1814
+    // Mac_mini 曲线: R(42)=49, R(66)=5+(35-5)×0.5^((66-60)/24)≈30.23 (v3.9 指数衰减外推)
+    // v4.3 残值 = 2400 × 30.23/49 ≈ 1480.5 (买入价锚定, 不再用当前新品价做分母)
     // 维修 = Mac_mini无电池 + 100/年×2 = 200
-    // 月均 = (2400 - 1814 + 200) / 24 ≈ 32.8
+    // 月均 = (2400 - 1480.5 + 200) / 24 ≈ 46.6
     const cost = computeMonthlyCost(constants, 'Mac_mini', 2400, 42, 24, 5999);
     expect(cost.retentionRate).toBeCloseTo(30.23, 1);
-    expect(cost.residual).toBeCloseTo(1813, 0);
+    expect(cost.buyRetentionRate).toBeCloseTo(49, 1);
+    expect(cost.residual).toBeCloseTo(1480.5, 0);
     expect(cost.maintenanceCost).toBe(200);
-    expect(cost.monthlyCost).toBeCloseTo(32.8, 1);
+    expect(cost.monthlyCost).toBeCloseTo(46.6, 1);
   });
 
   it('月均成本误差 ≤ 0.5 元', () => {
     const cost = computeMonthlyCost(constants, 'Mac_mini', 2400, 42, 24, 5999);
-    expect(Math.abs(cost.monthlyCost - 32.77)).toBeLessThan(0.5);
+    expect(Math.abs(cost.monthlyCost - 46.65)).toBeLessThan(0.5);
   });
 
-  it('spec 示例: mac-mini 二手 2700, 持3年, 保值率0.42, 新品4499, 维修200/年', () => {
-    // spec: 月均成本 = (2700 − 0.42×4499 + 200×3) / 36
-    // = (2700 - 1889.58 + 600) / 36 = 1410.42 / 36 = 39.18
-    // 注: 这里直接用保值率0.42即42%, 残值=0.42×4499=1889.58
+  it('spec 示例: mac-mini 二手 2700, 持3年, 维修200/年 (v4.3 买入价锚定)', () => {
+    // v4.3: 残值 = 2700 × R(36)/R(0) = 2700 × R(36)/100 (买入机龄 0)
+    // 月均 = (2700 − 残值 + 200×3) / 36, 这里验证公式自洽性, 不验证具体保值率值
     const cost = computeMonthlyCost(constants, 'Mac_mini', 2700, 0, 36, 4499);
     // 0月机龄+持36月→卖出36月, 查Mac_mini曲线36月保值率
-    // 这里验证公式正确性, 不验证具体保值率值
     const expected = (2700 - cost.residual + cost.maintenanceCost) / 36;
     expect(cost.monthlyCost).toBeCloseTo(expected, 4);
   });

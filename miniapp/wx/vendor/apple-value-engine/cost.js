@@ -5,15 +5,17 @@ import { getRetentionRate } from './retention.js';
  * @param constants 常量数据
  * @param category 品类(中文, 如 "Mac_mini")
  * @param buyPrice 买入价(元)
- * @param currentAgeMonths 当前机龄(月)
+ * @param currentAgeMonths 当前机龄(月), 类型 A 的买入机龄
  * @param holdingMonths 持有月数
- * @param currentNewPrice 当前同品类新品价(残值分母)
+ * @param currentNewPrice 当前同品类新品价(仅信息展示, 不参与残值计算)
  */
 export function computeMonthlyCost(constants, category, buyPrice, currentAgeMonths, holdingMonths, currentNewPrice) {
     const sellAgeMonths = currentAgeMonths + holdingMonths;
-    // 保值率(查表插值/外推)
+    const buyAgeMonths = currentAgeMonths;
+    // 保值率(查表插值/外推), v4.3 残值 = 买入价 × R(卖出机龄)/R(买入机龄), 比率封顶 1
     const retentionRate = getRetentionRate(constants.retentionCurves, category, sellAgeMonths);
-    const residual = (retentionRate / 100) * currentNewPrice;
+    const buyRetentionRate = getRetentionRate(constants.retentionCurves, category, buyAgeMonths);
+    const residual = buyPrice * Math.min(1, retentionRate / buyRetentionRate);
     // 维修成本
     const maintenanceCost = computeMaintenanceCost(constants, category, holdingMonths);
     const monthlyCost = (buyPrice - residual + maintenanceCost) / holdingMonths;
@@ -24,6 +26,7 @@ export function computeMonthlyCost(constants, category, buyPrice, currentAgeMont
         maintenanceCost,
         sellAgeMonths,
         retentionRate,
+        buyRetentionRate,
         currentNewPrice,
         holdingMonths,
     };
@@ -49,16 +52,22 @@ export function computeMaintenanceCost(constants, category, holdingMonths) {
  * 类型 B/C 候选的月均成本计算
  *
  * 与类型 A 的差异 (SKILL.md 步骤 5.4):
- *   - 残值 MUST NOT 施加新品发布冲击调整 (冲击已体现在买入价中, 或买入的就是新品)
+ *   - 残值 MUST NOT 施加新品发布冲击调整 (类型 C 的冲击已体现在买入价中, 且 v4.3
+ *     锚定公式让冲击折扣自然传导至残值; 类型 B 买入的就是新品)
  *   - 卖出时机龄由调用方显式传入:
  *     · 类型 B (等新品买新品): sellAgeMonths = holdingMonths (买入时为新机, 机龄 0)
  *     · 类型 C (等新品后买降价老款): sellAgeMonths = 当前机龄 + 等待月数 + 持有月数
  *
+ * v4.3 残值买入价锚定: 买入机龄 = sellAgeMonths − holdingMonths
+ *   (类型 B 得 0, 类型 C 得 当前机龄+等待月数), 残值 = 买入价 × R(卖出机龄)/R(买入机龄)
+ *
  * @param sellAgeMonths 卖出时机龄 (月), 由调用方按候选类型计算
  */
 export function computeMonthlyCostForWaitCandidate(constants, category, buyPrice, holdingMonths, currentNewPrice, sellAgeMonths) {
+    const buyAgeMonths = sellAgeMonths - holdingMonths;
     const retentionRate = getRetentionRate(constants.retentionCurves, category, sellAgeMonths);
-    const residual = (retentionRate / 100) * currentNewPrice;
+    const buyRetentionRate = getRetentionRate(constants.retentionCurves, category, buyAgeMonths);
+    const residual = buyPrice * Math.min(1, retentionRate / buyRetentionRate);
     const maintenanceCost = computeMaintenanceCost(constants, category, holdingMonths);
     const monthlyCost = (buyPrice - residual + maintenanceCost) / holdingMonths;
     return {
@@ -68,6 +77,7 @@ export function computeMonthlyCostForWaitCandidate(constants, category, buyPrice
         maintenanceCost,
         sellAgeMonths,
         retentionRate,
+        buyRetentionRate,
         currentNewPrice,
         holdingMonths,
     };
@@ -100,9 +110,13 @@ function mapCategoryToMaintenanceKey(category) {
     return map[c] ?? category;
 }
 /**
- * 从市场快照中提取当前同品类新品价(残值分母)
+ * 从市场快照中提取当前同品类新品价
  *
- * v4.2 规则 (spec「月均成本计算」残值分母选择): 在「新品」且含官方价的条目中,
+ * v4.3 起不参与残值计算(残值已改为买入价锚定), 仅用于:
+ *   - 类型 B 买入价预测的基准价 (predictNewProductPrice)
+ *   - 报表/端上的信息展示
+ *
+ * 取值规则 (v4.2, 原「残值分母选择规则」): 在「新品」且含官方价的条目中,
  * 取 productReleaseDates 发布月最晚者; 发布月并列时优先基础款 (芯片名不含
  * Pro/Max/Ultra 后缀)。MUST NOT 依赖快照键的插入顺序。
  * 无可解析条目时兜底旧行为: 首个含官方价的新品条目, 再退任意含官方价条目。

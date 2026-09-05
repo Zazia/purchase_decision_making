@@ -10,7 +10,14 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { loadConstants, computeParetoFrontier } from '../src/index.js';
+import {
+  loadConstants,
+  computeParetoFrontier,
+  getBuyPrice,
+  getRetentionRate,
+  parseReleasePlan,
+  computeResidualImpactFactor,
+} from '../src/index.js';
 import type { Constants, MacroContext } from '../src/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -64,9 +71,16 @@ describe('发布日期兜底: 完整芯片名匹配', () => {
     });
     const m4Pro4y = allPoints(result).find((p) => p.model.includes('M4_Pro') && p.holdingYears === 4);
     expect(m4Pro4y).toBeDefined();
-    // 排障日志 §五 P2 期望: 残值约 1923 (修复前错值 1208)
-    expect(m4Pro4y!.residual).toBeGreaterThan(1850);
-    expect(m4Pro4y!.residual).toBeLessThan(2000);
+    // v4.3 买入价锚定: 残值 = 买入价 × R(22+48)/R(22) × 冲击乘数(卖出点距发布 48 月 → 12月后因子)
+    // (旧口径为 R(70)/100 × 当前新品价 ≈ 1923)
+    const buyPrice = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_Pro_24G_512G_新品'], 'new')!;
+    const r70 = getRetentionRate(constants.retentionCurves, 'Mac_mini', 70);
+    const r22 = getRetentionRate(constants.retentionCurves, 'Mac_mini', 22);
+    const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro)!;
+    const impactFactor = computeResidualImpactFactor(constants, 'Mac_mini_M4_Pro', plan, defaultMacro, 48);
+    const expected = buyPrice * Math.min(1, r70 / r22) * impactFactor;
+    expect(m4Pro4y!.residual).toBeCloseTo(expected, 0);
+    expect(m4Pro4y!.residual).toBeLessThan(m4Pro4y!.buyPrice);
     // 真实机龄 22 月 + 持有 48 月 = 70 ≤ 72 (macOS 支持期), 不应标 exceeded
     expect(m4Pro4y!.systemSupportRisk).not.toBe('exceeded');
   });

@@ -18,6 +18,7 @@ import {
   computeMonthlyCost,
   computeMaintenanceCost,
   getCurrentNewPrice,
+  getBuyPrice,
   getRetentionRate,
   isAnchorCandidate,
   parseReleasePlan,
@@ -115,13 +116,17 @@ describe('v4.2 类型 A 残值冲击调整', () => {
     constants = loadConstants(constantsJson);
   });
 
-  /** 基线残值 (无冲击): 保值率(卖出时机龄) / 100 × 当前新品价 6999 */
-  function baselineResidual(sellAgeMonths: number): number {
-    const rate = getRetentionRate(constants.retentionCurves, 'Mac_mini', sellAgeMonths);
-    return (rate / 100) * getCurrentNewPrice(constants, 'Mac_mini');
+  /**
+   * 基线残值 (无冲击, v4.3 买入价锚定):
+   *   残值 = 买入价 × min(1, R(卖出机龄) / R(买入机龄))
+   */
+  function anchoredResidual(buyPrice: number, buyAgeMonths: number, sellAgeMonths: number): number {
+    const sellRate = getRetentionRate(constants.retentionCurves, 'Mac_mini', sellAgeMonths);
+    const buyRate = getRetentionRate(constants.retentionCurves, 'Mac_mini', buyAgeMonths);
+    return buyPrice * Math.min(1, sellRate / buyRate);
   }
 
-  it('M4 二手持有 12 月: 残值 = 原残值 × 0.92125 (调整后冲击 26.25% × 因子 0.30)', () => {
+  it('M4 二手持有 12 月: 残值 = 锚定残值 × 0.92125 (调整后冲击 26.25% × 因子 0.30)', () => {
     // M4 发布 2024-10, 分析月 2026-08 → 当前机龄 22 月; nextReleaseMonth=2026-08,
     // monthsToRelease=0, 卖出点距发布 12 月 → 残值调整因子 0.30
     // 乘数 = 1 − 0.2625 × 0.30 = 0.92125
@@ -140,11 +145,12 @@ describe('v4.2 类型 A 残值冲击调整', () => {
       (p) => p.model === 'M4_16G_256G_二手 × 1年' && p.candidateType === 'A',
     );
     expect(point).toBeDefined();
-    const expected = baselineResidual(22 + 12) * 0.92125;
+    const m4Used = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_16G_256G_二手'], 'used')!;
+    const expected = anchoredResidual(m4Used, 22, 22 + 12) * 0.92125;
     expect(point!.residual).toBeCloseTo(expected, 6);
     // 月均成本同步受残值影响
     const maintenance = computeMaintenanceCost(constants, 'Mac_mini', 12);
-    expect(point!.monthlyCost).toBeCloseTo((4200 - expected + maintenance) / 12, 6);
+    expect(point!.monthlyCost).toBeCloseTo((m4Used - expected + maintenance) / 12, 6);
   });
 
   it('M4 二手持有 18 月: 卖出点距发布 18 月 (12月后) → 残值 × 0.97375', () => {
@@ -162,7 +168,8 @@ describe('v4.2 类型 A 残值冲击调整', () => {
     );
     expect(point).toBeDefined();
     // 乘数 = 1 − 0.2625 × 0.10 = 0.97375
-    const expected = baselineResidual(22 + 18) * 0.97375;
+    const m4Used = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_16G_256G_二手'], 'used')!;
+    const expected = anchoredResidual(m4Used, 22, 22 + 18) * 0.97375;
     expect(point!.residual).toBeCloseTo(expected, 6);
   });
 
@@ -180,8 +187,9 @@ describe('v4.2 类型 A 残值冲击调整', () => {
       (p) => p.model === 'M6_16G_256G_新品 × 1年',
     );
     expect(point).toBeDefined();
-    // M6 机龄 0, 卖出时机龄 12 → 残值 = 保值率(12月) × 6999, 无冲击乘数
-    const expected = baselineResidual(0 + 12);
+    // M6 机龄 0, 卖出时机龄 12 → v4.3 残值 = 买入价 × R(12)/R(0), 无冲击乘数
+    const m6New = getBuyPrice(constants.marketSnapshots.Mac_mini['M6_16G_256G_新品'], 'new')!;
+    const expected = anchoredResidual(m6New, 0, 0 + 12);
     expect(point!.residual).toBeCloseTo(expected, 6);
   });
 
@@ -202,7 +210,8 @@ describe('v4.2 类型 A 残值冲击调整', () => {
       (p) => p.model === 'M4_16G_256G_二手 × 0.25年',
     );
     expect(point).toBeDefined();
-    const expected = baselineResidual(22 + 3); // 无乘数
+    const m4Used = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_16G_256G_二手'], 'used')!;
+    const expected = anchoredResidual(m4Used, 22, 22 + 3); // 无乘数
     expect(point!.residual).toBeCloseTo(expected, 6);
   });
 });
