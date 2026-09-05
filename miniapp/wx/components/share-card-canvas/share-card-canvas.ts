@@ -407,6 +407,21 @@ Component({
       ctx.fillText('个人主体 · 非商业 · CC BY-NC 4.0 · github.com/Zazia/apple-value-analysis', 60, 1430);
     },
 
+    /** 帕累托缩略图点的紧凑型号名 (如 "iPhone_13_ProMax_256G_二手 × 3年" → "13 PM") */
+    formatIphoneShortName(model: string): string {
+      const base = model.replace(/\s*×\s*[\d.]+年$/, '');
+      const match = base.match(/iPhone_(\d+)(?:_(ProMax|Pro|mini))?/);
+      if (match) {
+        const gen = match[1];
+        const variant = match[2];
+        if (variant === 'ProMax') return `${gen} PM`;
+        if (variant === 'Pro') return `${gen} Pro`;
+        if (variant === 'mini') return `${gen} mini`;
+        return gen;
+      }
+      return base.replace(/_/g, ' ');
+    },
+
     /** 绘制帕累托缩略图 (含点位极简标注) */
     drawParetoThumbnail(
       ctx: CanvasRenderingContext2D,
@@ -461,9 +476,12 @@ Component({
         ctx.arc(px, py, 10, 0, Math.PI * 2);
         ctx.fill();
 
-        // 极简标注: chip + 持有年数 (如 "M2·3y", "A18·5y")
-        const chipLabel = p.chip || p.model.replace(/_.*$/, '');
-        const label = `${chipLabel}·${p.holdingYears}y`;
+        // 极简标注: iPhone 用型号 (如 "13 Pro·3y"), 其他品类用芯片 (如 "M2·3y")
+        const isIphone = p.model.startsWith('iPhone_');
+        const pointName = isIphone
+          ? this.formatIphoneShortName(p.model)
+          : p.chip || p.model.replace(/_.*$/, '');
+        const label = `${pointName}·${p.holdingYears}y`;
         const labelWidth = ctx.measureText(label).width;
         const labelX = px + 14;
         const labelY = py - 14;
