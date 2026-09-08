@@ -8,15 +8,7 @@
 
 把"端到端调试微信小程序"过程中遇到的**每一个新卡点与解决方案**，持续沉淀到技能库，避免重复踩坑、避免经验散落在对话里丢失。
 
-### 单一事实来源（Single Source of Truth）
-
-| 用途 | 位置 |
-|------|------|
-| **技能（SOP 主体，可被 Agent 自动调用）** | `.agents/skills/wx-miniprogram-autotest/SKILL.md` |
-| 基础指南（原始记录） | `miniapp/AUTOTEST-GUIDE.md` |
-| 踩坑经验（原始记录） | `miniapp/AUTOTEST-LESSONS.md` |
-
-`SKILL.md` 是 Agent 调试时的**首选参考**；两份 AUTOTEST-*.md 是原始素材。三者内容应保持一致，有冲突以 `SKILL.md` 为准并回写修正另两份。
+ **技能（SOP 主体，可被 Agent 自动调用）** ： `.agents/skills/wx-miniprogram-autotest/SKILL.md` |
 
 ### 何时触发更新
 
@@ -40,18 +32,6 @@
    - 新的断言经验 → §七
    - 新的调试方法论 → §八
    - 无法归入现有章节时，新增章节并在 §十速查流程里补充
-3. **同步原始记录**：若经验较重要，同步更新 `miniapp/AUTOTEST-LESSONS.md`（按"现象 / 原因 / 解决"三段式记录），保持与技能一致。
-4. **提交时在 commit message 说明**：如 `docs(autotest): 记录 mp.xxx 超时绕过方案`。
-
-### 记录格式约定
-
-每条新经验至少包含三要素（参考 AUTOTEST-LESSONS.md 既有风格）：
-
-- **现象**：报什么错 / 卡在哪 / 表现是什么
-- **原因**：为什么会这样（版本、协议、沙箱、数据不一致…）
-- **解决**：可直接复制的代码 / 命令 / 配置，附简短说明
-
-能跑通的代码片段优先于文字描述。
 
 ## 2. 视觉规范
 
@@ -88,6 +68,23 @@
 **其他整洁规则**：
 
 - 一次性调试脚本放 `scripts/`、运行产物放 `scripts/debug/`（产物不入库，脚本本身保留）。
-- 历史参考克隆（如曾经的 `engine_ref/`，本仓库旧 commit 的本地副本）在内容合并进主目录后即删除，不留本地副本。
 - TRAE 的 `.uploads/`、`.playwright-browsers/`、`.trae-html-share-packages/` 为临时缓存，可随时清空。
 - 提交前 pre-commit 钩子（`core.hooksPath=scripts/hooks`）会在 `constants.json` 变更时自动同步小程序快照，勿用 `--no-verify` 跳过。
+
+## 6. constants 数据维护与云端发布
+
+常量库唯一数据源：`.agents/skills/apple-value-analysis/constants.json`。数据更新后的分发有两条通道：
+
+| 通道 | 命令 | 生效方式 |
+|------|------|----------|
+| 云端发布（**主通道，即时生效**） | `node scripts/publish-constants.mjs`（即 `pnpm publish:constants`） | 写入云数据库 `constants` 集合 `latest` 文档，小程序端**下次会话自动采用，免提审发版** |
+| 本地快照（随版本打包） | `node scripts/sync-snapshot.mjs`（即 `pnpm sync:snapshot`，pre-commit 自动执行） | 拷贝到 `miniapp/wx/snapshot/`，随小程序提审发版，作为云端不可用时的兜底 |
+
+**标准维护流程**：改 `constants.json`（递增 `metadata.version` 与 `last_updated`，并在 `metadata` 里追加对应版本号的「变更摘要」数组）→ 按需更新 `miniapp/wx/snapshot/macro-context.json`（`analysisMonth` 与宏观阶段）→ `node scripts/sync-snapshot.mjs` → `node scripts/publish-constants.mjs`。发布脚本支持 `--dry-run` 先校验不上传。
+
+**注意事项**：
+
+- 云端发布凭证：`WX_SECRET` 环境变量，或 `scripts/.wx-publish-credentials.json`（内容 `{"secret": "..."}`，已 gitignore 不入库）；appid 自动取自 `project.config.json`。
+- **I: 盘为 exFAT，`pnpm run <script>` 会触发依赖状态检查（内部执行 `pnpm install`）并因符号链接不支持而失败**——直接用 `node scripts/<脚本>.mjs` 跑即可，效果等价。
+- 云数据库单文档上限 512KB（脚本按 450KB 安全上限校验），当前 payload 约 275KB，若持续膨胀需考虑拆分到云存储。
+- **发布后必须验证**：发布成功输出看写入路径——`via update` 为常规更新、`via set (upsert)` / `via add` 为首次创建，均为真成功。**发布后跑 `node scripts/check-cloud-constants.mjs` 复核云端文档实际内容**（version/payload/hash 与本地比对）。
