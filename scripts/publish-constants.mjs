@@ -201,7 +201,12 @@ async function main() {
     console.log(`[publish-constants] 尝试写入 (${attempt.name}) ...`);
     const resp = await callCloudApi(attempt.path, token, { env: ENV_ID, query: attempt.query });
     allResponses.push({ attempt: attempt.name, resp });
-    if (resp.errcode === 0) {
+    // update 对不存在的文档返回 errcode=0 但 matched=0 (2026-09-08 实测):
+    // 必须检查 matched>0 才算写入成功, 否则误判假成功导致 set/add 兜底永不执行
+    const isPlainUpdate = attempt.name === 'update';
+    const matchedOk = !isPlainUpdate
+      || (typeof resp.matched === 'number' && resp.matched > 0);
+    if (resp.errcode === 0 && matchedOk) {
       console.log(`[publish-constants] 发布成功 (via ${attempt.name})`);
       console.log(`  collection:  ${COLLECTION}`);
       console.log(`  doc:         ${DOC_ID}`);
@@ -210,8 +215,12 @@ async function main() {
       console.log('[publish-constants] 小程序端下次会话将自动采用新数据 (无需提审发版)。');
       process.exit(0);
     }
+    if (resp.errcode === 0 && !matchedOk) {
+      console.warn(`[publish-constants] ${attempt.name} errcode=0 但 matched=0 (文档不存在, 假成功), 继续尝试下一种写入方式`);
+    } else {
+      console.warn(`[publish-constants] ${attempt.name} 未成功: ${JSON.stringify(resp)}`);
+    }
     const msg = `${resp.errcode} ${resp.errmsg || ''}`;
-    console.warn(`[publish-constants] ${attempt.name} 未成功: ${JSON.stringify(resp)}`);
     if (/access_token|40001|42001|40014/i.test(msg)) {
       fail('write', `access_token 无效: ${JSON.stringify(resp)} (检查 appid 与 AppSecret 是否匹配, IP 是否在白名单)`);
     }
@@ -226,9 +235,12 @@ async function main() {
       env: ENV_ID,
       query: `db.collection("${COLLECTION}").doc("${DOC_ID}").update({data: ${JSON.stringify(docData)}})`,
     });
-    if (retry.errcode === 0) {
+    if (retry.errcode === 0 && typeof retry.matched === 'number' && retry.matched > 0) {
       console.log('[publish-constants] 发布成功 (via update retry)');
       process.exit(0);
+    }
+    if (retry.errcode === 0) {
+      console.warn('[publish-constants] update retry errcode=0 但 matched=0 (假成功, 文档不存在)');
     }
     allResponses.push({ attempt: 'update retry', resp: retry });
   }
