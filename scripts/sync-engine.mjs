@@ -16,14 +16,15 @@
  *
  * 校验:
  * 1. 源 dist 目录与 index.js / index.d.ts 存在
- * 2. 拷贝 .js 与 .d.ts 文件(忽略 .map)
- * 3. 拷贝后入口文件存在性校验
+ * 2. dist 新鲜度: src/*.ts 任一文件比最新 dist 产物新 → 中止(旧构建曾静默回滚过 vendor)
+ * 3. 拷贝 .js 与 .d.ts 文件(忽略 .map)
+ * 4. 拷贝后入口文件存在性校验
  *
  * 失败退出非零码并指明失败步骤。
  *
  * 用法: node scripts/sync-engine.mjs
  */
-import { existsSync, mkdirSync, readdirSync, copyFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, copyFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -51,13 +52,32 @@ if (!existsSync(sourceIndexDts)) {
 }
 console.log('[sync-engine] Source dist found.');
 
-// Step 2: 确保目标目录存在
+// Step 2: dist 新鲜度校验 (src 比 dist 新 → 旧构建, 曾因此把 vendor 静默回滚到旧公式)
+const SRC_DIR = join(ROOT, 'packages/apple-value-engine/src');
+const srcFiles = readdirSync(SRC_DIR).filter((f) => f.endsWith('.ts'));
+const distFiles = readdirSync(SOURCE_DIR).filter((f) => f.endsWith('.js') || f.endsWith('.d.ts'));
+if (srcFiles.length === 0 || distFiles.length === 0) {
+  fail('freshness-check', 'src 或 dist 目录为空, 无法比对新鲜度。');
+}
+const newestSrcMs = Math.max(...srcFiles.map((f) => statSync(join(SRC_DIR, f)).mtimeMs));
+const newestDistMs = Math.max(...distFiles.map((f) => statSync(join(SOURCE_DIR, f)).mtimeMs));
+if (newestSrcMs > newestDistMs) {
+  const fmt = (ms) => new Date(ms).toLocaleString('zh-CN', { hour12: false });
+  fail(
+    'freshness-check',
+    `dist 构建过期: src 最新修改 ${fmt(newestSrcMs)} 晚于 dist 最新产物 ${fmt(newestDistMs)}。` +
+    '先执行 cd packages/apple-value-engine && node_modules/.bin/tsc -p tsconfig.json 重建, 再同步。',
+  );
+}
+console.log('[sync-engine] Freshness OK: dist 不早于 src 最新修改。');
+
+// Step 3: 确保目标目录存在
 if (!existsSync(TARGET_DIR)) {
   mkdirSync(TARGET_DIR, { recursive: true });
   console.log(`[sync-engine] Created target dir: ${TARGET_DIR}`);
 }
 
-// Step 3: 拷贝 .js 与 .d.ts 文件(忽略 .map / 其它)
+// Step 4: 拷贝 .js 与 .d.ts 文件(忽略 .map / 其它)
 const files = readdirSync(SOURCE_DIR).filter(
   (f) => f.endsWith('.js') || f.endsWith('.d.ts'),
 );
@@ -75,7 +95,7 @@ for (const file of files) {
 }
 console.log(`[sync-engine] Copied ${copiedJs} .js files + ${copiedDts} .d.ts files.`);
 
-// Step 4: 拷贝后入口存在性校验
+// Step 5: 拷贝后入口存在性校验
 if (!existsSync(join(TARGET_DIR, 'index.js'))) {
   fail('verify', 'index.js missing in target after copy.');
 }
