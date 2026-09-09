@@ -59,8 +59,12 @@ describe('发布日期兜底: 完整芯片名匹配', () => {
     expect(m4Pro.length).toBe(0);
   });
 
-  it('M4_Pro 日期补齐 (2024-10) 后按真实日期计算: 4年残值 ≈ 1923, 支持期不超', () => {
-    const result = computeParetoFrontier(constants, {
+  it('M4_Pro 日期补齐 (2024-10) 后按真实日期计算: 4年残值按锚定公式复算, 支持期不超', () => {
+    // 锁定发布窗口 2026-08 (M6 官宣未发售), 与 constants 节奏文本解耦;
+    // 机龄按 lastUpdated 动态推导 (发布 2024-10 → 当前 23 月, 持 48 → 卖出 71 月)
+    const cloned = structuredClone(constants) as Constants;
+    cloned.releaseRhythm.Mac_mini.下一次预计 = '2026-08';
+    const result = computeParetoFrontier(cloned, {
       category: 'mac-mini',
       budget: 30000,
       holdingYears: [4],
@@ -71,18 +75,24 @@ describe('发布日期兜底: 完整芯片名匹配', () => {
     });
     const m4Pro4y = allPoints(result).find((p) => p.model.includes('M4_Pro') && p.holdingYears === 4);
     expect(m4Pro4y).toBeDefined();
-    // v4.3 买入价锚定: 残值 = 买入价 × R(22+48)/R(22) × 冲击乘数(卖出点距发布 48 月 → 12月后因子)
-    // (旧口径为 R(70)/100 × 当前新品价 ≈ 1923)
+    // v4.3 买入价锚定: 残值 = 买入价 × R(机龄+48)/R(机龄) × 冲击乘数(卖出点距发布 48 月 → 12月后因子 0.1)
     const buyPrice = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_Pro_24G_512G_新品'], 'new')!;
-    const r70 = getRetentionRate(constants.retentionCurves, 'Mac_mini', 70);
-    const r22 = getRetentionRate(constants.retentionCurves, 'Mac_mini', 22);
-    const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro)!;
-    const impactFactor = computeResidualImpactFactor(constants, 'Mac_mini_M4_Pro', plan, defaultMacro, 48);
-    const expected = buyPrice * Math.min(1, r70 / r22) * impactFactor;
+    const lu = constants.lastUpdated.match(/^(\d{4})-(\d{1,2})/)!;
+    const rel = constants.productReleaseDates['Mac_mini_M4_Pro'].match(/^(\d{4})-(\d{1,2})/)!;
+    const m4ProAge = (Number(lu[1]) - Number(rel[1])) * 12 + (Number(lu[2]) - Number(rel[2]));
+    const rSell = getRetentionRate(constants.retentionCurves, 'Mac_mini', m4ProAge + 48);
+    const rBuy = getRetentionRate(constants.retentionCurves, 'Mac_mini', m4ProAge);
+    const plan = parseReleasePlan(cloned, 'Mac_mini', defaultMacro)!;
+    const impactFactor = computeResidualImpactFactor(cloned, 'Mac_mini_M4_Pro', plan, defaultMacro, 48);
+    const expected = buyPrice * Math.min(1, rSell / rBuy) * impactFactor;
     expect(m4Pro4y!.residual).toBeCloseTo(expected, 0);
     expect(m4Pro4y!.residual).toBeLessThan(m4Pro4y!.buyPrice);
-    // 真实机龄 22 月 + 持有 48 月 = 70 ≤ 72 (macOS 支持期), 不应标 exceeded
-    expect(m4Pro4y!.systemSupportRisk).not.toBe('exceeded');
+    // 支持期标注按真实机龄推导 (Mac 阈值 72 月, 近尾声 60 月);
+    // 日期兜底错配 (虚增 21 月) 会使支持期误标 exceeded
+    const sellAge = m4ProAge + 48;
+    expect(m4Pro4y!.systemSupportRisk).toBe(
+      sellAge >= 72 ? 'exceeded' : sellAge >= 60 ? 'near-end' : 'normal',
+    );
   });
 
   it('MacBook_Pro_14_M3Pro 缺失时正当兜底到 MacBook_Pro_16_M3Pro (候选不被跳过)', () => {

@@ -46,20 +46,40 @@ describe('v4.1 anchor-term (锚定-冲击双因子模型)', () => {
     analysisMonth: '2026-08',
   };
 
+  /**
+   * v4.6 起常量库已滚动: M6 已官宣并发售, 涨幅表「已官宣」标记随代际移除 (P4,
+   * anchorHike 归零, 实测涨幅移入 _口径说明_v4.6)。本组用例验证引擎锚定机制本身,
+   * 用变异克隆还原 v4.1-v4.5 的已官宣场景, 与常量库数据版本解耦
+   * (真实数据的滚动契约由 release-rhythm-data-integrity.test.ts 守护)。
+   */
+  function withAnnouncedMini(): Constants {
+    const cloned = structuredClone(constants) as Constants;
+    const table = cloned.pricePredictionModel?._分品类预测涨幅表 as
+      | Record<string, unknown>
+      | undefined;
+    for (const [k, v] of Object.entries(table ?? {})) {
+      if (k.startsWith('_当前值_') && v && typeof v === 'object') {
+        (v as Record<string, { 预测涨幅?: string }>).Mac_mini.预测涨幅 = '已官宣(M6实测16.7%)';
+        break;
+      }
+    }
+    return cloned;
+  }
+
   // ==========================================================================
   // "已官宣" 识别 (Mac_mini: 预测涨幅="已官宣", 中位数=16.7%)
   // ==========================================================================
 
   describe('"已官宣"状态识别', () => {
     it('hasHikeOccurred=true 且 anchorHike=中位数 (无宏观)', () => {
-      const plan = parseReleasePlan(constants, 'Mac_mini', noMacro);
+      const plan = parseReleasePlan(withAnnouncedMini(), 'Mac_mini', noMacro);
       expect(plan).not.toBeNull();
       expect(plan!.hasHikeOccurred).toBe(true);
       expect(plan!.anchorHike).toBeCloseTo(0.167, 4);
     });
 
     it('宏观触发时同样成立 (已官宣不依赖宏观事件)', () => {
-      const plan = parseReleasePlan(constants, 'Mac_mini', macroOngoing);
+      const plan = parseReleasePlan(withAnnouncedMini(), 'Mac_mini', macroOngoing);
       expect(plan).not.toBeNull();
       expect(plan!.hasHikeOccurred).toBe(true);
       // 已官宣 → 不再用预测涨幅外推 → predictedPriceHike=0
@@ -88,10 +108,11 @@ describe('v4.1 anchor-term (锚定-冲击双因子模型)', () => {
 
   describe('类型B防重复计算', () => {
     it('已官宣 → 预测价 = 快照官方价 (M6 6999), 不乘 (1+16.7%)', () => {
-      const plan = parseReleasePlan(constants, 'Mac_mini', macroOngoing);
+      const announced = withAnnouncedMini();
+      const plan = parseReleasePlan(announced, 'Mac_mini', macroOngoing);
       expect(plan).not.toBeNull();
-      const predicted = predictNewProductPrice(constants, 'Mac_mini', plan!);
-      const currentNew = getCurrentNewPrice(constants, 'Mac_mini');
+      const predicted = predictNewProductPrice(announced, 'Mac_mini', plan!);
+      const currentNew = getCurrentNewPrice(announced, 'Mac_mini');
       // 快照首位新品条目为 M6 官宣价 6999
       expect(currentNew).toBe(6999);
       expect(predicted).toBe(currentNew);
@@ -109,18 +130,20 @@ describe('v4.1 anchor-term (锚定-冲击双因子模型)', () => {
     const oldPrice = 4500; // M4 丐版当前叫价 (SKILL.md v4.1 更新注场景)
 
     it('无宏观: 4500 × (1+16.7%) × (1 − 26.25% × 1.0) ≈ 3873', () => {
-      const plan = parseReleasePlan(constants, 'Mac_mini', noMacro);
+      const announced = withAnnouncedMini();
+      const plan = parseReleasePlan(announced, 'Mac_mini', noMacro);
       expect(plan).not.toBeNull();
-      const discounted = predictDiscountedOldPrice(constants, oldPrice, plan!, noMacro);
+      const discounted = predictDiscountedOldPrice(announced, oldPrice, plan!, noMacro);
       const expected = oldPrice * 1.167 * (1 - 0.35 * (1 - 0.25) * 1.0);
       expect(discounted).toBeCloseTo(expected, 1);
       expect(discounted).toBeCloseTo(3872.98, 0);
     });
 
     it('宏观进行中: 时变因子随产能因子切换 → 价格高于无宏观口径的冲击项', () => {
-      const plan = parseReleasePlan(constants, 'Mac_mini', macroOngoing);
+      const announced = withAnnouncedMini();
+      const plan = parseReleasePlan(announced, 'Mac_mini', macroOngoing);
       expect(plan).not.toBeNull();
-      const discounted = predictDiscountedOldPrice(constants, oldPrice, plan!, macroOngoing);
+      const discounted = predictDiscountedOldPrice(announced, oldPrice, plan!, macroOngoing);
       // 2月 → 3月内 → 买入价下降因子 0.95
       const expected = oldPrice * 1.167 * (1 - 0.35 * 0.75 * 0.95);
       expect(discounted).toBeCloseTo(expected, 1);
@@ -128,9 +151,10 @@ describe('v4.1 anchor-term (锚定-冲击双因子模型)', () => {
     });
 
     it('锚定项生效: 含锚定项的价格 > 纯冲击公式价格 (v3.8 会高估捡漏空间)', () => {
-      const plan = parseReleasePlan(constants, 'Mac_mini', noMacro);
+      const announced = withAnnouncedMini();
+      const plan = parseReleasePlan(announced, 'Mac_mini', noMacro);
       expect(plan).not.toBeNull();
-      const withAnchor = predictDiscountedOldPrice(constants, oldPrice, plan!, noMacro);
+      const withAnchor = predictDiscountedOldPrice(announced, oldPrice, plan!, noMacro);
       const withoutAnchor = oldPrice * (1 - 0.35 * 0.75 * 1.0); // v3.8 形式
       expect(withAnchor).toBeGreaterThan(withoutAnchor);
       // 对应 SKILL.md v4.1 更新注: 漏掉锚定项会高估捡漏空间

@@ -42,8 +42,9 @@ describe('置信度解析: 复合格式前缀匹配', () => {
     base = loadConstants(constantsJson);
   });
 
-  it('"高(已官宣)" → high (真实数据: Mac_mini v4.0 回填)', () => {
-    const plan = parseReleasePlan(base, 'Mac_mini', defaultMacro);
+  it('"高(已官宣)" → high (真实数据: iPhone_ProMax 发布会官宣)', () => {
+    // v4.6: Mac_mini/Mac_studio 已滚动为下一代外推(中), 复合「高(已官宣)」载体换为 iPhone_ProMax
+    const plan = parseReleasePlan(base, 'iPhone_ProMax', defaultMacro);
     expect(plan).not.toBeNull();
     expect(plan!.releaseConfidence).toBe('high');
   });
@@ -54,13 +55,16 @@ describe('置信度解析: 复合格式前缀匹配', () => {
     expect(plan!.releaseConfidence).toBe('medium');
   });
 
-  it('纯 "高" 向后兼容 (真实数据: iPhone_Pro)', () => {
-    const iPhonePro = parseReleasePlan(base, 'iPhone_Pro', defaultMacro);
-    expect(iPhonePro!.releaseConfidence).toBe('high');
+  it('纯 "高" 向后兼容 (真实数据: iPhone_标准)', () => {
+    // v4.6: iPhone_Pro 快照置信度已为复合格式「高(已官宣)」, 纯「高」载体换为 iPhone_标准
+    const iPhoneStandard = parseReleasePlan(base, 'iPhone_标准', defaultMacro);
+    expect(iPhoneStandard!.releaseConfidence).toBe('high');
   });
 
-  it('"高(已官宣)" (Mac_studio) 与 "中(媒体爆料)" (HomePod) 真实数据对照', () => {
-    expect(parseReleasePlan(base, 'Mac_studio', defaultMacro)!.releaseConfidence).toBe('high');
+  it('"高(发布会已官宣)" (Apple_Watch) / "中(媒体爆料,下一代外推)" (Mac_studio v4.6 滚动) / "中(媒体爆料)" (HomePod) 真实数据对照', () => {
+    expect(parseReleasePlan(base, 'Apple_Watch', defaultMacro)!.releaseConfidence).toBe('high');
+    // v4.6 P1/P5: Mac_studio 置信度由「高(已官宣,已发售M5)」降级为「中(媒体爆料,下一代外推)」
+    expect(parseReleasePlan(base, 'Mac_studio', defaultMacro)!.releaseConfidence).toBe('medium');
     expect(parseReleasePlan(base, 'HomePod', defaultMacro)!.releaseConfidence).toBe('medium');
   });
 

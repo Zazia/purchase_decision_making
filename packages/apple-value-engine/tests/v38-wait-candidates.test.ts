@@ -55,18 +55,36 @@ describe('v3.8 wait candidates', () => {
     expect(typeC.length).toBeGreaterThan(0);
   });
 
-  it('Mac_mini confidence=高(已官宣) → shouldGenerate=true (P1 修复: 复合格式前缀匹配)', () => {
-    // constants v4.0 (2026-08-25) 已回填 "高(已官宣)"; 旧断言 low 是把 P1 bug 固化进用例
-    const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro);
+  it('iPhone_ProMax confidence=高(已官宣) → shouldGenerate=true (P1 修复: 复合格式前缀匹配)', () => {
+    // v4.6: Mac_mini 已滚动为下一代外推(中), 复合「高(已官宣)」真实数据载体换为 iPhone_ProMax
+    const plan = parseReleasePlan(constants, 'iPhone_ProMax', defaultMacro);
     expect(plan).not.toBeNull();
     expect(plan!.releaseConfidence).toBe('high');
+    expect(plan!.nextReleaseMonth).toBe('2026-09');
     expect(shouldGenerateWaitCandidates(plan!, defaultMacro)).toBe(true);
   });
 
-  it('Mac_mini confidence=高(已官宣) → 生成 B/C 候选', () => {
+  it('Mac_mini v4.6 滚动后: confidence=中(下一代外推) 且 2027-09 超 90 天窗口 → shouldGenerate=false', () => {
+    // v4.6 P1 修复: 「下一次预计」由污染文本(首个 YYYY-MM 解析出过去月 2026-08)改写为
+    // M7 世代 2027-09 预测; 置信度由 高(已发售 M6) 降为中(媒体爆料, 下一代外推)。
+    // 下一次发布落出等待窗口 → 不再生成 B/C 候选, 但持有期换代冲击恢复建模(见 v42/residual 测试)
+    const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro);
+    expect(plan).not.toBeNull();
+    expect(plan!.releaseConfidence).toBe('medium');
+    expect(plan!.nextReleaseMonth).toBe('2027-09');
+    expect(shouldGenerateWaitCandidates(plan!, defaultMacro)).toBe(false);
+  });
+
+  it('iMac (v4.6 补齐品类) 2026-10 发布 + 中置信度 → 生成 B/C 候选', () => {
+    // v4.6 P2: iMac 补「下一次预计」(2026-10 M6, Gurman 爆料, 中置信度) 后,
+    // 距发布 ≤ 90 天且非 low → 等待候选恢复生成 (此前缺失预测字段时无法生成)
+    const plan = parseReleasePlan(constants, 'iMac', defaultMacro);
+    expect(plan).not.toBeNull();
+    expect(plan!.releaseConfidence).toBe('medium');
+    expect(shouldGenerateWaitCandidates(plan!, defaultMacro)).toBe(true);
     const result = computeParetoFrontier(constants, {
-      category: 'mac-mini',
-      budget: 100000,
+      category: 'iMac',
+      budget: 30000,
       holdingYears: [2, 3],
       buyTiming: 'both',
       performanceFloor: 0,

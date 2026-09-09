@@ -22,6 +22,7 @@ import {
   getRetentionRate,
   isAnchorCandidate,
   parseReleasePlan,
+  computeResidualImpactFactor,
 } from '../src/index.js';
 import type { Constants, MacroContext } from '../src/index.js';
 
@@ -36,6 +37,28 @@ const defaultMacro: MacroContext = {
   analysisMonth: '2026-08',
 };
 
+/**
+ * 机龄(月) = constants.lastUpdated 与发布日期的月差 — 与引擎 computeAgeMonths 同口径。
+ * last_updated 随数据维护滚动, 机龄硬编码会逐月漂移, 故全部动态推导。
+ */
+function ageOf(c: Constants, releaseDateKey: string): number {
+  const date = c.productReleaseDates[releaseDateKey];
+  const m = date.match(/^(\d{4})-(\d{1,2})/)!;
+  const lu = c.lastUpdated.match(/^(\d{4})-(\d{1,2})/)!;
+  return (Number(lu[1]) - Number(m[1])) * 12 + (Number(lu[2]) - Number(m[2]));
+}
+
+/**
+ * 锁定 Mac_mini 发布窗口为 2026-08 (M6/M5 Pro 已官宣未发售)。
+ * 真实 constants 的「下一次预计」文本会随时间推移改写 (发布后指向下一代),
+ * 本文件的锚定品/冲击用例全部基于该窗口场景, clone 锁定与数据更新解耦。
+ */
+function lockMacMiniWindow(c: Constants): Constants {
+  const cloned = structuredClone(c) as Constants;
+  cloned.releaseRhythm.Mac_mini.下一次预计 = '2026-08';
+  return cloned;
+}
+
 describe('v4.2 锚定品识别 (isAnchorCandidate)', () => {
   let constants: Constants;
   beforeAll(() => {
@@ -43,18 +66,18 @@ describe('v4.2 锚定品识别 (isAnchorCandidate)', () => {
   });
 
   it('M6 (发布月 2026-08 = nextReleaseMonth) 是锚定品', () => {
-    const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro);
+    const plan = parseReleasePlan(lockMacMiniWindow(constants), 'Mac_mini', defaultMacro);
     expect(plan!.nextReleaseMonth).toBe('2026-08');
     expect(isAnchorCandidate(constants, 'Mac_mini_M6', plan!)).toBe(true);
   });
 
   it('M5_Pro (发布月 2026-08) 是锚定品', () => {
-    const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro);
+    const plan = parseReleasePlan(lockMacMiniWindow(constants), 'Mac_mini', defaultMacro);
     expect(isAnchorCandidate(constants, 'Mac_mini_M5_Pro', plan!)).toBe(true);
   });
 
   it('M4 (发布月 2024-10 < nextReleaseMonth) 不是锚定品', () => {
-    const plan = parseReleasePlan(constants, 'Mac_mini', defaultMacro);
+    const plan = parseReleasePlan(lockMacMiniWindow(constants), 'Mac_mini', defaultMacro);
     expect(isAnchorCandidate(constants, 'Mac_mini_M4', plan!)).toBe(false);
   });
 });
@@ -66,7 +89,7 @@ describe('v4.2 类型 C 候选排除锚定品', () => {
   });
 
   it('M6/M5_Pro 不出现在类型 C 候选集, M4 正常出现, M6 仍为类型 A 候选', () => {
-    const result = computeParetoFrontier(constants, {
+    const result = computeParetoFrontier(lockMacMiniWindow(constants), {
       category: 'mac-mini',
       budget: 100000,
       holdingYears: [1, 2],
@@ -126,11 +149,12 @@ describe('v4.2 类型 A 残值冲击调整', () => {
     return buyPrice * Math.min(1, sellRate / buyRate);
   }
 
-  it('M4 二手持有 12 月: 残值 = 锚定残值 × 0.92125 (调整后冲击 26.25% × 因子 0.30)', () => {
-    // M4 发布 2024-10, 分析月 2026-08 → 当前机龄 22 月; nextReleaseMonth=2026-08,
-    // monthsToRelease=0, 卖出点距发布 12 月 → 残值调整因子 0.30
-    // 乘数 = 1 − 0.2625 × 0.30 = 0.92125
-    const result = computeParetoFrontier(constants, {
+  it('M4 二手持有 12 月: 残值 = 锚定残值 × 残值冲击乘数 (调整后冲击 26.25% × 因子 0.30)', () => {
+    // 场景锁定: nextReleaseMonth=2026-08 = 分析月 → monthsToRelease=0,
+    // 卖出点距发布 12 月 → 残值调整因子 0.30 → 乘数 = 1 − 0.2625 × 0.30 = 0.92125
+    // (乘数由 computeResidualImpactFactor 动态计算, 26.25% = 冲击均值 35% × (1−0.25) 随数据演进)
+    const cloned = lockMacMiniWindow(constants);
+    const result = computeParetoFrontier(cloned, {
       category: 'mac-mini',
       budget: 100000,
       holdingYears: [1],
@@ -145,8 +169,12 @@ describe('v4.2 类型 A 残值冲击调整', () => {
       (p) => p.model === 'M4_16G_256G_二手 × 1年' && p.candidateType === 'A',
     );
     expect(point).toBeDefined();
+    const m4Age = ageOf(constants, 'Mac_mini_M4');
     const m4Used = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_16G_256G_二手'], 'used')!;
-    const expected = anchoredResidual(m4Used, 22, 22 + 12) * 0.92125;
+    const plan = parseReleasePlan(cloned, 'Mac_mini', defaultMacro)!;
+    const impactFactor = computeResidualImpactFactor(cloned, 'Mac_mini_M4', plan, defaultMacro, 12);
+    expect(impactFactor).toBeLessThan(1); // 冲击必须被施加
+    const expected = anchoredResidual(m4Used, m4Age, m4Age + 12) * impactFactor;
     expect(point!.residual).toBeCloseTo(expected, 6);
     // 月均成本同步受残值影响
     const maintenance = computeMaintenanceCost(constants, 'Mac_mini', 12);
@@ -154,7 +182,8 @@ describe('v4.2 类型 A 残值冲击调整', () => {
   });
 
   it('M4 二手持有 18 月: 卖出点距发布 18 月 (12月后) → 残值 × 0.97375', () => {
-    const result = computeParetoFrontier(constants, {
+    const cloned = lockMacMiniWindow(constants);
+    const result = computeParetoFrontier(cloned, {
       category: 'mac-mini',
       budget: 100000,
       holdingYears: [1.5],
@@ -167,14 +196,19 @@ describe('v4.2 类型 A 残值冲击调整', () => {
       (p) => p.model === 'M4_16G_256G_二手 × 1.5年' && p.candidateType === 'A',
     );
     expect(point).toBeDefined();
-    // 乘数 = 1 − 0.2625 × 0.10 = 0.97375
+    // 乘数 = 1 − 0.2625 × 0.10 = 0.97375 (动态计算)
+    const m4Age = ageOf(constants, 'Mac_mini_M4');
     const m4Used = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_16G_256G_二手'], 'used')!;
-    const expected = anchoredResidual(m4Used, 22, 22 + 18) * 0.97375;
+    const plan = parseReleasePlan(cloned, 'Mac_mini', defaultMacro)!;
+    const impactFactor = computeResidualImpactFactor(cloned, 'Mac_mini_M4', plan, defaultMacro, 18);
+    expect(impactFactor).toBeLessThan(1);
+    const expected = anchoredResidual(m4Used, m4Age, m4Age + 18) * impactFactor;
     expect(point!.residual).toBeCloseTo(expected, 6);
   });
 
   it('锚定品 M6 不施加残值冲击 (贬值由保值率曲线覆盖)', () => {
-    const result = computeParetoFrontier(constants, {
+    const cloned = lockMacMiniWindow(constants);
+    const result = computeParetoFrontier(cloned, {
       category: 'mac-mini',
       budget: 100000,
       holdingYears: [1],
@@ -187,9 +221,10 @@ describe('v4.2 类型 A 残值冲击调整', () => {
       (p) => p.model === 'M6_16G_256G_新品 × 1年',
     );
     expect(point).toBeDefined();
-    // M6 机龄 0, 卖出时机龄 12 → v4.3 残值 = 买入价 × R(12)/R(0), 无冲击乘数
+    // v4.3 残值 = 买入价 × R(卖出机龄)/R(买入机龄), 无冲击乘数 (机龄按 lastUpdated 动态)
+    const m6Age = ageOf(constants, 'Mac_mini_M6');
     const m6New = getBuyPrice(constants.marketSnapshots.Mac_mini['M6_16G_256G_新品'], 'new')!;
-    const expected = anchoredResidual(m6New, 0, 0 + 12);
+    const expected = anchoredResidual(m6New, m6Age, m6Age + 12);
     expect(point!.residual).toBeCloseTo(expected, 6);
   });
 
@@ -210,8 +245,9 @@ describe('v4.2 类型 A 残值冲击调整', () => {
       (p) => p.model === 'M4_16G_256G_二手 × 0.25年',
     );
     expect(point).toBeDefined();
+    const m4Age = ageOf(constants, 'Mac_mini_M4');
     const m4Used = getBuyPrice(constants.marketSnapshots.Mac_mini['M4_16G_256G_二手'], 'used')!;
-    const expected = anchoredResidual(m4Used, 22, 22 + 3); // 无乘数
+    const expected = anchoredResidual(m4Used, m4Age, m4Age + 3); // 无乘数
     expect(point!.residual).toBeCloseTo(expected, 6);
   });
 });

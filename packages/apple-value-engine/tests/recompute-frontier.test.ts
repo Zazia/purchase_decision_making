@@ -295,7 +295,10 @@ describe('自添加方案显式 memoryGb/storageGb 字段 (Bug 2 修复)', () =>
   it('同配置自添加方案 (model 不含 GB 段 + 显式字段) 与快照方案性能一致', () => {
     const original = computeParetoFrontier(constants, params);
     const allOrig = [...original.frontier, ...original.dominated];
-    const m4Orig = allOrig.find((p) => p.model.startsWith('M4_16G_256G_新品'));
+    // 取 A 类 (现在买) 快照方案: 自添加方案固定按类型 A 重算, 同口径比对
+    const m4Orig = allOrig.find(
+      (p) => p.model.startsWith('M4_16G_256G_新品') && p.candidateType === 'A',
+    );
     expect(m4Orig).toBeDefined();
 
     // 端内新增表单同款: 机型名不含 16G_256G 段, 显式填写 memoryGb/storageGb
@@ -324,10 +327,11 @@ describe('自添加方案显式 memoryGb/storageGb 字段 (Bug 2 修复)', () =>
     expect(Math.abs(customOut!.avgPerformance - m4Orig!.avgPerformance)).toBeLessThanOrEqual(0.001);
     // 自添加方案按类型 A「现在买」参与计算
     expect(customOut!.candidateType).toBe('A');
-    // 月均成本已被引擎按真实机龄重算 (非 bug 态的机龄 0 口径);
-    // 与等待类 (B/C) 快照方案存在等待月数的时点折旧差 (约 1-2 元), 属买入时点语义差
-    expect(Math.abs(customOut!.monthlyCost - m4Orig!.monthlyCost)).toBeLessThanOrEqual(2);
-    expect(Math.abs(customOut!.monthlyCost - m4Orig!.monthlyCost)).toBeGreaterThan(0);
+    // 月均成本已被引擎按真实机龄重算 (非 bug 态的机龄 0 口径):
+    // m4Orig 为 A 类时自添加方案与其同口径 (同机龄同价), 应几乎一致 (≤0.5 元);
+    // 机龄兜底 bug 复发 (按 0 计算) 时残值差 ~百元 → 月均差 >3 元, 断言可捕获
+    const diff = Math.abs(customOut!.monthlyCost - m4Orig!.monthlyCost);
+    expect(diff).toBeLessThanOrEqual(0.5);
   });
 
   it('自添加方案月均成本与「现在买」(A) 语义一致: 显式字段与 model 回退两路径等价', () => {

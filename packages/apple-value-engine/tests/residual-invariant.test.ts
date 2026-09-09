@@ -19,6 +19,8 @@ import {
   computeMonthlyCost,
   computeMonthlyCostForWaitCandidate,
   getRetentionRate,
+  parseReleasePlan,
+  computeWaitMonths,
 } from '../src/index.js';
 import type { Constants } from '../src/index.js';
 
@@ -139,7 +141,7 @@ describe('类型 C 残值锚定 (v4.3 复现用例)', () => {
     constants = loadConstants(constantsJson);
   });
 
-  it('iPhone 15 Pro 128G 二手 × 1年 (等待 2 月): 残值 = 买入价 × R(49)/R(37) < 买入价', () => {
+  it('iPhone 15 Pro 128G 二手 × 1年: 残值 = 买入价 × R(买入+12)/R(买入) < 买入价', () => {
     const result = computeParetoFrontier(constants, {
       category: 'iphone',
       budget: 999999,
@@ -152,12 +154,29 @@ describe('类型 C 残值锚定 (v4.3 复现用例)', () => {
       (p) => p.model === 'iPhone_15_Pro_128G_二手 × 1年' && p.candidateType === 'C',
     );
     expect(point).toBeDefined();
-    expect(point!.waitMonths).toBe(2);
 
-    // 当前机龄 35 + 等待 2 = 买入机龄 37; 卖出机龄 = 37 + 12 = 49
-    const r49 = getRetentionRate(constants.retentionCurves, 'iPhone_Pro', 49);
-    const r37 = getRetentionRate(constants.retentionCurves, 'iPhone_Pro', 37);
-    const expected = point!.buyPrice * Math.min(1, r49 / r37);
+    // 等待月数与机龄均动态推导 (依赖 releaseRhythm/lastUpdated, 硬编码会随数据维护漂移):
+    // computeParetoFrontier 未传 macroContext 时按 none + lastUpdated 分析月解析
+    const plan = parseReleasePlan(constants, 'iPhone_Pro', {
+      storageSuperCycleStage: 'none',
+      hasGlobalPriceHike: false,
+      analysisMonth: constants.lastUpdated.slice(0, 7),
+    })!;
+    const waitMonths = computeWaitMonths(plan, {
+      storageSuperCycleStage: 'none',
+      hasGlobalPriceHike: false,
+      analysisMonth: constants.lastUpdated.slice(0, 7),
+    });
+    expect(point!.waitMonths).toBe(waitMonths);
+
+    // 当前机龄 (发布 2023-09, 按 lastUpdated 动态) + 等待 = 买入机龄; 卖出 = 买入 + 12
+    const lu = constants.lastUpdated.match(/^(\d{4})-(\d{1,2})/)!;
+    const rel = constants.productReleaseDates['iPhone_15'].match(/^(\d{4})-(\d{1,2})/)!;
+    const currentAge = (Number(lu[1]) - Number(rel[1])) * 12 + (Number(lu[2]) - Number(rel[2]));
+    const buyAge = currentAge + waitMonths;
+    const rSell = getRetentionRate(constants.retentionCurves, 'iPhone_Pro', buyAge + 12);
+    const rBuy = getRetentionRate(constants.retentionCurves, 'iPhone_Pro', buyAge);
+    const expected = point!.buyPrice * Math.min(1, rSell / rBuy);
     expect(point!.residual).toBeCloseTo(expected, 6);
     expect(point!.residual).toBeLessThan(point!.buyPrice);
     expect(point!.monthlyCost).toBeGreaterThanOrEqual(0);
