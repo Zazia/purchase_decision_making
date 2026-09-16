@@ -23,6 +23,7 @@ import {
   computeWaitMonths,
 } from '../src/index.js';
 import type { Constants } from '../src/index.js';
+import { withIPhoneReleaseWindow } from './fixtures/iphone-release.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONSTANTS_PATH = join(__dirname, '../../../.agents/skills/apple-value-analysis/constants.json');
@@ -138,12 +139,12 @@ describe('比率封顶安全网 (v4.3)', () => {
 describe('类型 C 残值锚定 (v4.3 复现用例)', () => {
   let constants: Constants;
   beforeAll(() => {
-    constants = loadConstants(constantsJson);
+    constants = withIPhoneReleaseWindow(loadConstants(constantsJson));
   });
 
   it('iPhone 15 Pro 128G 二手 × 1年: 残值 = 买入价 × R(买入+12)/R(买入) < 买入价', () => {
     const result = computeParetoFrontier(constants, {
-      category: 'iphone',
+      category: 'iPhone_Pro',
       budget: 999999,
       holdingYears: [1],
       buyTiming: 'used',
@@ -190,7 +191,7 @@ describe('类型 C 残值锚定 (v4.3 复现用例)', () => {
 describe('类型 B 残值行为不变 (v4.3 等价性)', () => {
   let constants: Constants;
   beforeAll(() => {
-    constants = loadConstants(constantsJson);
+    constants = withIPhoneReleaseWindow(loadConstants(constantsJson));
   });
 
   it('sellAgeMonths = holdingMonths (买入机龄 0) 时, 残值 = 买入价 × R(持有月数)/100, 与旧公式一致', () => {

@@ -42,9 +42,8 @@ describe('置信度解析: 复合格式前缀匹配', () => {
     base = loadConstants(constantsJson);
   });
 
-  it('"高(已官宣)" → high (真实数据: iPhone_ProMax 发布会官宣)', () => {
-    // v4.6: Mac_mini/Mac_studio 已滚动为下一代外推(中), 复合「高(已官宣)」载体换为 iPhone_ProMax
-    const plan = parseReleasePlan(base, 'iPhone_ProMax', defaultMacro);
+  it('"高(已官宣)" → high (显式夹具，独立于发布数据滚动)', () => {
+    const plan = parseReleasePlan(withConfidence(base, 'iPhone_ProMax', '高(已官宣)'), 'iPhone_ProMax', defaultMacro);
     expect(plan).not.toBeNull();
     expect(plan!.releaseConfidence).toBe('high');
   });

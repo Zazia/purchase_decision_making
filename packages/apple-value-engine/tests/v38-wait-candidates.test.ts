@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { loadConstants, computeParetoFrontier, parseReleasePlan, shouldGenerateWaitCandidates } from '../src/index.js';
 import type { Constants, MacroContext } from '../src/index.js';
+import { withIPhoneReleaseWindow } from './fixtures/iphone-release.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONSTANTS_PATH = join(__dirname, '../../../.agents/skills/apple-value-analysis/constants.json');
@@ -20,7 +21,7 @@ const constantsJson = readFileSync(CONSTANTS_PATH, 'utf-8');
 describe('v3.8 wait candidates', () => {
   let constants: Constants;
   beforeAll(() => {
-    constants = loadConstants(constantsJson);
+    constants = withIPhoneReleaseWindow(loadConstants(constantsJson));
   });
 
   // 默认宏观状态: 无宏观事件, analysisMonth 取 constants.lastUpdated
@@ -56,7 +57,7 @@ describe('v3.8 wait candidates', () => {
   });
 
   it('iPhone_ProMax confidence=高(已官宣) → shouldGenerate=true (P1 修复: 复合格式前缀匹配)', () => {
-    // v4.6: Mac_mini 已滚动为下一代外推(中), 复合「高(已官宣)」真实数据载体换为 iPhone_ProMax
+    // 固定复合置信度夹具，避免发布预测滚动导致回归失效。
     const plan = parseReleasePlan(constants, 'iPhone_ProMax', defaultMacro);
     expect(plan).not.toBeNull();
     expect(plan!.releaseConfidence).toBe('high');
@@ -152,6 +153,7 @@ describe('v3.8 wait candidates', () => {
     });
     const allPoints = [...result.frontier, ...result.dominated];
     const typeB = allPoints.filter((p) => p.candidateType === 'B');
+    expect(typeB.length).toBeGreaterThan(0);
     for (const p of typeB) {
       expect(p.waitMonths).toBeGreaterThan(0);
       expect(p.predictedPrice).toBe(true);
@@ -170,11 +172,27 @@ describe('v3.8 wait candidates', () => {
     });
     const allPoints = [...result.frontier, ...result.dominated];
     const typeC = allPoints.filter((p) => p.candidateType === 'C');
+    expect(typeC.length).toBeGreaterThan(0);
     for (const p of typeC) {
       expect(p.waitMonths).toBeGreaterThan(0);
       expect(p.predictedPrice).toBe(true);
       // buyTiming 应为 'new' 或 'used' (继承自老款候选)
       expect(p.buyTiming === 'new' || p.buyTiming === 'used').toBe(true);
     }
+  });
+
+  it('v4.7 真实数据已滚动至 2027-09，不生成 iPhone Pro 等待候选', () => {
+    const live = loadConstants(constantsJson);
+    const plan = parseReleasePlan(live, 'iPhone_Pro', defaultMacro)!;
+    expect(plan.nextReleaseMonth).toBe('2027-09');
+    expect(plan.releaseConfidence).toBe('medium');
+    expect(shouldGenerateWaitCandidates(plan, defaultMacro)).toBe(false);
+    const result = computeParetoFrontier(live, {
+      category: 'iPhone_Pro', budget: 30000, holdingYears: [2],
+      buyTiming: 'both', performanceFloor: 0, macroContext: defaultMacro,
+    });
+    const points = [...result.frontier, ...result.dominated];
+    expect(points.length).toBeGreaterThan(0);
+    expect(points.every((point) => point.candidateType === 'A')).toBe(true);
   });
 });

@@ -436,7 +436,10 @@ function extractWaitCandidates(constants, categoryKey, releasePlan, macroContext
 function normalizeChipName(chip) {
     return chip.replace(/(?<!_)(Pro|Max|Ultra)/g, '_$1');
 }
-/** iPhone 产品名 → 芯片名映射 (productReleaseDates 用 iPhone_N, benchmarks 用 A_N) */
+/** iPhone 产品名 → 芯片名映射 (productReleaseDates 用 iPhone_N, benchmarks 用 A_N)
+ *  v4.7 补齐 ProMax 条目: 此前 ProMax 机型回退到同代标准版芯片
+ *  (如 iPhone_17_ProMax → A19 而非 A19_Pro), 性能满足度被低估。
+ *  12/13 ProMax 与同代标准版同芯片, 由前缀兜底覆盖, 不需显式条目。 */
 const IPHONE_CHIP_MAP = {
     'iPhone_12': 'A14', 'iPhone_13': 'A15',
     'iPhone_14': 'A15', 'iPhone_14_Pro': 'A16',
@@ -444,6 +447,10 @@ const IPHONE_CHIP_MAP = {
     'iPhone_16': 'A18', 'iPhone_16_Pro': 'A18_Pro',
     'iPhone_17': 'A19', 'iPhone_17_Pro': 'A19_Pro',
     'iPhone_18': 'A20', 'iPhone_18_Pro': 'A20_Pro',
+    'iPhone_14_ProMax': 'A16', 'iPhone_15_ProMax': 'A17_Pro',
+    'iPhone_16_ProMax': 'A18_Pro', 'iPhone_17_ProMax': 'A19_Pro',
+    'iPhone_18_ProMax': 'A20_Pro',
+    'iPhone_Duo': 'A20_Pro',
 };
 /**
  * 解析机型 key, 如 "M4_16G_256G_新品" → { chip: "M4", memoryGb: 16, storageGb: 256, releaseDateKey: "Mac_mini_M4" }

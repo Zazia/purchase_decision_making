@@ -1,0 +1,6 @@
+- [x] 修复 6 个失败用例并补 ProMax/Duo 回归（8 个映射案例、1 个真实数据滚动案例；等待候选非空断言）
+- [x] 全量测试、TypeScript 构建（16 文件、138 用例；tsc 与 ESM engine-smoke 通过）
+- [x] vendor、快照同步及 dry-run（304408 bytes；SHA-256 ecb1e498ff18a55274dba4d1f4f1c6359e806debc10296f8ab6aa719dfd2c159）
+- [x] 云端发布与读回验证（2026-09-16 `via update`；payload/version/hash 回读一致）
+- [x] 主规格同步与交接更新
+- [x] 完成发布后归档
