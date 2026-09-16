@@ -190,7 +190,14 @@ pnpm install               # 安装全部 workspace 依赖 / install all workspa
 pnpm test                  # 引擎一致性单测（vitest）/ engine consistency tests
 pnpm build                 # 构建 packages/* / build workspaces
 pnpm sync:snapshot         # constants.json → miniapp/wx/snapshot 同步 / sync mini-program snapshot
+pnpm constants:lint        # constants.json 结构校验 / lint constants payload
+pnpm constants:release    # 一键发布: lint → 云端发布 → 回读校验 / one-click release (加 `-- --dry-run` 干跑)
+pnpm intake:report        # shared_results 用户提交价离线分析报告 / shared-result price analysis
 ```
+
+> **数据维护凭证 / Data-maintenance credentials**: `constants:release`、`intake:report` 等云端脚本需要 AppSecret——设置 `WX_SECRET` 环境变量，或创建 `scripts/.wx-publish-credentials.json`（`{"secret": "..."}`，已 gitignore）。
+>
+> Cloud scripts (`constants:release`, `intake:report`, …) need the AppSecret — set the `WX_SECRET` environment variable, or create `scripts/.wx-publish-credentials.json` (`{"secret": "..."}`, gitignored).
 
 两个例外保持 npm（微信工具链生态）/ Two npm exceptions (WeChat toolchain):
 
@@ -203,7 +210,11 @@ cd miniapp/test && npm install   # miniprogram-automator E2E 测试依赖 / E2E 
 >
 > `core.hooksPath` points to `scripts/hooks`: staging the skill's `constants.json` auto-runs `sync-snapshot` and stages `miniapp/wx/snapshot/` on commit — do not bypass with `--no-verify`.
 
-其他工程约定（视觉规范、OpenSpec 变更流程、视频工程、仓库整洁）见 [agents.md](agents.md)。
+开启“展示我的方案”并点击生成时直接上传，无二次确认，将方案和用户输入价一起写入 `shared_results`；离线分析直接读取，无需第三集合。旧分享与测试记录不作为价格样本，同配置的多持有期只计一次，报告经人工审核后才进入 constants 发布流程。权限、台账迁移与保留策略见下方维护文档。
+
+安利使用 uv：Python 辅助脚本统一用 `uv run <脚本.py>`，依赖用 `uv add <包名>` 管理；Node 工作区继续使用 pnpm。
+
+数据维护命令（constants 发布 / 用户提交价分析 / 凭证与故障排查）完整说明见 [data-maintenance.md](docs/data-maintenance.md)。
 
 Other engineering conventions (design tokens, OpenSpec change flow, video project, repo hygiene) live in [agents.md](agents.md).
 

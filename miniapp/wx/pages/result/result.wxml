@@ -249,7 +249,7 @@
     <!-- 查看模式 -->
     <block wx:else>
       <!-- viewMode 切换 tabs (仅当有用户修改版时显示) -->
-      <view class="view-mode-tabs" wx:if="{{userModified}}">
+      <view class="view-mode-tabs" wx:if="{{userModified && !sharedCloudId}}">
         <view class="view-mode-tab {{viewMode === 'original' ? 'active' : ''}}" data-mode="original" bindtap="onSwitchViewMode">原始版</view>
         <view class="view-mode-tab {{viewMode === 'userModified' ? 'active' : ''}}" data-mode="userModified" bindtap="onSwitchViewMode">用户修改版</view>
       </view>

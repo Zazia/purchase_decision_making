@@ -302,6 +302,15 @@ assert(p.avgPerformance >= 0.8 - 0.001, '...');
 
 ## 八、调试方法论：分层隔离
 
+### 8.1 wechatide 0.3.10 / Windows 参数与只读验收（2026-09-14）
+
+- `wechatide.cmd` 经 PowerShell 传递 `--fn-source` 时，JavaScript 双引号可能被外层移除，出现 `ReferenceError: shared_results is not defined`。这是参数传递错误，不是数据库权限拒绝。简单表达式可在 PowerShell 单引号内使用 JavaScript 模板字符串；复杂参数优先用工具支持的 `--args-file`。含 `&` 的导航 URL 也可能被 cmd 拆为命令，应在运行时构造 URL 再导航。
+- 代码热重载可能把模拟器重置到初始页；每次调用页面方法前核对 route 和方法存在性，不沿用热重载前的页面假设。
+- `cloud_db_read_struct --action describeCollection` 仅返回索引/集合结构，不能据此认定安全规则已设置。客户端集合读取返回空数组也不能证明禁止直读，可能只是身份过滤后的空集，须另查权限规则或已知记录访问结果。
+- 分享页失败恢复测试可临时替换 `wx.cloud.callFunction` 为本地失败桩，核验确认次数、保存次数和本地图片；必须在 finally 恢复。该测试不能代替真实云端写入验收。2700→2500 重算后再编辑2300但不重算，保存提交价仍应为2500、原始对照2700。
+- 新版 `simulator_screenshot` 已可截图（指定 scripts/debug/ 内绝对路径），可用于分享卡视觉核验；旧 automator 的 mp.screenshot 超时限制仍存在。
+
+
 测试失败时按以下顺序定位（从快到慢、从纯 Node 到依赖工具）：
 
 1. **引擎层**：`node test/engine-integration.test.js` — 不依赖开发者工具，纯 Node
@@ -329,6 +338,16 @@ await withTimeout(page.data(), 8000, 'page.data()');        // ❌ 超时
 参考实现：`miniapp/test/diagnose.js` / `diagnose2.js` / `diagnose3.js`。
 
 ---
+
+### 原生确认弹窗不能仅以mock验收（2026-09-14）
+
+2026-09-15产品决定更新：本项目分享上传前二次确认已按用户要求移除，数据使用由协议与开关说明告知。当前验收应验证开启加生成直接上传、关闭零上传；以下按钮限制是历史问题与通用API经验，不能据此重新添加确认流程。
+
+wx.showModal 的 confirmText/cancelText 最多4个字符。「仅本地保存」5字会直接返回 showModal:fail cancelText length should not larger than 4 Chinese characters。此前mock直接返回confirm导致遗漏，且页面总catch误报“渲染失败”，实际上未上传。改用“本地保存”，按prepare/consent/render区分反馈；回归mock也必须校验参数长度，真实验收必须展示原生弹窗并人工确认。生成前等待setData回调，再等待组件二维码加载Promise；不能用export返回成功代替检查图片实际含二维码。首次无授权状态、取消、失败、已有授权重试分别记录，不能借用mock留下的授权状态证明首次确认成功。
+
+### 云函数平台信封与严格白名单（2026-09-14）
+
+真实 wx.cloud.callFunction 会附带平台 userInfo 和 tcbContext（后者由线上 invalidFields 诊断确认），纯本地 mock 若只传业务 DTO 会漏掉这一差异，导致本地校验通过、云端 invalid_payload。云函数入口先剥离 userInfo/tcbContext，再校验业务字段；身份仍只读 getWXContext().OPENID，绝不把整个 event 落库。回归必须模拟附加 userInfo/tcbContext，并验证伪造值不影响身份/幂等键且不会被持久化。
 
 ## 九、automator 0.12.1 可用 API 清单
 
@@ -370,3 +389,8 @@ cd miniapp
 node test/engine-integration.test.js   # 引擎层（纯 Node）
 node test/smoke.js                       # UI 层（依赖工具）
 ```
+
+
+### 分享落地必须核验快照而非仅生成图片（2026-09-16）
+
+云写成功、图片有码并不证明分享正确。若get只返params、接收页重算，会丢用户修改价。必须分别以scene和shareId进入，核对保存价格、月成本、推荐列表及修改标记，断言compute未调用；转发链接也须保留同一云ID。公开快照双层白名单保留展示字段，排除身份及原始分析对照。新增修改保存必须显式isUserModified，避免仅凭标题判断。旧纯参数链接没有ID，不能猜测关联历史记录。

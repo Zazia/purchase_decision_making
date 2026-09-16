@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 2,
+  "sourceCollection": "shared_results",
+  "watermark": 1789437029513,
+  "processedIds": [
+    "shared_results:65af4ef16a78041401cab33b08d5cdf5",
+    "shared_results:0e0afdc26a7808780167dac853b03bbc",
+    "shared_results:0e0afdc26a7809ae0167eb56271d037d",
+    "shared_results:65af4ef16a780a6a01caf85871ec70ea",
+    "shared_results:65af4ef16a780a9b01cafba73cf9a91f",
+    "shared_results:53d569bd6a780abc0172f1be0b126d4d",
+    "shared_results:53d569bd6a780e43017319c74ae115ad",
+    "shared_results:65af4ef16a780e9501cb45a62efab0e5",
+    "shared_results:53d569bd6a7817f70173967337175b78",
+    "shared_results:0e0afdc26a781b080168f882340f6ecf",
+    "shared_results:53d569bd6a781b130173c2ad0248015b",
+    "shared_results:65af4ef16a781b1401cbcc9f5ac3d95e",
+    "shared_results:65af4ef16a781b1701cbccbd43585f80",
+    "shared_results:65af4ef16a78521301cec4ae33ebfac0",
+    "shared_results:8e9ed36b6a796aa706dee554588618e2",
+    "shared_results:2e5d88db6a79daa60009ec204fe9bb41",
+    "shared_results:2e5d88db6a79e1e4000a811a1f1bb8b1",
+    "shared_results:2e5d88db6a7a7fa600121bae4b4e6610",
+    "shared_results:9a0201bc6a7a8bab000dec667d9e8a8b",
+    "shared_results:b5138c476a7a93f4017085fc2f518e0b",
+    "shared_results:2e5d88db6a7a941a00140e4d7df270e6",
+    "shared_results:9a0201bc6a7a9a5f000edc3f35c84902",
+    "shared_results:b5138c476a7aa965019986ab1ac427ff",
+    "shared_results:5ac99ce06a7dc71e00dce5c353d637f7",
+    "shared_results:2eaf35456a7dc71f002946dc5ce32b81",
+    "shared_results:d5e30a9b6a7dc76301064ade78a6886d",
+    "shared_results:3186bc486a7dc7ba002adc512ecf907e",
+    "shared_results:d5e30a9b6a7fd31701a5ed6276272301",
+    "shared_results:d5e30a9b6a80179a01b9725b3b5926f9",
+    "shared_results:2eaf35456a8069c7004df1977e5e2bb4",
+    "shared_results:d5e30a9b6a806a5801d336e00e51f396",
+    "shared_results:bf886e776a9240ac00a8a6a710c457f6",
+    "shared_results:bf886e776a92474600a90cd45996c13f",
+    "shared_results:d32b92d06a925a2500a56c5e4e699cdc",
+    "shared_results:f9ecc4af6a927a60039328df6e8a999c",
+    "shared_results:bf886e776a945b2800cce30b60e9574f",
+    "shared_results:d32b92d06a945c7100c34dc468d8a106",
+    "shared_results:d32b92d06a9841ae00fec2715de23899",
+    "shared_results:b1f5aa9b6a98c843056c00fe301e1a1f",
+    "shared_results:f9ecc4af6aa13af308ea2e5b5dcd4efa",
+    "shared_results:d32b92d06aa13af6017ec6d512135d5b",
+    "shared_results:d32b92d06aa200c10189dd8f3b8d36f6",
+    "shared_results:b1f5aa9b6aa7917d09e20f754522d5a0",
+    "shared_results:b1f5aa9b6aa7917d09e20f7e6909db18",
+    "shared_results:4a33fa98ffe4aa1a8cd5869f96eee7cd",
+    "shared_results:783a596c6c3a305d675e6c3ee3d4587a",
+    "shared_results:49bd15b4b657c351e5ee90315f6a085d",
+    "shared_results:cc946c23abea8fb63d3f43f2ebbdf20b",
+    "shared_results:b39447ca39f0cfdb370fcdc7369ba525"
+  ],
+  "groups": {},
+  "runs": [
+    {
+      "date": "2026-09-14T04:03:13.053Z",
+      "fetched": 0,
+      "newRecords": 0,
+      "newPoints": 0,
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": null
+    },
+    {
+      "date": "2026-09-14T04:19:39.290Z",
+      "fetched": 0,
+      "newRecords": 0,
+      "newPoints": 0,
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": null
+    },
+    {
+      "date": "2026-09-14T06:43:31.417Z",
+      "fetched": 0,
+      "newRecords": 0,
+      "newPoints": 0,
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": null
+    },
+    {
+      "date": "2026-09-14T10:09:50.407Z",
+      "fetched": 44,
+      "newRecords": 44,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 44,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 0,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": 1789366653491
+    },
+    {
+      "date": "2026-09-14T11:34:42.449Z",
+      "fetched": 45,
+      "newRecords": 1,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 1,
+        "ordinary": 0,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": 1789385570098
+    },
+    {
+      "date": "2026-09-14T11:37:35.560Z",
+      "fetched": 44,
+      "newRecords": 0,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 0,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": 1789385570098
+    },
+    {
+      "date": "2026-09-14T11:52:34.539Z",
+      "fetched": 44,
+      "newRecords": 0,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 0,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": 1789385570098
+    },
+    {
+      "date": "2026-09-15T01:33:58.879Z",
+      "fetched": 47,
+      "newRecords": 3,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 2,
+        "ordinary": 1,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": 1789435997614
+    },
+    {
+      "date": "2026-09-15T01:36:57.759Z",
+      "fetched": 46,
+      "newRecords": 0,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 0,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": 1789435997614
+    },
+    {
+      "date": "2026-09-15T01:55:16.240Z",
+      "fetched": 47,
+      "newRecords": 1,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 1,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 0,
+      "eligibleGroups": 0,
+      "watermark": 1789437029513
+    }
+  ]
+}

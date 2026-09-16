@@ -24,7 +24,7 @@
   <view class="option-row">
     <view class="option-label">
       <view class="option-title">展示我的方案</view>
-      <view class="option-desc">将把您的方案上传到云端并通过二维码查看。无论是否上传，均可点击生成的分享卡打开本次结果。</view>
+      <view class="option-desc">上传本次方案供二维码访问。您的价格数据将匿名保存，用于为大家改进预测。</view>
     </view>
     <switch checked="{{showMyPlan}}" bindchange="onToggleShowMyPlan" color="#007AFF" />
   </view>
@@ -32,7 +32,7 @@
   <!-- 操作按钮 -->
   <view class="actions">
     <view class="action-btn primary" bindtap="onGenerate">
-      {{generated ? '重新生成' : '生成分享卡'}}
+      {{generating ? '生成中…' : (generated ? '重新生成' : '生成分享卡')}}
     </view>
     <view class="action-btn secondary" wx:if="{{generated}}" bindtap="onSaveToAlbum">
       保存到相册
@@ -41,6 +41,8 @@
       转发给朋友
     </button>
   </view>
+
+  <view class="option-desc" wx:if="{{generationStatus}}">{{generationStatus}}</view>
 
   <!-- 分享呼吁 -->
   <view class="share-call">

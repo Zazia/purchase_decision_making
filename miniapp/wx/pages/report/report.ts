@@ -4,6 +4,7 @@
 
 import { getConstants, getDataFreshness, getMacroContext } from '../../engine-bridge/index';
 import { getSavedResult, sortPreferredPlans, type SavedResult } from '../../services/saved-results';
+import { clone, type UploadContext } from '../../services/share-upload';
 
 /** 与 PlanPoint 对齐的方案点(含 v3.8 候选类型字段) */
 interface PlanPoint {
@@ -154,6 +155,10 @@ Page({
     sopVersion: '',
     // 回看模式
     isReplay: false,
+    savedId: '',
+    isTest: false,
+    reportSnapshot: null as ReportData | null,
+    uploadContext: null as UploadContext | null,
     replayLastUpdated: '',
   },
 
@@ -184,17 +189,20 @@ Page({
     const app = getApp();
     if (app.globalData) {
       app.globalData.reportData = saved.reportData as unknown as Record<string, unknown>;
+      app.globalData.reportUploadContext = saved.uploadContext as unknown as Record<string, unknown> ?? null;
+      app.globalData.reportIsTest = saved.isTest === true;
     }
 
     // 标记回看模式, 使用保存时的数据日期
-    this.setData({ isReplay: true, replayLastUpdated: saved.lastUpdated });
+    this.setData({ isReplay: true, savedId, replayLastUpdated: saved.lastUpdated });
     this.loadReport();
   },
 
   /** 加载并组装报告数据 */
   async loadReport() {
     const app = getApp();
-    const reportData = app.globalData?.reportData as unknown as ReportData | null;
+    const reportData = clone(app.globalData?.reportData ?? null) as unknown as ReportData | null;
+    this.setData({ reportSnapshot: reportData, uploadContext: clone(app.globalData?.reportUploadContext ?? null) as unknown as UploadContext | null, isTest: app.globalData?.reportIsTest === true });
 
     if (!reportData || !reportData.params) {
       this.setData({ loading: false, error: '报告数据缺失，请从结果页重新进入' });
@@ -654,7 +662,7 @@ Page({
   /** 保存结果: 组装快照 → 存 globalData.shareCardData → 跳转 share-card 页 */
   onSaveResult() {
     const app = getApp();
-    const reportData = app.globalData?.reportData as unknown as ReportData | null;
+    const reportData = this.data.reportSnapshot;
     if (!reportData || !reportData.params) {
       wx.showToast({ title: '数据缺失，无法保存', icon: 'none' });
       return;
@@ -673,6 +681,9 @@ Page({
         headerTitle,
         topPlan,
         frontier: reportData.frontier || [],
+        uploadContext: clone(this.data.uploadContext),
+        savedId: this.data.savedId,
+        isTest: this.data.isTest,
       };
     }
 

@@ -3,6 +3,7 @@
 // 存储介质: wx.setStorageSync (单 key 上限 1MB, 总上限 10MB, 单条快照预估 < 50KB)
 // 容量策略: 保留最近 20 条, 超出时删除最旧快照
 
+import type { UploadContext, UploadState } from './share-upload';
 /** 与 result.ts PlanPoint 对齐的方案点 (含 v3.8 候选类型字段) */
 export interface PlanPoint {
   model: string;
@@ -40,6 +41,7 @@ export interface RecommendationRange {
 
 /** report 页渲染所需完整数据 (回看时直接用, 不重算) */
 export interface ReportData {
+  isUserModified?: boolean;
   params: DecisionParams;
   frontier: PlanPoint[];
   dominated: PlanPoint[];
@@ -64,6 +66,9 @@ export interface SavedResult {
   lastUpdated: string;
   /** 云端记录 _id (展示我的方案勾选且云函数成功时回填; 不勾选或失败为 null) */
   cloudId?: string | null;
+  uploadContext?: UploadContext | null;
+  uploadState?: UploadState | null;
+  isTest?: boolean;
 }
 
 /** 列表索引项 (轻量, 不含完整 reportData) */
@@ -220,7 +225,10 @@ export function updateResult(id: string, snapshot: Omit<SavedResult, 'id' | 'cre
     reportData: snapshot.reportData,
     headerTitle: snapshot.headerTitle,
     lastUpdated: snapshot.lastUpdated,
-    cloudId: snapshot.cloudId ?? existing.cloudId ?? null,
+    cloudId: snapshot.cloudId ?? null,
+    uploadContext: snapshot.uploadContext ?? null,
+    uploadState: snapshot.uploadState ?? null,
+    isTest: snapshot.isTest === true,
   };
   try {
     wx.setStorageSync(SNAPSHOT_KEY(id), updated);
@@ -270,7 +278,8 @@ export function deleteSavedResult(id: string): void {
 }
 
 /** 生成分享 path: /pages/result/result?category=...&budget=...&buyTiming=...&performanceFloor=...&holdingYears=2,3,4 */
-export function buildSharePath(params: DecisionParams): string {
+export function buildSharePath(params: DecisionParams, cloudId?: string): string {
+  if (cloudId) return `/pages/result/result?shareId=${encodeURIComponent(cloudId)}`;
   const q = `category=${params.category}&budget=${params.budget}&buyTiming=${params.buyTiming}&performanceFloor=${params.performanceFloor}&holdingYears=${params.holdingYears.join(',')}`;
   return `/pages/result/result?${q}`;
 }

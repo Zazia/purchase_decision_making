@@ -45,6 +45,8 @@ App({
     // 端内报告页数据, 从 result 页传递到 report 页
     // 含: params(决策参数) + frontier + dominated + recommendationRange + performanceFloor + budget
     reportData: null as unknown as Record<string, unknown> | null,
+    reportUploadContext: null as unknown as Record<string, unknown> | null,
+    reportIsTest: false,
     // 小程序名称 (分享卡底部文字显示; 小程序端无 API 自动获取自身名称,
     // 需在微信公众平台审核通过改名后手动同步此常量)
     appName: '帕累托买苹果',

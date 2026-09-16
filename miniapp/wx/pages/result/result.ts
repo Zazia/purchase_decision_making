@@ -3,7 +3,8 @@
 
 import { compute, getDataFreshness, getKnownChips, recomputeFromEditedPlans } from '../../engine-bridge/index';
 import { exportLongImage } from '../../services/long-image-export';
-import { getSavedResult, saveResult, sortPreferredPlans } from '../../services/saved-results';
+import { getSavedResult, saveResult, sortPreferredPlans, buildSharePath, type ReportData } from '../../services/saved-results';
+import { captureUploadContext, clone, type UploadContext } from '../../services/share-upload';
 import { EditorState } from '../../services/scheme-editor-state';
 import type { EditedPlanPoint, EditorSnapshot } from '../../services/scheme-editor-state';
 
@@ -112,7 +113,11 @@ Page({
     params: null as null | DecisionParams,
     // 回看模式: 从保存结果进入时直接渲染快照, 不重算
     isReplay: false,
+    sharedCloudId: '',
     savedId: '',
+    isTest: false,
+    originalUploadContext: null as UploadContext | null,
+    modifiedUploadContext: null as UploadContext | null,
     // 编辑模式状态 (manual-scheme-editor)
     // editorMode: 'view'=查看模式, 'edit'=编辑模式
     editorMode: 'view' as 'view' | 'edit',
@@ -186,9 +191,9 @@ Page({
       this.enterReplayMode(query.savedId);
       return;
     }
-    // 扫码场景: query.scene 是云端 _id (URL encoded), 走云函数拉 params
-    if (query.scene) {
-      const cloudId = decodeURIComponent(query.scene);
+    // 扫码及卡片均按云ID恢复保存快照。
+    if (query.scene || query.shareId) {
+      const cloudId = decodeURIComponent(query.scene || query.shareId);
       this.loadFromCloud(cloudId);
       this.loadFreshness();
       return;
@@ -213,7 +218,7 @@ Page({
   },
 
   /**
-   * 扫码场景: 调云函数 share-result 的 get action 拉 params, 再走重算流程
+   * 扫码/分享卡片: 加载公开结果快照；仅历史params-only记录重算。
    * 失败 (过期/不存在/网络错) → modal 提示 + 返回上一页或首页
    */
   async loadFromCloud(cloudId: string) {
@@ -224,24 +229,29 @@ Page({
         data: { action: 'get', id: cloudId },
       });
       const result = res.result as
-        | { ok?: boolean; error?: string; params?: DecisionParams }
+        | { ok?: boolean; error?: string; params?: DecisionParams; schemaVersion?: number; reportData?: ReportData }
         | undefined;
 
       // 过期或不存在
       if (!result || !result.ok || !result.params) {
         const isExpired = result?.error === 'expired';
         wx.showModal({
-          title: isExpired ? '方案已过期' : '方案不存在',
+          title: isExpired ? '方案已过期' : result?.error === 'missing_snapshot' ? '分享快照不可用' : '方案不存在',
           content: isExpired
             ? '该分享已超过 30 天, 无法查看'
-            : '该分享记录可能已被清理, 请让对方重新生成分享',
+            : '该分享记录或快照不可用，请让对方重新生成分享',
           showCancel: false,
         });
         this.navigateOut();
         return;
       }
 
-      // 成功 → 用 params 走现有重算流程
+      if (result.reportData) {
+        this.renderSharedSnapshot(result.reportData, cloudId);
+        return;
+      }
+      if (result.schemaVersion === 2) throw new Error('分享快照缺失');
+      // 兼容仅保存参数的旧分享。
       const params = result.params;
       this.setData({
         params,
@@ -259,6 +269,21 @@ Page({
       });
       this.navigateOut();
     }
+  },
+
+  /** 展示分享时的公开结果，不重算、不把别人的价格再次作为新输入上传。 */
+  renderSharedSnapshot(report: ReportData, cloudId: string) {
+    const { frontier, dominated, recommendationRange, params } = report;
+    const recKeys = new Set((recommendationRange?.plans ?? []).map(p => `${p.model}-${p.holdingYears}`));
+    const snapshot = { frontier, dominated, recommendationRange };
+    this.setData({ loading: false, error: '', isEmpty: frontier.length === 0,
+      relaxedHint: frontier.length ? '' : '分享时无可行方案',
+      params, budget: report.budget, performanceFloor: report.performanceFloor,
+      frontier, dominated, recommendationRange, plans: this.formatPlans(frontier, recKeys),
+      sharedCloudId: cloudId, isReplay: true, savedId: '',
+      original: snapshot, userModified: report.isUserModified ? snapshot : null,
+      viewMode: report.isUserModified ? 'userModified' : 'original',
+      originalUploadContext: null, modifiedUploadContext: null });
   },
 
   /** 返回上一页; 无上一页时 reLaunch 到首页 (decision-tree) */
@@ -306,12 +331,16 @@ Page({
       budget: params.budget,
       isReplay: true,
       savedId,
+      sharedCloudId: saved.cloudId || '',
+      originalUploadContext: reportData.isUserModified ? null : saved.uploadContext ?? null,
+      isTest: saved.isTest === true,
+      modifiedUploadContext: reportData.isUserModified ? saved.uploadContext ?? null : null,
       lastUpdated,
       freshnessLevel: 'fresh',
       // 保存原始快照供 viewMode 切换 (manual-scheme-editor)
       original: { frontier, dominated, recommendationRange: recRange },
-      userModified: null,
-      viewMode: 'original',
+      userModified: reportData.isUserModified ? { frontier, dominated, recommendationRange: recRange } : null,
+      viewMode: reportData.isUserModified ? 'userModified' : 'original',
     });
   },
 
@@ -529,6 +558,9 @@ Page({
       : { frontier: this.data.frontier, dominated: this.data.dominated, recommendationRange: this.data.recommendationRange };
     const app = getApp();
     if (app.globalData) {
+      app.globalData.reportUploadContext = clone(this.data.viewMode === 'userModified'
+        ? this.data.modifiedUploadContext : this.data.originalUploadContext) as unknown as Record<string, unknown> | null;
+      app.globalData.reportIsTest = this.data.isTest;
       app.globalData.reportData = {
         params,
         frontier: source.frontier,
@@ -542,7 +574,7 @@ Page({
     }
     // 回看模式且未编辑时带 savedId, 让 report 页复用同一份保存快照(含保存时数据日期);
     // 重算后(viewMode='userModified')不带 savedId, 让 report 页读取刚写入 globalData 的重算数据
-    const url = this.data.isReplay && this.data.viewMode !== 'userModified'
+    const url = this.data.isReplay && this.data.savedId && this.data.viewMode !== 'userModified'
       ? `/pages/report/report?savedId=${this.data.savedId}`
       : '/pages/report/report';
     wx.navigateTo({ url });
@@ -1649,23 +1681,7 @@ Page({
     const snap = editorState?.current;
     if (!params || !snap) return;
 
-    let qrcodeBase64 = '';
-    try {
-      const saveRes = await wx.cloud.callFunction({
-        name: 'share-result',
-        data: { action: 'save', params },
-      });
-      const cloudId = (saveRes.result as any)?.id;
-      if (cloudId) {
-        const qrRes = await wx.cloud.callFunction({
-          name: 'share-result',
-          data: { action: 'qrcode', id: cloudId },
-        });
-        qrcodeBase64 = (qrRes.result as any)?.buffer || '';
-      }
-    } catch (e) {
-      console.warn('Failed to get qrcode', e);
-    }
+    const qrcodeBase64 = '';
 
     const categoryLabel = CATEGORY_LABELS[params.category] || params.category;
     
@@ -1695,13 +1711,16 @@ Page({
     if (!params || !snap) return;
 
     // 收集未排除、未暂不考虑的点
-    const validPoints = snap.points.filter((p) => !p.excluded && !p.deferred);
+    const frozen = clone(snap);
+    const validPoints = frozen.points.filter((p) => !p.excluded && !p.deferred && !frozen.deferredRowIds.includes(p.rowId));
     if (validPoints.length === 0) {
       wx.showToast({ title: '当前没有可重算的方案，请恢复或新增至少一个方案', icon: 'none' });
       return;
     }
 
     try {
+      const original = this.data.original;
+      const context = captureUploadContext(frozen, [...(original?.frontier ?? []), ...(original?.dominated ?? [])]);
       wx.showLoading({ title: '正在计算...' });
       const result = await recomputeFromEditedPlans(params, validPoints);
       
@@ -1718,6 +1737,8 @@ Page({
 
       this.setData({
         userModified,
+        sharedCloudId: '',
+        modifiedUploadContext: context,
         viewMode: 'userModified',
         frontier: userModified.frontier,
         dominated: userModified.dominated,
@@ -1732,73 +1753,6 @@ Page({
       });
     } finally {
       wx.hideLoading();
-    }
-  },
-
-  /** 弹窗提示上传方案 */
-  async checkPriceIntakePrompt() {
-    if (wx.getStorageSync('skip_price_intake')) return;
-
-    const res = await wx.showModal({
-      title: '帮助修正预测',
-      content: '将你的方案上传到云端，帮助修正我们的预测——越多人使用并分享成交价，预测越准',
-      confirmText: '同意上传',
-      cancelText: '暂不上传'
-    });
-
-    if (res.confirm) {
-      await this.uploadPriceIntake();
-    } else {
-      wx.setStorageSync('skip_price_intake', true);
-      wx.showToast({ title: '不再自动弹出，可从编辑器手动触发上传', icon: 'none' });
-    }
-  },
-
-  /** 上传用户修改方案 */
-  async uploadPriceIntake() {
-    const params = this.data.params;
-    const snap = editorState?.current;
-    if (!params || !snap) return;
-
-    const validPoints = snap.points.filter((p) => !p.excluded && !p.deferred);
-    if (validPoints.length === 0) {
-      wx.showToast({ title: '没有可上传的方案', icon: 'none' });
-      return;
-    }
-    const originalPlans = this.data.original?.frontier || [];
-
-    wx.showLoading({ title: '上传中...', mask: true });
-    try {
-      const res = await wx.cloud.callFunction({
-        name: 'price-intake',
-        data: {
-          action: 'submit',
-          submittedPlans: validPoints,
-          originalPlans,
-          params
-        }
-      });
-      
-      wx.hideLoading();
-      const result = res.result as any;
-      
-      if (result && result.ok) {
-        wx.showModal({
-          title: '上传成功',
-          content: '谢谢你的分享，你的成交价会让下一份预测更准',
-          showCancel: false,
-          confirmText: '不客气'
-        });
-      } else {
-        throw new Error(result?.error || '上传失败');
-      }
-    } catch (e) {
-      wx.hideLoading();
-      wx.showModal({
-        title: '上传失败',
-        content: '上传失败，可稍后重试',
-        showCancel: false
-      });
     }
   },
 
@@ -1839,6 +1793,7 @@ Page({
     const headerTitle = `${categoryLabel} 购买决策分析 · 用户修改版`;
     const reportData = {
       params,
+      isUserModified: true,
       frontier: userModified.frontier,
       dominated: userModified.dominated,
       recommendationRange: userModified.recommendationRange,
@@ -1859,6 +1814,8 @@ Page({
         headerTitle,
         topPlan: topPlanRaw,
         frontier: userModified.frontier,
+        uploadContext: clone(this.data.modifiedUploadContext),
+        isTest: this.data.isTest,
       } as unknown as Record<string, unknown>;
     }
 
@@ -1889,6 +1846,7 @@ Page({
     const reportData = {
       params,
       frontier: this.data.frontier,
+      isUserModified: this.data.viewMode === 'userModified',
       dominated: this.data.dominated,
       recommendationRange: this.data.recommendationRange,
       performanceFloor: params.performanceFloor,
@@ -1903,6 +1861,9 @@ Page({
         headerTitle,
         topPlan: topPlanRaw,
         frontier: this.data.frontier,
+        uploadContext: clone(this.data.viewMode === 'userModified' ? this.data.modifiedUploadContext : this.data.originalUploadContext),
+        savedId: this.data.isReplay && this.data.viewMode === 'original' ? this.data.savedId : '',
+        isTest: this.data.isTest,
       } as unknown as Record<string, unknown>;
     }
 
@@ -1924,7 +1885,7 @@ Page({
   onShareAppMessage() {
     const params = this.data.params;
     if (!params) return { title: '苹果购买决策分析' };
-    const path = `/pages/decision-tree/decision-tree?category=${params.category}&budget=${params.budget}`;
+    const path = buildSharePath(params, this.data.sharedCloudId || undefined);
     return {
       title: '苹果购买决策分析 — 用数据帮你选',
       path,
