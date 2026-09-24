@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "4.7",
-    "last_updated": "2026-09-14",
+    "version": "4.8",
+    "last_updated": "2026-09-24",
     "data_sources": [
       "SellMacBook Device Depreciation Guide",
       "SellCell resale index",
@@ -24,6 +24,7 @@
       "v4.4发布计划调研(2026-09-05采集):MacRumors Apple Event指南(9-9发布会六新品预期,2026-09-01更新);Apple Newsroom 14寸M5基础款MacBook Pro(2025-10-15官宣10-22发售)与M5 Pro/Max款(2026-03-03官宣3-11发售);phonearena/MacRumors MacBook Pro M5发布时间线",
       "用户提供实采数据(2026-09-08):Mac mini M6官宣后M4/M2二手价5条(v4.5快照刷新);双指数拟合半衰期校准(scripts/fit-residual-functions.mjs)",
       "v4.6发布节奏信源核查(2026-09-09采集):MacRumors Mac mini M7/M7 Pro 2027年与Mac Studio M7 Ultra 2028年报道;Gurman Apple TV 4K(A17 Pro)/HomePod mini秋季报道(2026-07-28);iPad mini 8(OLED)2026-10爆料;MacBook Air M6 2027春爆料;Vision Pro廉价款显示屏开发暂停与下一代2028-2029报道(2026-07);iPhone Ultra折叠屏价格信源复核(截至9-9仍未官宣,泄露价14999元起不入引擎)",
+      "v4.8 Mac mini耐久价格复核(2026-09-24):用户确认M4/M2五个同配置价格经较长时间多次观察稳定在2026-09-08实采区间;V2EX/公开Telegram同配置叫价与该区间一致;Used-Lab日本市场发售后控制组仅变动-0.8%~-2.1%;据此校准18-48月中期残值曲线,不改变0-12月与60月后外推",
       "v4.7 iPhone 18系列发布回填(2026-09-14采集):苹果官网预购页apple.com.cn及发布会报道(18 Pro 256G 9999/18 Pro Max 256G 10999/Duo 256G 15999,9-12预购/9-18发售,Duo 10-16预购/10-23发售);A20 Pro GB6.7.0实测跑分(单核4719/多核12677);iPhone 17全系官方涨价800元与17 Pro/ProMax停产(九派新闻/新浪财经2026-09-10 https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml);18 Pro电商破发(潮新闻2026-09-14核实结算页9099);转转17系列交易量环比+280%/闲鱼上门回收17系+70元(九派新闻2026-09-10);Apple官方TradeIn下调16 Pro/ProMax(US口径9to5Mac 2026-09-09:16 Pro Max $720→$610/16 Pro $630→$510);中国TradeIn理论值(搜狐数码闲聊站2026-09-12)"
     ],
     "data_provenance_v3.8": {
@@ -110,6 +111,12 @@
       "P5置信度快照联动:_当前校验结果_重命名为2026-09-09;18品类全覆盖(Mac_mini/Mac_studio由'高(已官宣)'降为'中(媒体爆料,下一代外推)',新增iPhone_ProMax/iPad_Pro/iPad_Air/iPad_标准/iPad_mini/MacBook_Air/iMac/Mac_Pro/Apple_Watch/AirPods/Vision_Pro共11条目);iPhone_Ultra价格未官宣维持三表现状",
       "防复发:新增packages/apple-value-engine/tests/release-rhythm-data-integrity.test.ts,复用引擎parseReleasePlan断言每品类nextReleaseMonth为null或≥分析月,并校验置信度快照联动(有预测必有快照条目);历史发布日期再污染预测字段时CI变红",
       "本版仅动发布节奏/涨幅表标记/置信度快照/metadata,未动保值率曲线/跑分/快照价格,未改引擎src;测试夹具同步更新(confidence-parsing/v38-wait-candidates/v41-anchor-term改用克隆锁定,与数据滚动解耦);9-10发布会官宣内容回填(官宣价/冲击采集)为后续维护任务"
+    ],
+    "v4.8_变更摘要": [
+      "Mac mini耐久价格区间确认:用户于2026-09-24确认M4 16G/256G=3850、M2 16G/256G=3200、M2 16G/512G=3500、M2 8G/256G=2300、M2 8G/512G=2800已跨多次观察长期稳定;价格本身沿用9-08实采值,不伪造新成交样本",
+      "Mac mini中期残值曲线校准:18月72→68、24月65→55、36月52→47、48月46→41;23月理论值66.17→57.17(对M4实测55.01偏差-11.16pp→-2.16pp),44月理论值48→43(对齐M2四配置中位42.86%);0-12月、60月35、floor=5、half-life=45保持不变",
+      "九个Mac mini实测点MAE由v4.5曲线7.75pp降至6.24pp;M1 69月外推理论31.12%不变,避免用中期样本污染长期底价",
+      "曲线年中更新例外:用户明确确认长期多次观察并授权更新;审计与OpenSpec记录位于scripts/debug/analysis-facts.md及openspec/changes/recalibrate-mac-mini-residual-curve"
     ],
     "v4.7_变更摘要": [
       "iPhone 18系列官宣价回填(2026-09-09发布会,9-12预购/9-18发售):实时市场价快照iPhone_Pro/iPhone_ProMax新增18代新品条目(18 Pro 256G 9999/18 Pro Max 256G 10999),旧机17 Pro/ProMax停产标注与残值分母切换至18代官方价;国补/二手字段记'无法搜索'(9-18才发售),发售后回填",
@@ -389,10 +396,10 @@
       "3": 90,
       "6": 82,
       "12": 80,
-      "18": 72,
-      "24": 65,
-      "36": 52,
-      "48": 46,
+      "18": 68,
+      "24": 55,
+      "36": 47,
+      "48": 41,
       "60": 35,
       "_floor": 5,
       "_half_life_months": 45,
@@ -415,6 +422,25 @@
         "_修订日期": "2026-08-10",
         "_样本量": "8台(M1×5, M2×3, 含用户提供3台)",
         "_修订后MAE": "8.7pp(用当前新品价做分母,SKILL.md标准),±15pp内8/8(100%)"
+      },
+      "_曲线修订_v4.8": {
+        "_说明": "2026-09-24基于用户多次长期观察确认的稳定价格区间校准中期曲线。M4 16G/256G在23月残值率55.01%;M2四配置在44月残值率32.86%-50.01%、中位42.86%。仅调整18-48月节点,0-12月与60月后外推保持不变",
+        "_修订前值_v4.5": {
+          "18": 72,
+          "24": 65,
+          "36": 52,
+          "48": 46
+        },
+        "_修订后值": {
+          "18": 68,
+          "24": 55,
+          "36": 47,
+          "48": 41
+        },
+        "_修订日期": "2026-09-24",
+        "_耐久性依据": "用户确认上述五个同配置价格经较长时间多次观察稳定;公开同配置叫价仍处同一价格带;跨市场发售后控制组无阶跃波动",
+        "_拟合改善": "九个现有Mac mini实测点MAE 7.75pp→6.24pp;23月M4偏差-11.16pp→-2.16pp;44月理论值48%→43%",
+        "_边界保护": "0-12月节点不变;60月=35%、floor=5、half_life_months=45不变,故69月理论值仍为31.12%"
       }
     },
     "Mac_Studio": {
@@ -1648,7 +1674,7 @@
       "多抓鱼(duozhuayu.com)": "⚠️ 需微信扫码登录,browser-use可能可行但未实测",
       "搜索能力总结": "实测:WebFetch仅能直接搜索苹果官网。闲鱼/爱回收可通过browser-use subagent + 用户协助登录搜索(中置信度,挂单价非实付)。具体搜索策略见本快照'_browser_use_最佳实践'字段"
     },
-    "snapshot_date": "2026-09-08",
+    "snapshot_date": "2026-09-24",
     "_快照更新说明_v4.2": "2026-08-26刷新:iPhone三品类重点条目(16系二手/17系官方价+涨价预警)、Mac_mini M4二手参考、MacBook_Pro新增M4Pro二手条目;其余条目沿用2026-08-07/08-13采集值。iPhone 17系列官方价经apple.com.cn复核(17 256G=5999/17 Pro 256G=8999/17 ProMax 256G=9999)未变",
     "snapshot_sources": [
       "apple.com.cn(WebFetch直接搜索,高置信度)",
@@ -1738,6 +1764,7 @@
     "_待搜索品类清单": [],
     "Mac_mini": {
       "_说明": "Mac mini 全系,基础芯片款。残值分母用 Mac mini M6 基础款官方售价6999元(v4.0起;原M4口径5999元作历史分母保留于M4条目)",
+      "_耐久性复核_v4.8": "2026-09-24用户确认M4/M2五个同配置价格经较长时间多次观察稳定在2026-09-08实采区间:M4 16G/256G=3850;M2 16G/256G=3200;M2 16G/512G=3500;M2 8G/256G=2300;M2 8G/512G=2800。价格字段保留原实采日期,本字段记录多时点稳定性复核;据此校准Mac mini 18-48月残值曲线",
       "M6_16G_256G_新品": {
         "官方价": 6999,
         "官方价_来源": "https://www.apple.com.cn/mac-mini/specs/ 与 https://www.apple.com.cn/shop/buy-mac/mac-mini (WebFetch直接搜索,2026-08-25官宣日)",

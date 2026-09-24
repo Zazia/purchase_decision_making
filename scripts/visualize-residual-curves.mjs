@@ -17,6 +17,22 @@ const GROUPS = [
   { key: 'iPad', title: 'iPad', cats: ['iPad_Pro', 'iPad_Air', 'iPad_标准', 'iPad_mini'] }
 ];
 
+// Mac mini v4.5 基线：用于在报告中直接展示校准前后差异。
+const MAC_MINI_V45 = { 0: 100, 3: 90, 6: 82, 12: 80, 18: 72, 24: 65, 36: 52, 48: 46, 60: 35 };
+
+function rateFromKnots(curve, t, floor = 5, halfLife = 45) {
+  const knots = Object.keys(curve).filter(key => /^\d+$/.test(key)).map(Number).sort((a, b) => a - b);
+  const last = knots[knots.length - 1];
+  if (t > last) return floor + (curve[last] - floor) * Math.pow(0.5, (t - last) / halfLife);
+  for (let i = 0; i < knots.length - 1; i++) {
+    if (t >= knots[i] && t <= knots[i + 1]) {
+      const [t0, t1] = [knots[i], knots[i + 1]];
+      return curve[t0] + (curve[t1] - curve[t0]) * (t - t0) / (t1 - t0);
+    }
+  }
+  return curve[last];
+}
+
 const CURVE_META = {
   Mac_mini: { color: '#007AFF', label: 'Mac mini' },
   iPhone_proMax: { color: '#5856D6', label: 'iPhone Pro Max' },
@@ -137,11 +153,24 @@ const devStats = groups.map(g => {
     min: Math.min(...devs), max: Math.max(...devs) };
 });
 
+const macMiniDots = groups.find(g => g.key === 'Mac_mini').dots.filter(d => !d.isRef);
+const macMiniV45Mae = macMiniDots.reduce((sum, d) => sum + Math.abs(d.price / d.denom * 100 - rateFromKnots(MAC_MINI_V45, d.age)), 0) / macMiniDots.length;
+const macMiniV48Mae = macMiniDots.reduce((sum, d) => sum + Math.abs(d.price / d.denom * 100 - rateFromKnots(CURVES.Mac_mini, d.age, 5, 45)), 0) / macMiniDots.length;
+const legacyMacMiniPoints = [];
+for (let t = 0; t <= 84; t += 3) legacyMacMiniPoints.push([t, Math.round(rateFromKnots(MAC_MINI_V45, t) * 10) / 10]);
+const macMiniCalibration = {
+  v45Mae: Math.round(macMiniV45Mae * 100) / 100,
+  v48Mae: Math.round(macMiniV48Mae * 100) / 100,
+  legacyPoints: legacyMacMiniPoints,
+  month23: { v45: 66.17, v48: 57.17, observed: 55.01 },
+  month44: { v45: 48, v48: 43, observedMedian: 42.86 }
+};
+
 const payload = {
   meta: { snapshot_date: SNAP, version: flat.meta.version, dots: allDots.length,
     refDots: allDots.filter(d => d.isRef).length,
     ageMin: Math.min(...allDots.map(d => d.age)), ageMax: Math.max(...allDots.map(d => d.age)) },
-  groups, devStats,
+  groups, devStats, macMiniCalibration,
   dots: allDots
 };
 
@@ -154,7 +183,6 @@ const TEMPLATE = String.raw`<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>苹果产品残值曲线 · __VERSION__ 快照 __SNAP__</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 :root{
   --bg:#F5F5F7; --surface:#FFFFFF; --rule:#D2D2D8; --muted:#86868F; --fg:#1D1D1F;
@@ -214,7 +242,7 @@ footer{margin-top:48px;color:var(--muted);font-size:12px;border-top:1px solid va
 <body>
 <nav class="top-nav">
   <div class="brand">苹果产品残值曲线</div>
-  <div class="meta">constants v__VERSION__ · 快照 __SNAP__ · 生成 2026-09-08</div>
+  <div class="meta">constants v__VERSION__ · 快照 __SNAP__ · 生成 __GENERATED__</div>
 </nav>
 <main>
 
@@ -223,22 +251,22 @@ footer{margin-top:48px;color:var(--muted);font-size:12px;border-top:1px solid va
   <p class="sec-sub">五大品类（Mac mini / iPhone / MacBook Air / MacBook Pro / iPad）共 10 条子品类残值曲线，叠加 __NDOT__ 个具体机型的实测点位（快照闲鱼价 ÷ 当前在售新品官价，机龄按各机型发布月计算）。</p>
   <div class="grid-kpi">
     <div class="kpi"><div class="k-label">理论曲线</div><div class="k-value" style="color:var(--accent)">10</div><div class="k-note">子品类 · 0-84 月</div></div>
-    <div class="kpi"><div class="k-label">实测点位</div><div class="k-value" style="color:var(--accent)">__NDOT__</div><div class="k-note">实价 65 / 参考价 4</div></div>
+    <div class="kpi"><div class="k-label">实测点位</div><div class="k-value" style="color:var(--accent)">__NDOT__</div><div class="k-note">实价 __NREAL__ / 参考价 __NREF__</div></div>
     <div class="kpi"><div class="k-label">机龄跨度</div><div class="k-value">__AGEMIN__-__AGEMAX__</div><div class="k-note">月 · 覆盖曲线实测段与外推段</div></div>
-    <div class="kpi"><div class="k-label">平均偏差</div><div class="k-value" style="color:var(--error)">+9.7pp</div><div class="k-note">实测 − 理论（5 品类均值）</div></div>
+    <div class="kpi"><div class="k-label">平均偏差</div><div class="k-value" style="color:var(--error)">__AVGDEV__pp</div><div class="k-note">实测 − 理论（5 品类组均值）</div></div>
     <div class="kpi"><div class="k-label">|偏差|>15pp</div><div class="k-value" style="color:var(--warning)">__NDEV__</div><div class="k-note">大容量 / 涨价环境溢价点</div></div>
   </div>
   <div class="findings">
-    <div class="finding"><div><span class="badge badge-warn">发现</span></div><div><div class="f-title">实测系统性高于理论曲线（5 品类均值 +6 ～ +12.6pp）</div><div class="f-detail">两重原因：①2026 存储超级周期 + 二手 iPhone 升值潮（事件记录较年初涨 10-20%）；②口径差异——曲线为相对发布价，实测分母为当前在售新品官价（2026-06 全线调价后普遍高于原发布价）。叠加效果使实测点整体上浮。</div></div></div>
-    <div class="finding"><div><span class="badge badge-error">异常</span></div><div><div class="f-title">大容量机型偏差最大：iPhone 14 512G 达 +52.6pp</div><div class="f-detail">偏差前五均为 512G/1T 机型（iPhone 14 512G +52.6、iPad Air M2 256G +34.1、iPhone 16 Pro 512G +28.5、MacBook Pro M3Pro 36G +27.6、iPhone 13 512G +27.3pp）。存储超级周期对大容量二手的溢价远超曲线假设，512G 档实测残值 50-83%，曲线理论仅 22-45%。</div></div></div>
-    <div class="finding"><div><span class="badge badge-info">提示</span></div><div><div class="f-title">60 月外推区实测普遍超曲线：floor 偏保守</div><div class="f-detail">机龄 60-70 月的 5 个实测点（iPhone 12 两档、MacBook Air M1 两档、Mac mini M1）全部高于外推值 15-22pp，外推渐近线（floor 3-5%）基于 Intel/老款锚点，未反映当前涨价环境下的老设备底价抬升。</div></div></div>
-    <div class="finding"><div><span class="badge badge-info">背景</span></div><div><div class="f-title">Mac mini 曲线已做过中国市场修订（v3.9.1）</div><div class="f-detail">原 SellMacBook 海外曲线系统性低估中国市场 +22.3pp，2026-08-10 基于 8 台实测修订；本次 8 个 Mac mini 实测点与修订后曲线偏差收敛到 [-10.3, +21.9]pp，但 M1/M2 大容量款仍偏高——涨价潮影响可能需要类似修订。iPhone 曲线三档形态接近，Pro Max 全周期略优 3-5pp。</div></div></div>
+    <div class="finding"><div><span class="badge badge-warn">校准</span></div><div><div class="f-title">Mac mini 中期曲线已对齐耐久价格中枢，MAE __MAC_MAE_OLD__pp → __MAC_MAE_NEW__pp</div><div class="f-detail">用户于 2026-09-24 确认五个 M4/M2 同配置价格经较长时间多次观察稳定。v4.8 将 18/24/36/48 月节点由 72/65/52/46 调整为 68/55/47/41；23 月 M4 理论值 66.17%→57.17%（实测 55.01%），44 月理论值 48%→43%（M2 四配置中位 42.86%）。</div></div></div>
+    <div class="finding"><div><span class="badge badge-error">异常</span></div><div><div class="f-title">大容量机型偏差最大：iPhone 14 512G 达 +52.6pp</div><div class="f-detail">偏差前五（iPhone 14 512G +52.6、iPad Air M2 256G +34.1、iPhone 16 Pro 512G +28.5、MacBook Pro M3Pro 36G +27.6、iPhone 13 512G +27.3pp）中四席为大容量机型。存储超级周期对大容量二手的溢价远超曲线假设，512G 档实测残值 50-83%，曲线理论仅 22-45%。</div></div></div>
+    <div class="finding"><div><span class="badge badge-info">提示</span></div><div><div class="f-title">60 月外推区实测全部超曲线：floor 偏保守</div><div class="f-detail">机龄 60-70 月的 8 个实测点全部为正偏差（+1.0 ～ +18.9pp）：Mac mini M1 四档（v4.5 半衰期校准 24→45 月后，该段理论值已由约 27.7% 上修至 31.1%，缺口收窄但大内存档仍 +18.9）、iPhone 12 两档（+1.4 / +17.7）、MacBook Air M1 两档（+15.4 / +17.0）。外推渐近线（floor 3-5%）基于 Intel/老款锚点，未反映当前涨价环境下的老设备底价抬升。</div></div></div>
+    <div class="finding"><div><span class="badge badge-info">背景</span></div><div><div class="f-title">Mac mini 曲线完成三轮校准，长期段保持稳定</div><div class="f-detail">v3.9.1 将海外曲线校准为中国市场口径；v4.5 将 60 月后半衰期校准为 45 月；v4.8 只下调 18–48 月中期节点。0–12 月与 60 月节点保持不变，因此 M1 69 月理论值仍为 31.12%，不会用本次 M4/M2 中期样本污染长期外推。</div></div></div>
   </div>
 </section>
 
 <section>
   <h2 class="sec-title">二 · 全品类曲线对比</h2>
-  <p class="sec-sub">0-60 月为曲线实测段（实线），60-84 月为指数衰减外推（虚线，R(t)=floor+(R(60)-floor)×0.5^((t-60)/24)）。</p>
+  <p class="sec-sub">0-60 月为曲线实测段（实线），60-84 月为指数衰减外推（虚线，R(t)=floor+(R(60)-floor)×0.5^((t-60)/h)，h 为品类专属半衰期——v4.5 起由统一 24 月按双指数拟合校准为 17～45 月，如 Mac mini 45 / iPhone ProMax 40 / MacBook Air 22）。</p>
   <div class="card"><div id="chart-overview" style="width:100%;height:500px"></div>
     <div class="legend-note"><span>实线 = 曲线实测段</span><span>虚线 = 60 月后外推</span><span>点击图例可切换品类</span></div>
   </div>
@@ -332,6 +360,11 @@ D.groups.forEach(function(g, gi){
 
   function optionFor(selIdx){
     var series = [];
+    if (g.key === 'Mac_mini') {
+      series.push({ name:'Mac mini v4.5 基线', type:'line', data:D.macMiniCalibration.legacyPoints,
+        showSymbol:false, smooth:0.15, lineStyle:{ color:'#86868F', width:1.5, type:'dashed' },
+        itemStyle:{ color:'#86868F' }, z:1 });
+    }
     g.curves.forEach(function(c, ci){
       var s = { name:c.label + ' 曲线', type:'line', data:c.solid, showSymbol:false, smooth:0.15,
         lineStyle:{ color:c.color, width:2.5 }, itemStyle:{ color:c.color }, z:2 };
@@ -394,7 +427,7 @@ D.groups.forEach(function(g, gi){
           return p.seriesName + ' · ' + p.value[0] + '月 = ' + p.value[1] + '%';
         } },
       legend:{ top:0, textStyle:{color:'#48484D',fontSize:11}, itemWidth:16, itemHeight:8,
-        data: g.curves.map(function(c){ return c.label + ' 曲线'; }) },
+        data: (g.key === 'Mac_mini' ? ['Mac mini v4.5 基线'] : []).concat(g.curves.map(function(c){ return c.label + ' 曲线'; })) },
       grid:{ left:44, right:60, top:40, bottom:30 },
       xAxis:{ type:'value', name:'机龄(月)', min:0, max:84, ...AXIS },
       yAxis:{ type:'value', name:'残值率 %', min:0, max:100, ...AXIS },
@@ -511,16 +544,18 @@ const panelHtml = groups.map((g, gi) => {
   const legends = g.curves.map(c =>
     `<span><span class="sw" style="background:${c.color}"></span>${c.label} 曲线</span><span><span class="dt" style="background:${c.color}"></span>${c.label} 实测</span>`).join('');
   const titleN = ['三', '四', '五', '六', '七'][gi];
+  const calibrationLegend = g.key === 'Mac_mini' ? '<span><span class="sw" style="background:#86868F"></span>v4.5 基线（灰色虚线）</span>' : '';
+  const calibrationNote = g.key === 'Mac_mini' ? '灰色虚线为 v4.5，蓝色实线为 v4.8，可直接比较中期下修。' : '';
   return `<section id="panel-${gi}">
   <h2 class="sec-title">${titleN} · ${g.title}</h2>
-  <p class="sec-sub">${g.curves.length} 条曲线 × ${g.dots.length} 个实测点。选择具体产品后显示其未来残值轨迹（以当前价为锚，按曲线相对衰减）。</p>
+  <p class="sec-sub">${g.curves.length} 条曲线 × ${g.dots.length} 个实测点。${calibrationNote}选择具体产品后显示其未来残值轨迹（以当前价为锚，按曲线相对衰减）。</p>
   <div class="card">
     <div class="panel-head">
       <div class="panel-title">${g.title} 残值曲线</div>
       <div class="picker">产品轨迹 <select data-g="${gi}"></select></div>
     </div>
     <div class="panel-chart" style="width:100%;height:420px"></div>
-    <div class="legend-note">${legends}<span>空心虚框 = 参考价口径</span><span>红描边 = |偏差|>15pp</span></div>
+    <div class="legend-note">${calibrationLegend}${legends}<span>空心虚框 = 参考价口径</span><span>红描边 = |偏差|>15pp</span></div>
   </div>
 </section>`;
 }).join('\n');
@@ -528,14 +563,20 @@ const panelHtml = groups.map((g, gi) => {
 let html = TEMPLATE
   .replace(/__VERSION__/g, () => payload.meta.version)
   .replace(/__SNAP__/g, () => payload.meta.snapshot_date)
+  .replace(/__GENERATED__/g, () => '2026-09-24')
   .replace(/__NDOT__/g, () => payload.meta.dots)
+  .replace(/__NREAL__/g, () => payload.meta.dots - payload.meta.refDots)
+  .replace(/__NREF__/g, () => payload.meta.refDots)
+  .replace(/__AVGDEV__/g, () => { const m = devStats.reduce((a, b) => a + b.mean, 0) / devStats.length; return (m >= 0 ? '+' : '') + m.toFixed(1); })
   .replace(/__AGEMIN__/g, () => payload.meta.ageMin)
   .replace(/__AGEMAX__/g, () => payload.meta.ageMax)
   .replace(/__NDEV__/g, () => allDots.filter(d => Math.abs(d.dev) > 15 && !d.isRef).length)
+  .replace(/__MAC_MAE_OLD__/g, () => payload.macMiniCalibration.v45Mae.toFixed(2))
+  .replace(/__MAC_MAE_NEW__/g, () => payload.macMiniCalibration.v48Mae.toFixed(2))
   .replace('__PANELS__', () => panelHtml)
   .replace('__PAYLOAD__', () => JSON.stringify(payload).replace(/</g, '\\u003c'));
 
-const outPath = path.join(ROOT, '2026-09-08-产品残值曲线可视化.html');
+const outPath = path.join(ROOT, `${SNAP}-产品残值曲线可视化.html`);
 fs.writeFileSync(outPath, html, 'utf8');
 
 console.log('=== 数据汇总 ===');
@@ -543,4 +584,5 @@ console.log('实测点:', allDots.length, '（实价', allDots.filter(d => !d.is
 console.log('机龄范围:', payload.meta.ageMin, '-', payload.meta.ageMax, '月');
 groups.forEach(g => console.log(g.title + ': 曲线' + g.curves.length + '条, 实测点' + g.dots.length + '个'));
 console.log('|dev|>15pp:', allDots.filter(d => Math.abs(d.dev) > 15 && !d.isRef).length);
+console.log('Mac mini MAE: v4.5', payload.macMiniCalibration.v45Mae, '→ v4.8', payload.macMiniCalibration.v48Mae, 'pp');
 console.log('报告:', outPath);
