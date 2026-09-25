@@ -63,4 +63,10 @@
 - [x] 9.2 更新技能 CHANGELOG，并同步 OpenSpec 主规格：新增 `residual-price-observation-schema`，更新 `residual-curve-calibration` 与 `constants-maintenance-tooling`
 - [x] 9.3 按 AGENTS.md 约定把 SKILL、CHANGELOG、reference 与脚本单向同步至公开 `apple-value-analysis` 仓库，验证 diff 不包含 constants 或本地报告
 - [x] 9.4 运行所有相关测试、constants lint、全品类审计、报告校验、本地快照同步、云端发布 dry-run/正式发布与云端哈希核验
-- [ ] 9.5 提交主仓库变更并推送 GitHub/Gitee 主分支；提交并双远程推送公开技能仓库，记录两个仓库的提交与发布结果
+- [x] 9.5 提交主仓库变更并推送 GitHub/Gitee 主分支；提交并双远程推送公开技能仓库，记录两个仓库的提交与发布结果
+
+发布记录（2026-09-25）：
+
+- 主仓库：`237a312`，已推送 `origin/main` 与 `gitee/main`
+- 公开技能仓库：`d7fca28`，已推送 `origin/master` 与 `gitee/master`
+- 云端：`constants/latest` version=`2026-09-25`，sha256=`96e8e47eaab28bb34e284ce9493434fbc02bf047e2bbf1171fc7896441d077c4`，正式发布与回读核验通过
