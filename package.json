@@ -12,6 +12,9 @@
     "sync:snapshot": "node scripts/sync-snapshot.mjs",
     "publish:constants": "node scripts/publish-constants.mjs",
     "constants:lint": "node scripts/lint-constants.mjs",
+    "constants:audit-curves": "node scripts/audit-curve-release.mjs",
+    "constants:audit-residuals": "node scripts/audit-residual-curves.mjs",
+    "constants:fit-residual": "node scripts/fit-residual-curve.mjs",
     "constants:release": "node scripts/release-constants.mjs",
     "intake:report": "node scripts/intake/run-pipeline.mjs"
   },

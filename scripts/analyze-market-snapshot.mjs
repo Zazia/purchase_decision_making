@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { normalizeObservationData } from './lib/residual-observations.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -116,18 +117,25 @@ for (const cat of CATEGORIES) {
   }
 }
 
-// 残值分母
-const catFirstOfficial = {};
-for (const cat of CATEGORIES) {
-  const first = records.find(r => r.category === cat && r.isNew && typeof r.channels['官方价'] === 'number');
-  if (first) catFirstOfficial[cat] = first.channels['官方价'];
-}
+// 曲线观测只能引用结构化的同地区同配置首发官方价；备注与当前新品价仅保留人工溯源。
+const launchCatalog = data['首发价目录']?.records ?? {};
+const observations = data['二手价格观测']?.records ?? [];
+const normalizedById = new Map(normalizeObservationData(data).rows.map(row => [row.observation_id, row]));
+const observationByModel = new Map(observations.map(observation => [`${observation.category}/${observation.model_key}`, observation]));
 for (const r of records) {
-  if (typeof r.channels['官方价'] === 'number') { r.分母 = r.channels['官方价']; r.分母来源 = '本条官方价'; continue; }
-  const m1 = r.说明.match(/(?:残值分母|分母)[^。]*?(\d{2,6})\s*元/);
-  if (m1) { r.分母 = parseFloat(m1[1]); r.分母来源 = '说明明示'; continue; }
-  if (r.说明.includes('当前在售同品类新品官方价') && catFirstOfficial[r.category]) { r.分母 = catFirstOfficial[r.category]; r.分母来源 = '同品类在售新品'; continue; }
-  r.分母来源 = '未确定';
+  if (!r.isUsed) { r.分母来源 = '不适用'; continue; }
+  const modelKey = r.item.replace(/_二手$/, '');
+  const observation = observationByModel.get(`${r.category}/${modelKey}`);
+  const normalized = observation ? normalizedById.get(observation.id) : null;
+  const launch = observation?.launch_price_id ? launchCatalog[observation.launch_price_id] : null;
+  r.观测ID = observation?.id ?? null;
+  r.分母 = launch?.launch_msrp ?? null;
+  r.分母来源 = launch ? '结构化同配置首发价' : '无可核验首发价';
+  r.曲线观测保值率 = normalized?.retention_observed == null ? null : Math.round(normalized.retention_observed * 1000) / 10;
+  r.替代价值率 = normalized?.replacement_value_ratio == null ? null : Math.round(normalized.replacement_value_ratio * 1000) / 10;
+  r.个体投资保值率 = normalized?.owner_value_ratio == null ? null : Math.round(normalized.owner_value_ratio * 1000) / 10;
+  r.校准资格 = normalized?.calibration_eligible ?? false;
+  r.排除原因 = normalized?.exclusion_reasons ?? [];
 }
 
 const SEV = { error: 0, warn: 0, info: 0 };
@@ -179,9 +187,9 @@ for (const r of records) {
     addIssue(r.category, r.item, 'SUBSIDY_NOT_CHEAPER', 'warn', `国补到手 ${r.channels['国补到手']} ≥ 京东自营 ${r.channels['京东自营']}`);
   if (hasNum(xy) && r.闲鱼样本量 === 0 && !r.样本量) addIssue(r.category, r.item, 'PRICE_NO_SAMPLE', 'warn', '有闲鱼价但样本量为0');
 
-  if (hasNum(xy) && hasNum(r.分母)) {
-    const rate = xy / r.分母;
-    r.隐含保值率 = Math.round(rate * 1000) / 10;
+  if (hasNum(r.曲线观测保值率)) {
+    const rate = r.曲线观测保值率 / 100;
+    r.隐含保值率 = r.曲线观测保值率;
     if (rate > 1.0) addIssue(r.category, r.item, 'RETENTION_OVER_100', 'error', `闲鱼价/分母 = ${(rate * 100).toFixed(0)}% > 100%`);
     else if (rate > 0.80) addIssue(r.category, r.item, 'RETENTION_HIGH_80', 'info', `隐含保值率 ${(rate * 100).toFixed(0)}% 处于异常高位（2026涨价环境+大容量溢价可部分解释，建议复核）`);
     else if (rate < 0.15) addIssue(r.category, r.item, 'RETENTION_LOW_15', 'warn', `隐含保值率 ${(rate * 100).toFixed(0)}% < 15%，疑似偏低`);
@@ -290,7 +298,9 @@ const rows = records.map(r => {
   const maxSev = rl.reduce((a, i) => sevRank[i.severity] > sevRank[a] ? i.severity : a, 'ok');
   return {
     cat: r.category, item: r.item, type: r.isNew ? '新品' : (r.isUsed ? '二手' : '其他'),
-    ch, ret: r.隐含保值率 || null, denom: r.分母, dsrc: r.分母来源,
+    ch, ret: r.曲线观测保值率 || null, replacement: r.替代价值率 || null,
+    owner: r.个体投资保值率 || null, denom: r.分母, dsrc: r.分母来源,
+    observationId: r.观测ID, calibrationEligible: r.校准资格, exclusionReasons: r.排除原因,
     conf: r.置信度, confLevel: r.confLevel, date: r.搜索日期 || '—', src: r.sourceCount,
     sev: maxSev, issueN: rl.length, note: r.备注, refClues: r.refClues
   };
@@ -462,8 +472,8 @@ footer{margin-top:48px;color:var(--muted);font-size:12px;border-top:1px solid va
 </section>
 
 <section id="s4">
-  <h2 class="sec-title">四 · 隐含保值率全景（闲鱼中位价 ÷ 残值分母）</h2>
-  <p class="sec-sub">__NRET__ 条可计算的二手条目，按保值率降序。颜色 = 置信度。虚线 = 2026-07 事件记录的「Pro系列残值率75%」参考位。</p>
+  <h2 class="sec-title">四 · 曲线观测保值率（观测价 ÷ 同配置首发官方价）</h2>
+  <p class="sec-sub">__NRET__ 条具备结构化首发价引用的二手观测，按比率降序。颜色 = 置信度。替代价值率与个体投资保值率不进入本图。</p>
   <div class="card"><div class="chart-box" id="chart-retention" style="height:560px"></div></div>
 </section>
 
@@ -518,7 +528,7 @@ footer{margin-top:48px;color:var(--muted);font-size:12px;border-top:1px solid va
 
 <footer>
   数据源：.agents/skills/apple-value-analysis/constants.json（v__VERSION__）·「实时市场价快照」snapshot_date=__SNAP__ · 共 __NREC__ 条 / __NCAT__ 品类。<br>
-  审查规则：完整性（新品无渠道价 / 二手无渠道价 / 无来源URL / 无日期 / 无置信度 / 仅参考价）与合理性（中位价 vs 区间、二手 vs 官方、京东 vs 官方偏差>15%、国补 vs 自营、保值率>80%或<15%、成色区间断层>15%、日期时效与倒挂）。保值率 = 闲鱼中位价 ÷ 残值分母（分母优先取本条官方价，其次说明明示，再次同品类在售新品官价）。生成脚本：scripts/analyze-market-snapshot.mjs。
+  审查规则：完整性（新品无渠道价 / 二手无渠道价 / 无来源URL / 无日期 / 无置信度 / 仅参考价）与合理性（中位价 vs 区间、二手 vs 官方、京东 vs 官方偏差>15%、国补 vs 自营、曲线观测保值率>80%或<15%、成色区间断层>15%、日期时效与倒挂）。曲线观测保值率只使用结构化的同地区同配置首发官方价；当前新品价、后续调价、实际购入价和说明文本不得作为曲线分母。生成脚本：scripts/analyze-market-snapshot.mjs。
 </footer>
 </main>
 
@@ -641,7 +651,7 @@ el('findings').innerHTML = fHtml;
   mkChart('chart-retention', {
     tooltip:{ trigger:'item', confine:true, formatter:function(p){
       var d = p.data;
-      return '<b>' + d.cat + ' / ' + d.item + '</b><br>隐含保值率: ' + d.value + '%<br>置信度: ' + d.conf + '<br>分母: ¥' + fmt(d.denom) + '（' + d.dsrc + '）';
+      return '<b>' + d.cat + ' / ' + d.item + '</b><br>曲线观测保值率: ' + d.value + '%<br>置信度: ' + d.conf + '<br>首发官方价: ¥' + fmt(d.denom) + '（' + d.dsrc + '）';
     }},
     grid:{ left:10, right:70, top:16, bottom:16, containLabel:true },
     xAxis:{ type:'value', max:100, name:'%', ...AXIS },

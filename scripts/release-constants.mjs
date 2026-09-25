@@ -2,7 +2,7 @@
 /**
  * release-constants.mjs — constants 一键发布流水线 (data-maintenance-automation)
  *
- * 编排: lint → publish → verify
+ * 编排: lint → curve-audit → publish → verify
  *   - lint:    结构校验 (无参数; lint 的位置参数是文件路径, 故不透传旗标)
  *   - publish: 云端发布 (透传 --dry-run / --env)
  *   - verify:  云端回读校验 (透传 --dry-run / --env; dry-run 下差异不阻断)
@@ -30,6 +30,7 @@ const passThrough = [
 
 const stages = [
   { name: 'lint', script: 'lint-constants.mjs', pass: [] },
+  { name: 'curve-audit', script: 'audit-curve-release.mjs', pass: [] },
   { name: 'publish', script: 'publish-constants.mjs', pass: passThrough },
   { name: 'verify', script: 'verify-cloud-constants.mjs', pass: passThrough },
 ];

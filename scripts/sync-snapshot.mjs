@@ -22,6 +22,7 @@
  * 用法: node scripts/sync-snapshot.mjs
  */
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -33,6 +34,14 @@ const TARGET_DIR = join(ROOT, 'miniapp/wx/snapshot');
 const TARGET_JSON = join(TARGET_DIR, 'constants.json');
 const TARGET_JS = join(TARGET_DIR, 'constants.js');
 const MACRO_SOURCE = join(TARGET_DIR, 'macro-context.json');
+
+// 发布门禁必须发生在任何快照写入前；此时 TARGET_JSON 仍是上一已发布基线。
+if (existsSync(TARGET_JSON)) {
+  const gate = spawnSync(process.execPath, [join(__dirname, 'audit-curve-release.mjs'), '--source', SOURCE, '--baseline', TARGET_JSON], { stdio: 'inherit' });
+  if (gate.error || gate.status !== 0) {
+    fail('curve-release-gate', gate.error?.message ?? `exit ${gate.status}`);
+  }
+}
 
 function sha256(content) {
   return createHash('sha256').update(content).digest('hex');

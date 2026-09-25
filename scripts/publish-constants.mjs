@@ -27,6 +27,7 @@
  * 失败退出非零码并指明失败步骤。
  */
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -52,6 +53,13 @@ const ENV_ID = envFlagIdx !== -1 && args[envFlagIdx + 1] ? args[envFlagIdx + 1] 
 function fail(step, message) {
   console.error(`[publish-constants] FAIL @ ${step}: ${message}`);
   process.exit(1);
+}
+
+// 在 dry-run 或任何网络写入前执行曲线/观测门禁。
+const baselinePath = join(ROOT, 'miniapp/wx/snapshot/constants.json');
+if (existsSync(baselinePath)) {
+  const gate = spawnSync(process.execPath, [join(__dirname, 'audit-curve-release.mjs'), '--source', SOURCE, '--baseline', baselinePath], { stdio: 'inherit' });
+  if (gate.error || gate.status !== 0) fail('curve-release-gate', gate.error?.message ?? `exit ${gate.status}`);
 }
 
 // ---- Step 1: 读取与校验源数据 ----

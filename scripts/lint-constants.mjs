@@ -21,6 +21,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import { validateObservationSchema } from './lib/residual-observations.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -220,6 +221,13 @@ for (const [cat, entries] of Object.entries(snapshot)) {
   }
 }
 
+// L5: 首发价目录、二手观测与 manifest 引用完整性
+const observationSchema = validateObservationSchema(constants);
+for (const message of observationSchema.violations) {
+  fail('residual-observation-schema', '首发价目录/二手价格观测/保值率校准清单', message,
+    '可校准观测必须精确引用同地区同配置首发官方价，且不得引用当前新品价、后续调价、实付价或说明文本');
+}
+
 // ---- 汇总 ----
 if (violations.length > 0) {
   console.log(`[lint-constants] ✗ 数值字段检查: ${violations.length} 项违规`);
@@ -230,4 +238,5 @@ if (violations.length > 0) {
   process.exit(1);
 }
 console.log(`[lint-constants] ✓ 数值字段检查: 冲击/涨幅表/传导因子/曲线/跑分/维修成本/权重 通过, 快照价格字段 ${snapshotChecked} 处通过`);
+console.log(`[lint-constants] ✓ 残值观测引用: ${observationSchema.rows.length} 条观测, ${observationSchema.rows.filter((row) => row.calibration_eligible).length} 条可校准`);
 console.log('[lint-constants] PASS: 全部检查通过');
