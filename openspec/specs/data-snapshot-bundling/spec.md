@@ -103,7 +103,7 @@
 
 ### Requirement: 云端 constants 文档契约
 
-云端数据库 SHALL 使用集合 `constants`、文档 ID `latest` 承载分发数据，字段 MUST 包含：`_ready`（boolean，发布完成标记）、`version`（string，等于 payload 的 `metadata.last_updated`）、`payload`（string，源 constants.json 全文）、`macroContext`（object 或 null，对应 `miniapp/wx/snapshot/macro-context.json`）、`hash`（string，payload 的 sha256，供维护者核对）、`publishedAt`（string，发布时间 ISO 格式）。客户端 MUST 仅在文档 `_ready=true` 且 `payload` 可解析、可校验时采用。集合权限 MUST 配置为「所有用户可读、仅管理端可写」。发布操作 MUST 以单次文档更新原子写入全部字段（或先建 `_ready=false` 骨架再最终置 `_ready=true`），保证客户端不会读到半更新数据。
+云端数据库 SHALL 使用集合 `constants`、文档 ID `latest` 承载分发数据，字段 MUST 包含：`_ready`（boolean，发布完成标记）、`version`（string，等于 payload 的 `metadata.last_updated`）、`payload`（string，源 constants.json 的紧凑序列化全文——JSON 解析后重新序列化、去除缩进空白，与源文件语义等价）、`macroContext`（object 或 null，对应 `miniapp/wx/snapshot/macro-context.json`）、`hash`（string，payload 的 sha256，供维护者核对）、`publishedAt`（string，发布时间 ISO 格式）。客户端 MUST 仅在文档 `_ready=true` 且 `payload` 可解析、可校验时采用。集合权限 MUST 配置为「所有用户可读、仅管理端可写」。发布操作 MUST 以单次文档更新原子写入全部字段（或先建 `_ready=false` 骨架再最终置 `_ready=true`），保证客户端不会读到半更新数据。
 
 #### Scenario: 文档原子发布
 
@@ -117,7 +117,7 @@
 
 ### Requirement: constants 云端发布脚本
 
-仓库 SHALL 提供发布脚本 `scripts/publish-constants.mjs`，将源 `.agents/skills/apple-value-analysis/constants.json` 与 `miniapp/wx/snapshot/macro-context.json` 发布为云端 `constants.latest` 文档。脚本 MUST：从 `miniapp/wx/project.config.json` 读取 appid；从环境变量 `WX_SECRET`（或 gitignore 的本地凭证文件）读取 AppSecret，凭证 MUST NOT 入库；通过 stable_token 接口获取 access_token 后调用云开发 HTTP API（`tcb/databaseupdate`，文档不存在时 `tcb/databaseadd`）；发布前校验 `metadata.last_updated` 非空、payload ≤ 450KB（云数据库单文档 512KB 上限的安全余量）；支持 `--dry-run` 仅校验与打印摘要不联网。脚本失败 MUST 退出非零码并指明失败步骤。
+仓库 SHALL 提供发布脚本 `scripts/publish-constants.mjs`，将源 `.agents/skills/apple-value-analysis/constants.json` 与 `miniapp/wx/snapshot/macro-context.json` 发布为云端 `constants.latest` 文档。脚本 MUST：从 `miniapp/wx/project.config.json` 读取 appid；从环境变量 `WX_SECRET`（或 gitignore 的本地凭证文件）读取 AppSecret，凭证 MUST NOT 入库；通过 stable_token 接口获取 access_token 后调用云开发 HTTP API（`tcb/databaseupdate`，文档不存在时 `tcb/databaseadd`）；发布前校验 `metadata.last_updated` 非空、序列化后 payload ≤ 450KB（云数据库单文档 512KB 上限的安全余量）；支持 `--dry-run` 仅校验与打印摘要不联网。脚本失败 MUST 退出非零码并指明失败步骤。
 
 #### Scenario: 发布成功
 

@@ -3,6 +3,7 @@
  * 用服务端 API 查询云数据库 constants/latest 文档实际内容, 与本地 constants.json 比对。
  * 用法: node scripts/check-cloud-constants.mjs
  */
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -54,5 +55,8 @@ console.log('payload.last_updated:   ', meta.last_updated);
 console.log('payload bytes:         ', (doc.payload || '').length);
 console.log('macroContext:          ', JSON.stringify(doc.macroContext).slice(0, 160));
 
-const localRaw = readFileSync(join(ROOT, '.agents/skills/apple-value-analysis/constants.json'), 'utf-8');
-console.log('本地 constants hash(前12):', localRaw.length === doc.payload?.length ? '(长度一致)' : `(长度不一致: 本地${localRaw.length} vs 云端${doc.payload?.length})`);
+// 云端 payload 为紧凑序列化(2026-10-19 起), 本地同口径比对 hash 与字节数
+const localCompact = JSON.stringify(JSON.parse(readFileSync(join(ROOT, '.agents/skills/apple-value-analysis/constants.json'), 'utf-8')));
+const localHash = createHash('sha256').update(localCompact, 'utf-8').digest('hex');
+console.log('本地紧凑 hash(前12):   ', localHash.slice(0, 12), localHash === doc.hash ? '(与云端一致)' : '(与云端不一致!)');
+console.log('本地紧凑 bytes:        ', localCompact.length, localCompact.length === (doc.payload || '').length ? '(长度一致)' : `(长度不一致: 云端${(doc.payload || '').length})`);

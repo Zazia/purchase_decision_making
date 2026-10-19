@@ -86,5 +86,57 @@
 
 - 云端发布凭证：`WX_SECRET` 环境变量，或 `scripts/.wx-publish-credentials.json`（内容 `{"secret": "..."}`，已 gitignore 不入库）；appid 自动取自 `project.config.json`。
 - **I: 盘为 exFAT，`pnpm run <script>` 会触发依赖状态检查（内部执行 `pnpm install`）并因符号链接不支持而失败**——直接用 `node scripts/<脚本>.mjs` 跑即可，效果等价。
-- 云数据库单文档上限 512KB（脚本按 450KB 安全上限校验），当前 payload 约 275KB，若持续膨胀需考虑拆分到云存储。
+- 云数据库单文档上限 512KB（脚本按 450KB 安全上限校验）。payload 以紧凑序列化上云（2026-10-19 起，源文件美化排版不再原样上传，语义等价、客户端无感），源文件 476KB 压缩后约 392KB；若紧凑 payload 持续膨胀逼近 450KB，需考虑拆分到云存储。
 - **发布后必须验证**：发布成功输出看写入路径——`via update` 为常规更新、`via set (upsert)` / `via add` 为首次创建，均为真成功。**发布后跑 `node scripts/check-cloud-constants.mjs` 复核云端文档实际内容**（version/payload/hash 与本地比对）。
+
+## 7. 技能分发仓库同步（apple-value-analysis）
+
+本仓库 `.agents/skills/apple-value-analysis/` 是技能的**开发工作副本（单一事实源）**；`I:\_Devolopment\1-small-tools\apple-value-analysis` 是**公开发布仓库**（MIT，origin=GitHub + gitee 双远程），从工作副本**单向**抽取快照分发，不回改。
+
+### 两仓库关系
+
+| | 本仓库 `.agents/skills/apple-value-analysis/` | 兄弟仓库 `apple-value-analysis` |
+|---|---|---|
+| 角色 | 开发工作副本（源） | 公开分发快照（下游） |
+| 共有（同步对象） | SKILL.md、CHANGELOG.md、examples.md、`reference/*.md`、`scripts/*.mjs` | 同左 |
+| 特有 | constants.json（数据唯一源）、HTML 报告等本地产物 | README.md、METHOD.md、LICENSE、`docs/` |
+| 常量数据 | 随本仓库 §6 流程维护 | **不含** constants.json；技能运行时经 raw 链接回本仓库拉取（Gitee 主源、GitHub 备份，按 `last_updated` 7 天新鲜度判断，详见兄弟仓库 README「Remote Fetch」节） |
+
+**关键依赖**：分发版技能用户的数据通道是本仓库的 gitee/GitHub raw 链接——因此 **constants 更新后主仓库必须双远程推送（`git push origin main` + `git push gitee main`），这一步同时就是分发渠道的数据更新**。
+
+### 何时同步兄弟仓库
+
+| 本仓库变更 | 是否同步兄弟仓库 |
+|------|------|
+| SKILL.md 方法论版本演进（SOP vX.X，如 v5.2 残值口径） | **必须**（否则分发用户按旧口径算错数） |
+| reference/、examples.md、CHANGELOG.md 修订 | 同步 |
+| scripts/ 工具脚本变更 | 同步 |
+| constants.json 数据更新（§6 流程） | **不需要**（运行时远程拉取）；主仓库双远程推送即可 |
+
+### 标准操作
+
+```powershell
+# 1. 复制同步对象（工作副本 → 兄弟仓库，覆盖）
+$src = ".agents\skills\apple-value-analysis"
+$dst = "I:\_Devolopment\1-small-tools\apple-value-analysis"
+Copy-Item "$src\SKILL.md","$src\CHANGELOG.md","$src\examples.md" $dst -Force
+Copy-Item "$src\reference\*.md" "$dst\reference\" -Force
+Copy-Item "$src\scripts\*.mjs" "$dst\scripts\" -Force
+# 不复制: constants.json / HTML 报告 / *计划*.md 等本地产物
+# 不覆盖: README.md / METHOD.md / LICENSE / docs/（分发仓库专属）
+
+# 2. 兄弟仓库内验证并提交（沿用其 docs:/feat: + 中文摘要风格）
+git -C $dst status        # 预期仅同步对象出现改动
+git -C $dst add SKILL.md CHANGELOG.md examples.md reference scripts
+git -C $dst commit -m "docs: SKILL.md v5.2 残值口径 v4.3 同步"   # 示例
+
+# 3. 双远程推送
+git -C $dst push origin master
+git -C $dst push gitee master
+```
+
+**注意事项**：
+
+- **同步完整性校验点**：CHANGELOG.md 顶部条目与 SKILL.md「维护与版本」版本号——兄弟仓库 CHANGELOG 缺最新 SOP 条目即落后（2026-09-09 核查即发现缺 v5.2 残值口径条目）。
+- 换行符：两边 LF/CRLF 可能不一致，`Get-FileHash` 比对会误报 DIFF，以 `git diff`（归一化后）结果为准。
+- 分发版 SKILL.md 一律按远程获取约定引用 constants.json，不要把数据文件打进分发仓库。
