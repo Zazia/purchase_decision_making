@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "4.9",
-    "last_updated": "2026-09-25",
+    "version": "4.10",
+    "last_updated": "2026-10-19",
     "data_sources": [
       "SellMacBook Device Depreciation Guide",
       "SellCell resale index",
@@ -25,7 +25,9 @@
       "用户提供实采数据(2026-09-08):Mac mini M6官宣后M4/M2二手价5条(v4.5快照刷新);双指数拟合半衰期校准(scripts/fit-residual-functions.mjs)",
       "v4.6发布节奏信源核查(2026-09-09采集):MacRumors Mac mini M7/M7 Pro 2027年与Mac Studio M7 Ultra 2028年报道;Gurman Apple TV 4K(A17 Pro)/HomePod mini秋季报道(2026-07-28);iPad mini 8(OLED)2026-10爆料;MacBook Air M6 2027春爆料;Vision Pro廉价款显示屏开发暂停与下一代2028-2029报道(2026-07);iPhone Ultra折叠屏价格信源复核(截至9-9仍未官宣,泄露价14999元起不入引擎)",
       "v4.8 Mac mini耐久价格复核(2026-09-24):用户确认M4/M2五个同配置价格经较长时间多次观察稳定在2026-09-08实采区间;V2EX/公开Telegram同配置叫价与该区间一致;Used-Lab日本市场发售后控制组仅变动-0.8%~-2.1%;据此校准18-48月中期残值曲线,不改变0-12月与60月后外推",
-      "v4.7 iPhone 18系列发布回填(2026-09-14采集):苹果官网预购页apple.com.cn及发布会报道(18 Pro 256G 9999/18 Pro Max 256G 10999/Duo 256G 15999,9-12预购/9-18发售,Duo 10-16预购/10-23发售);A20 Pro GB6.7.0实测跑分(单核4719/多核12677);iPhone 17全系官方涨价800元与17 Pro/ProMax停产(九派新闻/新浪财经2026-09-10 https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml);18 Pro电商破发(潮新闻2026-09-14核实结算页9099);转转17系列交易量环比+280%/闲鱼上门回收17系+70元(九派新闻2026-09-10);Apple官方TradeIn下调16 Pro/ProMax(US口径9to5Mac 2026-09-09:16 Pro Max $720→$610/16 Pro $630→$510);中国TradeIn理论值(搜狐数码闲聊站2026-09-12)"
+      "v4.7 iPhone 18系列发布回填(2026-09-14采集):苹果官网预购页apple.com.cn及发布会报道(18 Pro 256G 9999/18 Pro Max 256G 10999/Duo 256G 15999,9-12预购/9-18发售,Duo 10-16预购/10-23发售);A20 Pro GB6.7.0实测跑分(单核4719/多核12677);iPhone 17全系官方涨价800元与17 Pro/ProMax停产(九派新闻/新浪财经2026-09-10 https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml);18 Pro电商破发(潮新闻2026-09-14核实结算页9099);转转17系列交易量环比+280%/闲鱼上门回收17系+70元(九派新闻2026-09-10);Apple官方TradeIn下调16 Pro/ProMax(US口径9to5Mac 2026-09-09:16 Pro Max $720→$610/16 Pro $630→$510);中国TradeIn理论值(搜狐数码闲聊站2026-09-12)",
+      "v4.10 iPhone产品线价格快照复核(2026-10-19采集):apple.com.cn iPhone在售阵容/18 Pro与Pro Max全档官方价/iPhone Duo预购页(10-19 WebFetch直采);Apple CN新闻稿 iPhone 17(2025-09-10)/iPhone 17 Pro与Pro Max(2025-09-10)/iPhone 18 Pro与Pro Max(2026-09-09);烟台水母网·头条双11渠道价(18 Pro拼多多8899/京东9099/电信自营8959/ProMax渠道10099起);网易(京东11.11到手9199);财联社·新浪财经2026-09-18(18 ProMax回收加价300-1000/18 Pro黄牛拒收);上游新闻·光明网2026-09-21(18发售后3天16 Pro系跌800余元,SellCell发售窗口期旧款回收损失最高20.2%,约两月后企稳);新浪财经·封面新闻2026-09-14(闲鱼16 ProMax成交均价5210/15 ProMax 4087);Apple官网TradeIn 2026-10-19(16 ProMax 5250/16 Pro 4300/17 ProMax 8300/17 Pro 6400/17 4050,教育商店高约250-300);观察者网2026-10-19(Duo 256G第三方溢价5天回落超五成);川观新闻(Duo发货排期滑至2027-01下旬)",
+      "v4.10补充·闲鱼直采(2026-10-19,TRAE外部Chrome列表页快照):iPhone 15~17全系256G挂价区间,12款机型14组检索共234个有效样本,关键词不带“国行”(避免盒子类挂单刷屏),标题过滤排除配件/损坏/非目标容量/有锁卡贴/全新未拆封/异常低挂价;原始样本与过滤口径见scripts/debug/xianyu-2026-10-19-samples.json"
     ],
     "data_provenance_v3.8": {
       "_说明": "v3.8新增。记录关键数据更新来源,便于追溯",
@@ -132,6 +134,17 @@
       "判定 Mac mini v4.8 校准失效：九个旧报告点使用当前 M6 基础款 6999 元或说明文本作为分母，与“同型号同配置首发官方价”曲线定义不兼容，旧 MAE 改善不得作为验收证据。",
       "撤销 Mac mini 18/24/36/48 月 68/55/47/41 节点，恢复 v4.5 的 72/65/52/46 临时基线；0–12 月、60 月、floor=5 与 half-life=45 不变。临时基线标记 provisional/unverified，不宣称准确。",
       "新增结构化首发价目录、70 条二手观测、三类价格比率归一化、全品类审计与曲线发布门禁；高配/CTO、事件窗口及来源不足观测保留但不进入校准。"
+    ],
+    "v4.10_变更摘要": [
+      "iPhone产品线价格快照红色全量复核(2026-10-19,距上次采集>30天且期间iPhone 18于9-18发售):iPhone_Pro/iPhone_proMax/iPhone_标准三品类重搜。18 Pro 256G官方价9999、18 ProMax 256G官方价10999、17 256G官方价6799经apple.com.cn复核均未变;三品类说明中的\"残值分母\"按v4.9口径改述为\"当前同品类新品价\"(仅类型B买入价预测与替代价值率),曲线分母指向“首发价目录”同配置首发价",
+      "18 Pro/ProMax T+1月行情回填(原\"无法搜索\"字段):电商到手价双双破发——18 Pro 256G 8899(拼多多)-9199(京东11.11)即-8%~-11%,较9-14的9099破发小幅扩大;18 ProMax 256G渠道10099起(破发900),由9-14\"坚挺未破发\"转为破发,幅度小于Pro,热门配色256G/512G仍缺货。国补口径明确:手机国家统一国补限≤6000元机型,18系不在覆盖范围;电商\"国补\"名义实为店铺/运营商/地方补贴(500元封顶,结算页抵扣)",
+      "⚠️18 Pro/ProMax二手稳定成交价未能核实(发售1个月样本稀少):58同城5000元(10-18)疑引流价、拍拍14029元为准新未激活溢价样本,均判定异常不采用;9-18全新仅激活挂价较官网低100-500元。已在快照标注待人工到闲鱼/转转\"近期成交\"复采,决策时以电商到手价为\"现在买\"实际成本锚",
+      "16/17系复采(验证v4.7\"冲击深化\"假设):16 Pro Max回收端9-21约4900→10月中旬企稳(苹果官方TradeIn最高5250,与9-14闲鱼成交均价5210持平);16 Pro回收端仍偏弱(TradeIn 4300);17系\"涨价+停产\"锚定支撑消退——标准版9-14门店回收5200+→10-19官方折抵4050。苹果官方TradeIn 10-19五档入库(16 ProMax 5250/16 Pro 4300/17 ProMax 8300/17 Pro 6400/17 4050)",
+      "首发价目录补iPhone 17代/18代5条结构化首发价(cn-iphone-17-256 5999/cn-iphone-17-pro-256 8999/cn-iphone-17-promax-256 9999/cn-iphone-18-pro-256 9999/cn-iphone-18-promax-256 10999),来源为Apple CN新闻稿;二手价格观测新增7条2026-09/10观测(id:obs-2026-10-19-01~07),因处发布冲击窗口(launch_window)或官方调价窗口(official_repricing)一律calibration_eligible=false,不进入曲线拟合;16 Pro 256G无同配置首发价条目,launch_price_id留空不猜测",
+      "iPhone Duo折叠屏10-16预购开启(256G 15999/512G 17999/1TB 21499/2TB 26499,限购2部,仅eSIM):数分钟首批售罄,官网发货排期11月→12月→2027-01下旬;第三方溢价高开低走(256G星光白10-15约22873→10-19约19047,5天缩水超五成)。发布节奏iPhone_Duo条目回填预购实况;快照品类仍待10-23发售后真实市场价(v4.7待办③),二级市场溢价按shortage_or_bubble处理不作残值依据",
+      "修正v4.7价格事件文本:iPhone 16(128G)官网现价5999元=其发售价,未见调价,\"17e与16涨600-800\"中16部分与官网不符,以官网为准;iPhone 17e当前5299起;iPhone Air为独立产品线(当前8799起,2026-09-10曾+800),不是\"iPhone 17 Air\"命名",
+      "本版仅动iPhone线快照/首发价目录/二手价格观测/发布节奏注记/价格事件与metadata,未动保值率曲线、跑分与引擎;audit-residual-observations.mjs通过(errors=0)。v4.7遗留引擎待办(品类基准芯片切换A20 Pro、IPHONE_MEMORY_MAP内存权重)不在本版范围",
+      "闲鱼直采补录(2026-10-19二批):iPhone 15~17全系256G挂价区间回写「闲鱼中位价_二手同款」——15标准 2288-3188(中位2700)/15 Plus 2289-3358(中位2994)/15 Pro 3088-4000(中位3639)/15 ProMax 3150-4450(中位4088)/16标准 2999-4450(中位3599)/16 Plus 3666-4996(中位3891)/16 Pro 3999-5600(中位4889)/16 ProMax 4998-6200(中位5590)/17标准 3699-5400(中位4488)/17 Pro 5200-7105(中位6388)/17 ProMax 6500-8200(中位7374)/17e 3300-4119(中位3625);二手价格观测新增9条listing口径观测(obs-2026-10-19-08~16,calibration_eligible=false);无对应首发价目录条目的型号launch_price_id留null不猜测;15 Plus/16 Plus/17e快照无对应品类条目,数据仅留档于样本文件与本摘要;browser_use直采策略修订:关键词不加“国行”(盒子类挂单刷屏),筛选规则补充盒子/模型/有锁卡贴/全新未拆封/错型号/求购贴"
     ]
   },
   "首发价目录": {
@@ -630,6 +643,101 @@
         "launch_msrp": 3799,
         "price_kind": "launch_msrp",
         "source_url": "https://www.apple.com.cn/cn/newsroom/2021/09/apple-unveils-new-ipad-mini-with-breakthrough-performance-in-stunning-new-design/",
+        "verification_status": "verified"
+      },
+      "cn-iphone-17-256": {
+        "id": "cn-iphone-17-256",
+        "category": "iPhone_标准",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "base",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "region": "CN",
+        "currency": "CNY",
+        "release_date": "2025-09-10",
+        "launch_msrp": 5999,
+        "price_kind": "launch_msrp",
+        "source_url": "https://www.apple.com.cn/newsroom/2025/09/apple-debuts-iphone-17/",
+        "verification_status": "verified"
+      },
+      "cn-iphone-17-pro-256": {
+        "id": "cn-iphone-17-pro-256",
+        "category": "iPhone_Pro",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_Pro_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "pro",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "region": "CN",
+        "currency": "CNY",
+        "release_date": "2025-09-10",
+        "launch_msrp": 8999,
+        "price_kind": "launch_msrp",
+        "source_url": "https://www.apple.com.cn/newsroom/2025/09/apple-unveils-iphone-17-pro-and-iphone-17-pro-max-cn/",
+        "verification_status": "verified"
+      },
+      "cn-iphone-17-promax-256": {
+        "id": "cn-iphone-17-promax-256",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "region": "CN",
+        "currency": "CNY",
+        "release_date": "2025-09-10",
+        "launch_msrp": 9999,
+        "price_kind": "launch_msrp",
+        "source_url": "https://www.apple.com.cn/newsroom/2025/09/apple-unveils-iphone-17-pro-and-iphone-17-pro-max-cn/",
+        "verification_status": "verified"
+      },
+      "cn-iphone-18-pro-256": {
+        "id": "cn-iphone-18-pro-256",
+        "category": "iPhone_Pro",
+        "generation": "iPhone_18",
+        "model_key": "iPhone_18_Pro_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "pro",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "region": "CN",
+        "currency": "CNY",
+        "release_date": "2026-09-09",
+        "launch_msrp": 9999,
+        "price_kind": "launch_msrp",
+        "source_url": "https://www.apple.com.cn/newsroom/2026/09/apple-debuts-iphone-18-pro-and-iphone-18-pro-max/",
+        "verification_status": "verified"
+      },
+      "cn-iphone-18-promax-256": {
+        "id": "cn-iphone-18-promax-256",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_18",
+        "model_key": "iPhone_18_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "region": "CN",
+        "currency": "CNY",
+        "release_date": "2026-09-09",
+        "launch_msrp": 10999,
+        "price_kind": "launch_msrp",
+        "source_url": "https://www.apple.com.cn/newsroom/2026/09/apple-debuts-iphone-18-pro-and-iphone-18-pro-max/",
         "verification_status": "verified"
       }
     }
@@ -3255,6 +3363,470 @@
           "official_price_note": "A15(iPad mini 6)已停产(2021年发布)。残值分母使用iPad mini A17 Pro 128G官方价4799元",
           "original_confidence": "低(资讯稿回收报价,非实付)"
         }
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "unknown",
+        "sample_size": 1,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-01",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_16",
+        "model_key": "iPhone_16_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-09-14",
+        "observed_price": 5210,
+        "price_type": "transaction",
+        "source_url": "https://finance.sina.com.cn/roll/2026-09-14/doc-iniruark4819405.shtml",
+        "source_urls": [
+          "https://finance.sina.com.cn/roll/2026-09-14/doc-iniruark4819405.shtml"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": "cn-iphone-16-promax-256",
+        "current_new_same_tier_price": 10999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "unknown",
+        "sample_size": 1,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-02",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_15",
+        "model_key": "iPhone_15_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-09-14",
+        "observed_price": 4087,
+        "price_type": "transaction",
+        "source_url": "https://finance.sina.com.cn/roll/2026-09-14/doc-iniruark4819405.shtml",
+        "source_urls": [
+          "https://finance.sina.com.cn/roll/2026-09-14/doc-iniruark4819405.shtml"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": "cn-iphone-15-promax-256",
+        "current_new_same_tier_price": 10999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "unknown",
+        "sample_size": 1,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-03",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_16",
+        "model_key": "iPhone_16_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 5250,
+        "price_type": "trade_in",
+        "source_url": "https://www.apple.com.cn/shop/trade-in",
+        "source_urls": [
+          "https://www.apple.com.cn/shop/trade-in"
+        ],
+        "confidence": "high",
+        "event_state": "launch_window",
+        "launch_price_id": "cn-iphone-16-promax-256",
+        "current_new_same_tier_price": 10999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "unknown",
+        "sample_size": 1,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-04",
+        "category": "iPhone_Pro",
+        "generation": "iPhone_16",
+        "model_key": "iPhone_16_Pro_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "pro",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 4300,
+        "price_type": "trade_in",
+        "source_url": "https://www.apple.com.cn/shop/trade-in",
+        "source_urls": [
+          "https://www.apple.com.cn/shop/trade-in"
+        ],
+        "confidence": "high",
+        "event_state": "launch_window",
+        "launch_price_id": null,
+        "current_new_same_tier_price": 9999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "unknown",
+        "sample_size": 1,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-05",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 8300,
+        "price_type": "trade_in",
+        "source_url": "https://www.apple.com.cn/shop/trade-in",
+        "source_urls": [
+          "https://www.apple.com.cn/shop/trade-in"
+        ],
+        "confidence": "high",
+        "event_state": "official_repricing",
+        "launch_price_id": "cn-iphone-17-promax-256",
+        "current_new_same_tier_price": 10999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "unknown",
+        "sample_size": 1,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-06",
+        "category": "iPhone_Pro",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_Pro_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "pro",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 6400,
+        "price_type": "trade_in",
+        "source_url": "https://www.apple.com.cn/shop/trade-in",
+        "source_urls": [
+          "https://www.apple.com.cn/shop/trade-in"
+        ],
+        "confidence": "high",
+        "event_state": "official_repricing",
+        "launch_price_id": "cn-iphone-17-pro-256",
+        "current_new_same_tier_price": 9999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "unknown",
+        "sample_size": 1,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-07",
+        "category": "iPhone_标准",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "base",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 4050,
+        "price_type": "trade_in",
+        "source_url": "https://www.apple.com.cn/shop/trade-in",
+        "source_urls": [
+          "https://www.apple.com.cn/shop/trade-in"
+        ],
+        "confidence": "high",
+        "event_state": "official_repricing",
+        "launch_price_id": "cn-iphone-17-256",
+        "current_new_same_tier_price": 6799
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 23,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-08",
+        "category": "iPhone_标准",
+        "generation": "iPhone_15",
+        "model_key": "iPhone_15_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "base",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 2700,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2015%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2015%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": null,
+        "current_new_same_tier_price": 6799
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 23,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-09",
+        "category": "iPhone_Pro",
+        "generation": "iPhone_15",
+        "model_key": "iPhone_15_Pro_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "pro",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 3639,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2015%20pro%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2015%20pro%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": null,
+        "current_new_same_tier_price": 9999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 19,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-10",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_15",
+        "model_key": "iPhone_15_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 4088,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2015%20pro%20max%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2015%20pro%20max%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": "cn-iphone-15-promax-256",
+        "current_new_same_tier_price": 10999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 15,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-11",
+        "category": "iPhone_标准",
+        "generation": "iPhone_16",
+        "model_key": "iPhone_16_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "base",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 3599,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2016%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2016%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": null,
+        "current_new_same_tier_price": 6799
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 17,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-12",
+        "category": "iPhone_Pro",
+        "generation": "iPhone_16",
+        "model_key": "iPhone_16_Pro_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "pro",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 4889,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2016%20pro%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2016%20pro%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": null,
+        "current_new_same_tier_price": 9999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 25,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-13",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_16",
+        "model_key": "iPhone_16_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 5590,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2016%20pro%20max%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2016%20pro%20max%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "launch_window",
+        "launch_price_id": "cn-iphone-16-promax-256",
+        "current_new_same_tier_price": 10999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 21,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-14",
+        "category": "iPhone_标准",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "base",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 4488,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2017%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2017%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "official_repricing",
+        "launch_price_id": "cn-iphone-17-256",
+        "current_new_same_tier_price": 6799
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 19,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-15",
+        "category": "iPhone_Pro",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_Pro_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "pro",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 6388,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2017%20pro%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2017%20pro%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "official_repricing",
+        "launch_price_id": "cn-iphone-17-pro-256",
+        "current_new_same_tier_price": 9999
+      },
+      {
+        "region": "CN",
+        "currency": "CNY",
+        "condition": "mixed",
+        "sample_size": 22,
+        "calibration_eligible": false,
+        "actual_paid_price": null,
+        "id": "obs-2026-10-19-16",
+        "category": "iPhone_proMax",
+        "generation": "iPhone_17",
+        "model_key": "iPhone_17_ProMax_256G",
+        "configuration": {
+          "size": null,
+          "chip_tier": "max",
+          "memory_gb": null,
+          "storage_gb": 256
+        },
+        "observed_at": "2026-10-19",
+        "observed_price": 7374,
+        "price_type": "listing",
+        "source_url": "https://www.goofish.com/search?q=iphone%2017%20pro%20max%20256g",
+        "source_urls": [
+          "https://www.goofish.com/search?q=iphone%2017%20pro%20max%20256g"
+        ],
+        "confidence": "medium",
+        "event_state": "official_repricing",
+        "launch_price_id": "cn-iphone-17-promax-256",
+        "current_new_same_tier_price": 10999
       }
     ]
   },
@@ -4269,7 +4841,8 @@
       "下一次预计": "2027-09 iPhone Duo二代(年度节奏假设;新形态品类首代无历史周期,暂无信源)",
       "_最近发布_v4.7": "2026-09-09发布会(北京时间9-10凌晨)发布苹果首款折叠屏,官方命名iPhone Duo(非此前媒体传闻的iPhone Ultra/Fold):书本式内折,5.4寸外屏(面积约为iPhone 18 Pro的90%)/7.6寸内屏(屏下摄像头),展开约4.5mm,钛金属边框;A20 Pro+12GB内存+C2基带;侧边Touch ID(无Face ID,2017年iPhone X以来旗舰首次),双4800万主摄+超广角(无长焦无可变光圈),仅eSIM;10-16预购/10-23发售(较Pro系列晚5周);国行256G 15999/512G 17999/1TB 21499/2TB 26499",
       "_命名说明_v4.7": "v4.6校验结果中该品类记为'iPhone_Ultra'(发布会前媒体命名),官宣定名Duo后本表及快照/校验结果统一更名为iPhone_Duo",
-      "_节奏说明_v4.7": "发布周期月12为假设(对标iPhone年度节奏);折叠屏迭代周期可能更长(供应链良率/铰链成本),二代节奏待首代发售后观察"
+      "_节奏说明_v4.7": "发布周期月12为假设(对标iPhone年度节奏);折叠屏迭代周期可能更长(供应链良率/铰链成本),二代节奏待首代发售后观察",
+      "_预购实况_v4.10": "2026-10-16晚8点预购如期开启:官网数分钟首批售罄,发货排期从11月滑向12月、最终定格2027-01下旬(川观新闻);第三方溢价高开低走——256G星光白10-15约22873元→10-19约19047元,5天缩水超五成(观察者网2026-10-19);每人限购2部,仅eSIM。10-23发售临近,发售后需:建快照品类(v4.7待办③)+采集真实市场价+观察折叠屏保值率首代曲线"
     },
     "iPad_Pro": {
       "发布周期月": 18,
@@ -4645,7 +5218,10 @@
         "T+1周_17系(次新)": "二手/回收不降反涨:闲鱼上门回收17系+70元,商家抬价抢货;转转17系列交易量环比+280%(标准版+700%);17 Pro第三方渠道库存7600-8600元坚挺",
         "T+1周_16及更老款": "Apple官方TradeIn发布当日全面下调(US口径):16 Pro Max $720→$610(-15.3%)/16 Pro $630→$510(-19.0%)/15 Pro Max $530→$455(-14.2%);中国口径16 ProMax理论最高抵扣6550(2025-09其下架时点)→5100(-22.1%),实际估价仅4100",
         "_解读": "三因叠加(18涨价发布+17 Pro系停产稀缺+17全系官方涨价锚定)使次新代17系获强支撑,与iPhone_17_2025-09事件形态一致且更强;16及更老款按'代际跨越'正常承压,TradeIn口径含渠道利润仅作方向参考。⚠️观察期仅5天(9-9发布→9-14),9-18正式发售后需复采:T+1月冲击是否深化(参照'1月内=冲击最大时点')",
-        "_数据来源_2026-09-14": "转转/回收商家:九派新闻(2026-09-10,https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml);US TradeIn:9to5Mac(2026-09-09,https://9to5mac.com/2026/09/09/apple-updates-trade-in-values-following-surprise-and-shine-event-lowers-iphone-payouts/);中国TradeIn与渠道价:搜狐数码闲聊站(2026-09-12,https://m.sohu.com/a/1075193905_120951518/)"
+        "_数据来源_2026-09-14": "转转/回收商家:九派新闻(2026-09-10,https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml);US TradeIn:9to5Mac(2026-09-09,https://9to5mac.com/2026/09/09/apple-updates-trade-in-values-following-surprise-and-shine-event-lowers-iphone-payouts/);中国TradeIn与渠道价:搜狐数码闲聊站(2026-09-12,https://m.sohu.com/a/1075193905_120951518/)",
+        "T+1月_2026-10-19复采": "冲击分化而非单边深化:①16 Pro Max回收端9-21约4900→10月中旬企稳(苹果官方TradeIn 5250,与9-14闲鱼成交均价5210持平),16 Pro回收端仍偏弱(TradeIn 4300);②17系\"涨价+停产\"锚定支撑消退——17标准版官方折抵4050(9-14门店回收报价5200+,口径不同不可直接相减),17 Pro/ProMax官方折抵6400/8300;③18代自身由首发溢价转破发:18 Pro 256G电商8899-9199(-8%~-11%)、18 ProMax 256G渠道10099起(-8%),Pro款破发快于ProMax的历史规律重现",
+        "_解读_T+1月": "首月跌幅最大(16 Pro系发售后3天跌800余元)符合\"1月内=冲击最大时点\"方向,但16 Pro Max在T+1月已企稳回升,支持v4.2\"涨价发布形态冲击消退快于表值(锚定托底)\"的判断;17系回落则显示锚定支撑随事件时间衰减。SellCell口径:发布→发售10天窗口旧款回收损失最高20.2%,旧旗舰约两个月后企稳、11月中下旬或小幅回弹(上游新闻2026-09-21,趋势判断未验证,可作T+2月复采假设)",
+        "_数据来源_2026-10-19": "上游新闻·光明网2026-09-21 https://m.gmw.cn/2026-09/21/content_1304566491.htm ;新浪财经·封面新闻2026-09-14 https://finance.sina.com.cn/roll/2026-09-14/doc-iniruark4819405.shtml ;Apple TradeIn 2026-10-19 https://www.apple.com.cn/shop/trade-in ;烟台水母网·头条 https://m.toutiao.com/group/7698352596486046218/ "
       },
       "_阶段性结论": "4事件8时点观测整体支持曲线方向(1月内最大→逐月消退),但量级分化:涨价发布形态冲击消退远快于表值(锚定托底),降价/平价发布形态3月内几乎无消退。因子表v4.2暂维持,建议2027-01随保值率曲线年度更新一并用全部实证点重校"
     },
@@ -4676,7 +5252,15 @@
         "决策含义": "锚定传导强劲且可能超调(二手涨幅可超官方涨幅)——SOP §9.4情景C(零冲击+锚定全额传导)的实证依据",
         "数据来源": "东方财富网/橙柿财经(转转成交价)+smzdm+V2EX+本库快照2026-07-27实测校验(详见'实时市场价快照.Mac_mini'各条目备注)"
       },
-      "_与冲击均值的关系": "本字段是'涨价发布'形态下的实测锚点,与各品类冲击历史均值并用:均值经价格传导因子对冲后是理论上限,本字段提供实证口径。两者差距大时(如Mac_mini均值38%无实测来源),情景A与情景B的差距即源于此,预估必须输出区间而非点值"
+      "_与冲击均值的关系": "本字段是'涨价发布'形态下的实测锚点,与各品类冲击历史均值并用:均值经价格传导因子对冲后是理论上限,本字段提供实证口径。两者差距大时(如Mac_mini均值38%无实测来源),情景A与情景B的差距即源于此,预估必须输出区间而非点值",
+      "iPhone_18_2026-09": {
+        "事件形态": "涨价发布(18 Pro/ProMax较上代+11.1%/+10.0%,叠加17 Pro系停产稀缺+在售旧机官方涨价800元三因)",
+        "发布后1周老款冲击": "16 Pro系二手跌800余元(约-13%),17系不降反涨(回收+70元/交易量+280%)",
+        "发布后1月老款冲击": "16 Pro Max企稳(官方折抵5250,较其2025-09下架时点理论峰值6550约-20%),16 Pro仍偏弱(4300);17系锚定支撑消退(标准版官方折抵回落至4050)",
+        "新品自身价格路径": "首发日溢价(ProMax酒红加价300-800,Pro遭黄牛拒收)→1月内转破发(18 Pro 8899-9199/-8%~-11%,18 ProMax 10099起/-8%),Pro款破发快于ProMax",
+        "决策含义": "①\"等新机发布买旧款捡漏\"窗口在涨价发布时关闭(17系),但代际跨越的16系仍承压约-13~-20%;②新机首发溢价不可作买入预算依据,首发月后电商破发价才是实际成本锚;③次新代(停产款)折抵价可在官方调价后仍获支撑(17 ProMax折抵8300高于16 ProMax 5250约58%)",
+        "数据来源": "见'实时市场价快照.近期重大价格事件'2026-09-18与2026-10-16条目、_时变实证点_v4.2 iPhone_18发布条目(2026-10-19复采)"
+      }
     },
     "iPhone": {
       "范围": "5-15%",
@@ -5009,14 +5593,15 @@
     },
     "_browser_use_最佳实践": {
       "_说明": "三级数据源(browser-use直采销售渠道)的执行细节。SOP步骤3.1仅保留触发条件与适用平台概述,具体搜索策略按本字段执行",
-      "_实测日期": "2026-07-27",
+      "_实测日期": "2026-10-19",
       "前提条件": "用户需手动扫码登录(browser_waiting_for_user_interaction提示)",
       "适用平台": "闲鱼(goofish.com,推荐)、爱回收(aihuishou.com)、转转、多抓鱼",
       "搜索策略": [
         "1.直接访问搜索URL:如 https://www.goofish.com/search?q={URL编码关键词},避免点击搜索框触发拦截",
         "2.从快照提取,不点详情页:browser_snapshot获取列表页文本,直接提取标题+价格,每个机型约6-8步",
-        "3.关键词精确化:加'国行'/'标准'等限定词排除Pro/Plus/Max变体,加'整机'排除配件",
-        "4.筛选规则:排除'维修'/'翻新'/'换屏'/'配件'/'壳'/'挂单价异常低'等"
+        "3.关键词精确化:机型词+容量直搜即可(如'iphone 15 256g');不要加'国行'——2026-10-19实测会命中'原装盒子'等盒子类挂单刷屏,靠标题过滤控噪;加'自用'可进一步压商家噪声",
+        "4.筛选规则:排除'盒子/包装盒/模型/膜/壳/配件单卖'/'维修'/'翻新'/'换屏/漏液/碎屏/换后盖'/'非目标容量'/'美版有锁/卡贴/韩版/扩容'/'全新未拆封'/'挂单价异常低'/'错型号(Pro/Plus/Max混入)'/'求购贴'",
+        "5.列表页提取用 evaluate 表达式化脚本(箭头函数+表达式体);TRAE浏览器工具的evaluate不接受function(){}花括号形式,会静默返回null"
       ],
       "置信度": "中(挂单价非实付,实际成交价通常比挂单价低5-10%,需在备注中标注)",
       "步骤预算": "每机型约6-10步(快照提取法),60步预算可覆盖5-7个机型",
@@ -5039,7 +5624,7 @@
       "多抓鱼(duozhuayu.com)": "⚠️ 需微信扫码登录,browser-use可能可行但未实测",
       "搜索能力总结": "实测:WebFetch仅能直接搜索苹果官网。闲鱼/爱回收可通过browser-use subagent + 用户协助登录搜索(中置信度,挂单价非实付)。具体搜索策略见本快照'_browser_use_最佳实践'字段"
     },
-    "snapshot_date": "2026-09-24",
+    "snapshot_date": "2026-10-19",
     "_快照更新说明_v4.2": "2026-08-26刷新:iPhone三品类重点条目(16系二手/17系官方价+涨价预警)、Mac_mini M4二手参考、MacBook_Pro新增M4Pro二手条目;其余条目沿用2026-08-07/08-13采集值。iPhone 17系列官方价经apple.com.cn复核(17 256G=5999/17 Pro 256G=8999/17 ProMax 256G=9999)未变",
     "snapshot_sources": [
       "apple.com.cn(WebFetch直接搜索,高置信度)",
@@ -5103,7 +5688,20 @@
         "事件": "2026-09-10 iPhone 18系列发布+在售旧机官方涨价+17 Pro/ProMax停产(三事件叠加)",
         "影响": "①iPhone 18 Pro 256G 9999(+11.1%)/18 ProMax 256G 10999(+10.0%)/Duo 256G 15999(10-16预购/10-23发售);②17 Pro/ProMax发布当日官网停产下架(苹果惯例);③在售旧机全系官方涨价:iPhone 17全系+800(256G 5999→6799/512G 7999→8799),Air 256G/512G+800(起售8799)/1TB+2300(14299),17e与16涨600-800——8月'涨价传闻≤1000元'兑现。二手市场:回收价逆势上涨(闲鱼上门回收17系+70元,商家抬价抢货),转转苹果搜索量+270%/17系列搜索+470%/交易量+280%/17标准版交易量+700%,回收估价量+311%(17系列估价量+5倍);14/15系预计为换新抛售主力",
         "处理": "v4.7已回填:18 Pro/ProMax快照新品条目、A20/A20 Pro跑分、发布节奏表滚动(Pro/ProMax→2027-09,Duo新增)、涨幅表实测滚动分列(Pro 11.1%/ProMax 10.0%)、17系残值分母切换(Pro系→18代10999/9999,标准系→6799)、17 Pro/ProMax停产注记;17系京东国补价随停产失效待复核;Duo待10-23发售后回填快照;老款冲击实测观察记入_时变实证点_v4.7(涨价发布+停产稀缺+旧机官方涨价三因叠加,17系二手获锚定支撑)",
-        "来源": "九派新闻/新浪财经2026-09-10 https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml(官网涨价明细+转转/回收商家数据);MacRumors 2026-09-09 https://www.macrumors.com/2026/09/09/apple-discontinues-iphone-17-pro-max/(17 Pro/ProMax停产)及 https://www.macrumors.com/2026/09/09/apple-raises-iphone-17-prices/(旧机涨价);ZOL 2026-09-10 http://mobile.zol.com.cn/1245/12456451.html(下架证实)"
+        "来源": "九派新闻/新浪财经2026-09-10 https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml(官网涨价明细+转转/回收商家数据);MacRumors 2026-09-09 https://www.macrumors.com/2026/09/09/apple-discontinues-iphone-17-pro-max/(17 Pro/ProMax停产)及 https://www.macrumors.com/2026/09/09/apple-raises-iphone-17-prices/(旧机涨价);ZOL 2026-09-10 http://mobile.zol.com.cn/1245/12456451.html(下架证实)",
+        "_修正_v4.10": "2026-10-19复核:\"17e与16涨600-800\"中iPhone 16部分与官网不符——iPhone 16(128G)官网现价5999元=其发售价,未见调价(9-10报道亦未提及16系涨价),以官网为准;iPhone 17e当前5299起;iPhone Air为独立产品线(2026-09-10调价后8799起,256G/512G曾+800、1TB+2300),不是\"iPhone 17 Air\"命名"
+      },
+      {
+        "事件": "2026-09-18 iPhone 18 Pro/Pro Max发售(T+1月行情复核)",
+        "影响": "①首发日热销配色溢价(Pro Max勃艮第酒红1TB加价500-800,256G加价400-500),18 Pro遭黄牛拒收,闲鱼全新仅激活挂价较官网低100-500;②一个月后由溢价市场转为破发市场:18 Pro 256G电商到手8899(拼多多)-9199(京东11.11)-9099(京东自营补贴),18 ProMax 256G渠道10099起(破发900),ProMax热门配色256G/512G仍有缺货风险;③国补口径:手机国家统一国补限≤6000元机型,18系不在覆盖范围,电商\"国补\"名义实为店铺/运营商/地方补贴(500元封顶);④老款冲击T+1月呈分化——16 Pro Max回收端9-21约4900→10月中旬企稳(TradeIn 5250),16 Pro回收端仍偏弱(4300),17系\"涨价+停产\"锚定支撑消退(标准版官方折抵回落至4050)",
+        "处理": "18 Pro/ProMax条目回填电商到手价与国补口径,二手稳定成交价标注\"未能核实\"待人工补采(58同城5000/拍拍14029判定异常样本不采用);16/17系条目复采更新并回填苹果官方TradeIn 10-19报价;T+1月观测记入_时变实证点_v4.2 iPhone_18发布条目",
+        "来源": "Apple CN新闻稿2026-09-09 https://www.apple.com.cn/newsroom/2026/09/apple-debuts-iphone-18-pro-and-iphone-18-pro-max/ ;烟台水母网·头条 https://m.toutiao.com/group/7698352596486046218/ ;网易 https://c.m.163.com/news/a/L9BS36FV051189P5.html ;财联社·新浪财经2026-09-18 https://finance.sina.com.cn/wm/2026-09-18/doc-inisftwx3298483.shtml ;上游新闻·光明网2026-09-21 https://m.gmw.cn/2026-09/21/content_1304566491.htm ;新浪财经·封面新闻2026-09-14 https://finance.sina.com.cn/roll/2026-09-14/doc-iniruark4819405.shtml ;Apple TradeIn https://www.apple.com.cn/shop/trade-in (2026-10-19直采)"
+      },
+      {
+        "事件": "2026-10-16 iPhone Duo折叠屏开启预购(10-23发售)",
+        "影响": "官网预购页四档价256G 15999/512G 17999/1TB 21499/2TB 26499,每位顾客限购2部,仅支持eSIM;预购开启数分钟首批售罄,官网发货排期从11月一路滑向12月、最终定格2027-01下旬;第三方溢价高开低走——256G星光白10-15约22873元(较官方溢价约6874)→10-19约19047元(溢价约3048),5天缩水超五成",
+        "处理": "预购开启为v4.7待办③(建快照品类)的触发点之一,快照品类仍待10-23发售后以真实市场价建立(引擎对缺失保值率曲线的品类抛错,不建品类即不出错);二级市场溢价按shortage_or_bubble处理,不作残值分母与曲线依据(残值口径只认官方价15999-26499与后续真实成交);发布节奏iPhone_Duo条目回填预购实况",
+        "来源": "apple.com.cn/shop/buy-iphone/iphone-duo (2026-10-19 WebFetch直采);观察者网2026-10-19(溢价回落);川观新闻(发货排期滑至2027-01下旬);光明网(首批秒空)"
       }
     ],
     "_已搜索品类清单_v3.6": [
@@ -6154,22 +6752,26 @@
       }
     },
     "iPhone_proMax": {
-      "_说明": "iPhone ProMax 全系。当前在售iPhone 18 ProMax(2026-09-09发布,9-12预购/9-18发售)。残值分母用iPhone 18 ProMax 256G官方价10999元;17 ProMax已于2026-09-10随新代发布官网停产下架(MacRumors/ZOL证实),仅第三方渠道库存流通",
+      "_说明": "iPhone ProMax 全系。当前在售iPhone 18 ProMax(2026-09-09发布,9-12预购/9-18发售)。当前同品类新品价用iPhone 18 ProMax 256G官方价10999元(仅类型B买入价预测与替代价值率,不作曲线分母;曲线分母见\"首发价目录\"同配置首发价cn-iphone-18-promax-256)。17 ProMax已于2026-09-10停产下架,仅第三方渠道库存流通",
       "iPhone_18_ProMax_256G_新品": {
         "官方价": 10999,
-        "官方价_来源": "2026-09-09发布会官宣(v4.7):256G 10999/512G 12999/1TB 16499/2TB 21499,9-12预购/9-18发售;苹果官网预购页apple.com.cn及发布会报道交叉核实",
-        "京东国补到手价": "无法搜索(首发预购期,国补通常新品上市后1-3个月才开放,见'_国补窗口说明')",
-        "闲鱼中位价_二手同款": "无法搜索(9-18才发售,二手市场暂无流通)",
-        "京东拍拍价": "无法搜索",
+        "官方价_来源": "Apple CN新闻稿2026-09-09明载\"iPhone 18 Pro Max 起售价为 RMB 10,999\";2026-10-19官网复核未变。全档256G 10999/512G 12999/1TB 16499/2TB 21499(256G与1TB经官网页/SKU页直采核实,512G/2TB为Pro同档+1000元固定差价模式推断,标注待直采)",
+        "京东国补到手价": "国家统一国补未覆盖(手机国补限≤6000元机型);电商\"国补\"名义实为店铺/运营商/地方补贴,500元封顶可在结算页抵扣(2026-10-19口径)",
+        "闲鱼中位价_二手同款": "未能核实(发售1个月,二手稳定成交样本稀少);9-18首发日黄牛回收加价300-500(1TB勃艮第酒红加价500-800,财联社/新浪财经)",
+        "京东拍拍价": "14029(256G勃艮第酒红,准新/未激活溢价样本,较官方价+28%,非正常流通价,不采用)",
         "爱回收售价": "无法搜索",
         "爱回收回收报价": "无法搜索",
-        "样本量": "官方价(发布会官宣+官网预购页)",
+        "样本量": "官方价(Apple新闻稿+官网直采)+电商渠道价3条(双11预热报道)",
         "搜索来源URL": [
-          "https://www.apple.com.cn/shop/buy-iphone"
+          "https://www.apple.com.cn/newsroom/2026/09/apple-debuts-iphone-18-pro-and-iphone-18-pro-max/",
+          "https://www.apple.com.cn/shop/buy-iphone/iphone-18-pro",
+          "https://m.toutiao.com/group/7698352596486046218/",
+          "https://finance.sina.com.cn/wm/2026-09-18/doc-inisftwx3298483.shtml"
         ],
-        "搜索日期": "2026-09-14",
-        "置信度": "高(官方官宣价,256G 10999)",
-        "备注": "iPhone 18 ProMax 256G 10999元(较17 ProMax 9999涨+10.0%,2TB +3500元/+19.4%为全系涨幅之最)。预购首日热门配色官网发货已排至10月,渠道价坚挺未破发(与18 Pro电商破发形成分化,ProMax供需更紧)。⚠️首发期热门配色发货排队,类型A'现在买'实际到手时间可能滞后至10月"
+        "搜索日期": "2026-10-19",
+        "置信度": "高(官方价10999经Apple新闻稿+官网直采复核);中(电商到手价,双11促销口径时效性强)",
+        "备注": "iPhone 18 ProMax 256G官方价10999元(2026-10-19复核未变,较17 ProMax 9999涨+10.0%,2TB 21499较上代+3500/+19.4%为全系涨幅之最)。T+1月行情:由坚挺转破发——9-14渠道价坚挺未破发→10月渠道10099起(破发900),幅度小于18 Pro(-8%~-11%);首发日黄牛加价收ProMax(酒红加价300-800,1TB加价500-800),与18 Pro遭拒收形成分化;10月热门配色(勃艮第酒红256G/512G)仍有缺货风险。⚠️二手稳定成交价未采到,类型A\"现在买\"实际成本以电商到手价10099-10444为锚",
+        "京东自营价": "10099起(2026-10双11渠道价,较官方10999破发900);京东电信自营店叠10%补贴约10444;京东企业专享(勃艮第酒红256G)10999未破发"
       },
       "iPhone_17_ProMax_256G_新品": {
         "官方价": 9999,
@@ -6182,7 +6784,7 @@
         "京东国补到手价_PLUS版_来源": "✅WebSearch可信二手资料:smzdm用户实付晒单(2026-07-24,https://m.smzdm.com/p/178838981/),PLUS立减48.88+国补10%+满1000减20,实付8737.31元",
         "京东以旧换新到手价": 7999,
         "京东以旧换新到手价_来源": "WebSearch:新浪财经(2026-07-17,https://cj.sina.cn/articles/view/7879848900/),官方直降1000+以旧换新1000,实付7999元",
-        "闲鱼中位价_二手同款": "无法搜索(17 ProMax为当前在售款,二手市场暂无大量流通)",
+        "闲鱼中位价_二手同款": 7374,
         "京东拍拍价": "无法搜索",
         "爱回收售价": "无法搜索",
         "爱回收回收报价": "无法搜索",
@@ -6192,9 +6794,9 @@
           "https://m.smzdm.com/p/178838981/",
           "https://cj.sina.cn/articles/view/7879848900/"
         ],
-        "搜索日期": "2026-08-26",
-        "置信度": "高(官方价+多个京东实付晒单符合5项标准)",
-        "备注": "iPhone 17 ProMax 256G官方价9999元(2026-05-15降价后,2026-08-26经apple.com.cn复核未变)。京东国补到手价8999元(普通用户),PLUS版8737.31元。以旧换新到手7999元。⚠️v4.7:17 ProMax已于2026-09-10官网停产下架(18 ProMax发布当日,MacRumors https://www.macrumors.com/2026/09/09/apple-discontinues-iphone-17-pro-max/ 及ZOL http://mobile.zol.com.cn/1245/12456451.html 证实);官方价9999转为停产前历史分母,京东第三方渠道库存仍在售(约8999-9999元),国补/以旧换新价随官网下架可能失效,下次校验时按渠道实价更新"
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价22样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "iPhone 17 ProMax 256G官方价9999元(2026-05-15降价后,2026-08-26复核未变)。京东国补到手8999元(普通用户),PLUS版8737.31元,以旧换新到手7999元(均为停产前口径)。⚠️v4.7:17 ProMax已于2026-09-10官网停产下架(18 ProMax发布当日,MacRumors https://www.macrumors.com/2026/09/09/apple-discontinues-iphone-17-pro-max/ 及ZOL证实)。v4.10复核(2026-10-19):官网已无此款,国补/以旧换新价失效确认;苹果官方TradeIn对17 ProMax最高折抵8300元(10-19官网,较16 ProMax 5250高58%),注意高于9-14闲鱼成交均价7199的口径差(折抵价含渠道补贴,不可直接与二手成交价比较)。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):22个有效样本(剔除8条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间6500-8200元,中位7374元。⚠️挂价非成交,实际成交价通常比挂价低5-10%"
       },
       "iPhone_16_ProMax_256G_二手": {
         "官方价": null,
@@ -6212,16 +6814,18 @@
         "爱回收回收报价_来源": "WebSearch:今日头条07月回收价目表(http://m.toutiao.com/group/7664136468475494953/, http://m.toutiao.com/group/7664488672234750500/);新浪财经(2026-07-19,https://k.sina.cn/article_7879777215_1d5abdbbf06801a8jw.html)",
         "苹果官方TradeIn折抵": 5100,
         "苹果官方TradeIn折抵_来源": "v4.7更新(2026-09-14):iPhone 18发布当日(9-9)苹果全面下调iPhone TradeIn,16 ProMax理论最高抵扣降至5100元(US口径$720→$610/-15.3%,9to5Mac https://9to5mac.com/2026/09/09/apple-updates-trade-in-values-following-surprise-and-shine-event-lowers-iphone-payouts/;中国口径实际估价约4100元,搜狐数码闲聊站2026-09-12 https://m.sohu.com/a/1075193905_120951518/)。旧值5800为2026-07口径已失效",
-        "样本量": "5+个来源交叉验证",
+        "样本量": "闲鱼成交均价1条(新浪财经·封面新闻2026-09-14)+官网TradeIn+媒体回收行情",
         "搜索来源URL": [
           "https://k.sina.cn/article_7880068262_1d5b04ca606801mxxe.html",
           "http://m.toutiao.com/group/7664488672234750500/",
           "https://post.smzdm.com/p/azz2n365/",
           "https://swappa.com/prices/apple-iphone-16-pro-max"
         ],
-        "搜索日期": "2026-08-26",
-        "置信度": "中",
-        "备注": "闲鱼中位价~6000元,95新国行5400-6800元,美版Swappa均价约5900元(8-21)。爱回收线上回收5200元,线下95新5400-5600元。苹果官方折抵5100元(v4.7,发布当日下调)。低于行情500元以上疑为翻新机。✅v4.7预测兑现:'iPhone18发布后预计再降'已兑现——TradeIn口径-15.3%(US$720→$610)/中国理论最高6550→5100(-22.1%);闲鱼成交口径9-18发售后复采回填"
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价25样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "8-26口径闲鱼中位约6000元(95新国行5400-6800,Swappa美版约5900)。v4.10复采:9-14闲鱼成交均价5210元(较前周-2.3%,新浪财经·封面新闻),9-21回收约4900(上游新闻),10月中旬苹果官方折抵最高5250(教育商店5550)——回收端较9月低点企稳回升,挂价端低于7月基线但未继续下探。✅v4.7预测兑现:US TradeIn 16 Pro Max $720→$610(-15.3%),中国口径理论最高6550→5250(-19.8%)。⚠️二手稳定成交价建议人工到闲鱼\"近期成交\"复采。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):25个有效样本(剔除5条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间4998-6200元,中位5590元。⚠️挂价非成交,实际成交价通常比挂价低5-10%",
+        "闲鱼中位价_二手同款": 5590,
+        "爱回收回收报价": "苹果官方折抵最高5250(教育商店5550,2026-10-19官网);9-21媒体口径回收约4900(较开售前-500)"
       },
       "iPhone_15_ProMax_256G_二手": {
         "官方价": null,
@@ -6244,9 +6848,10 @@
           "https://k.sina.cn/article_7879777215_1d5abdbbf06801a8jw.html",
           "http://m.toutiao.com/group/7663767428320526894/"
         ],
-        "搜索日期": "2026-07-26",
-        "置信度": "中",
-        "备注": "闲鱼95新国行4800-5200元(07-03);参考价4000-4100元(07-24)。爱回收256GB回收4500-5000元(07-19)。苹果官方折抵4300元。2026年存储芯片涨价致二手价较年初涨超500元,残值率约75%"
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价19样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "闲鱼95新国行4800-5200元(07-03);参考价4000-4100元(07-24)。爱回收256GB回收4500-5000元(07-19)。苹果官方折抵4300元。2026年存储芯片涨价致二手价较年初涨超500元,残值率约75%。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):19个有效样本(剔除11条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间3150-4450元,中位4088元。⚠️挂价非成交,实际成交价通常比挂价低5-10%",
+        "闲鱼中位价_二手同款": 4088
       },
       "iPhone_14_ProMax_256G_二手": {
         "官方价": null,
@@ -6290,9 +6895,9 @@
         "搜索来源URL": [
           "https://www.goofish.com/search?q=iPhone%2016%20ProMax%20512G"
         ],
-        "搜索日期": "2026-08-07",
+        "搜索日期": "2026-10-19",
         "置信度": "高(用户提供实采数据,3个样本)",
-        "备注": "闲鱼挂单价中位7100元(2026-08-07用户提供),3个有效样本,价格7100-7200元。用户提供实采数据,置信度高。⚠️闲鱼挂单价(非实付交易),实际成交价通常比挂单价低5-10%",
+        "备注": "闲鱼挂单价中位7100元(2026-08-07用户提供),3个有效样本,价格7100-7200元。用户提供实采数据,置信度高。⚠️闲鱼挂单价(非实付交易),实际成交价通常比挂单价低5-10%。v4.10复采:苏宁99新挂牌7168元(日期未标注,B2C口径),与8-07闲鱼挂价中位7100基本持平,512G档未见进一步下跌",
         "闲鱼价格区间": [
           7100,
           7200
@@ -6446,22 +7051,26 @@
       }
     },
     "iPhone_Pro": {
-      "_说明": "iPhone Pro 全系。当前在售iPhone 18 Pro(2026-09-09发布,9-12预购/9-18发售)。残值分母用iPhone 18 Pro 256G官方价9999元;17 Pro已于2026-09-10随新代发布官网停产下架(MacRumors/ZOL证实),京东第三方渠道库存仍报8999元",
+      "_说明": "iPhone Pro 全系。当前在售iPhone 18 Pro(2026-09-09发布,9-12预购/9-18发售)。当前同品类新品价用iPhone 18 Pro 256G官方价9999元(仅类型B买入价预测与替代价值率,不作曲线分母;曲线分母见\"首发价目录\"同配置首发价cn-iphone-18-pro-256)。17 Pro已于2026-09-10随新代发布官网停产下架(MacRumors/ZOL证实),第三方渠道库存价已失效仅作参考",
       "iPhone_18_Pro_256G_新品": {
         "官方价": 9999,
-        "官方价_来源": "2026-09-09发布会官宣(v4.7):256G 9999/512G 11999/1TB 15499/2TB 20499,9-12预购/9-18发售;苹果官网预购页apple.com.cn及发布会报道交叉核实",
-        "京东国补到手价": "无法搜索(首发预购期,国补通常新品上市后1-3个月才开放,见'_国补窗口说明')",
-        "闲鱼中位价_二手同款": "无法搜索(9-18才发售,二手市场暂无流通)",
-        "京东拍拍价": "无法搜索",
+        "官方价_来源": "Apple CN新闻稿2026-09-09(https://www.apple.com.cn/newsroom/2026/09/apple-debuts-iphone-18-pro-and-iphone-18-pro-max/)明载\"iPhone 18 Pro 起售价为 RMB 9,999\";2026-10-19 apple.com.cn商店页复核未变。全档256G 9999/512G 11999/1TB 15499/2TB 20499(2026-10-19官网存储档直采)",
+        "京东国补到手价": "国家统一国补未覆盖(手机国补限≤6000元机型,18 Pro 9999元不在范围);电商\"国补\"名义实为店铺/运营商/地方补贴,500元封顶可在结算页抵扣(2026-10-19口径)",
+        "闲鱼中位价_二手同款": "未能核实(发售1个月,二手稳定成交样本稀少);9-18全新仅激活挂价较官网低100-500元(快科技);10-18 58同城个人闲置挂价5000元疑引流价不采用",
+        "京东拍拍价": "未能核实(18 ProMax 256G拍拍14029元为准新未激活溢价样本,非正常流通价,不采用)",
         "爱回收售价": "无法搜索",
         "爱回收回收报价": "无法搜索",
-        "样本量": "官方价(发布会官宣+官网预购页)+电商破发价(潮新闻核实结算页)",
+        "样本量": "官方价(Apple新闻稿+官网2次直采)+电商渠道价4条(双11预热报道,时效性强)",
         "搜索来源URL": [
-          "https://www.apple.com.cn/shop/buy-iphone"
+          "https://www.apple.com.cn/newsroom/2026/09/apple-debuts-iphone-18-pro-and-iphone-18-pro-max/",
+          "https://www.apple.com.cn/shop/buy-iphone/iphone-18-pro",
+          "https://m.toutiao.com/group/7698352596486046218/",
+          "https://c.m.163.com/news/a/L9BS36FV051189P5.html"
         ],
-        "搜索日期": "2026-09-14",
-        "置信度": "高(官方官宣价9999;电商破发价9099为补贴实付口径)",
-        "备注": "iPhone 18 Pro 256G 9999元(较17 Pro 8999涨+11.1%,实测落于发布前IDC预测区间10-15%内)。⚠️发布5日内电商已破发:某电商补贴后9699再叠600元券至9099(2026-09-14潮新闻核实结算页,较官方价-8.9%),与ProMax渠道坚挺形成分化——历史规律Pro款破发快于ProMax。A20 Pro 2nm+可变光圈主摄+12GB内存。类型A'现在买'若可接受电商渠道,实际到手价可低于官方价"
+        "搜索日期": "2026-10-19",
+        "置信度": "高(官方价9999经Apple新闻稿+官网直采两次复核);中(电商到手价,双11促销口径时效性强,预计大促后回落)",
+        "备注": "iPhone 18 Pro 256G官方价9999元(2026-10-19复核未变,较17 Pro 8999涨+11.1%)。A20 Pro 2nm+可变光圈主摄+12GB内存(官方口径:6核CPU/7核GPU/双16核神经网络引擎,VC均热板散热面积3倍,C2基带)。T+1月行情:破发小幅扩大——9-14某电商补贴券后9099→10月拼多多8899/京东9099-9199/电信自营8959(较官方-8%~-11%),与ProMax由未破发转破发900形成同步但幅度更深;首发日黄牛拒收Pro、加价收ProMax。国补:统一国补未覆盖,电商店铺补贴500封顶。⚠️二手稳定成交价未采到,类型A\"现在买\"实际成本以电商到手价8899-9199为锚,二手价待人工复采",
+        "京东自营价": "9099-9199(2026-10双11预热:京东自营叠平台补贴/300元券+500元以旧换新补贴后到手,较官方9999破发800-900);另:拼多多8899,京东电信自营店叠10%补贴约8959"
       },
       "iPhone_17_Pro_256G_新品": {
         "官方价": 8999,
@@ -6472,7 +7081,7 @@
         "京东国补到手价_来源": "✅WebSearch可信二手资料:smzdm用户实付晒单(2026-07-22,https://m.smzdm.com/p/179062104/),满5000减500券+国补500,实付7999元",
         "京东以旧换新到手价": 6999,
         "京东以旧换新到手价_来源": "WebSearch:凤凰科技(2026-06-26,https://tech.ifeng.com/c/8uHArBfwEGZ),10%政府补贴+500以旧换新,实付6999元",
-        "闲鱼中位价_二手同款": "无法搜索(17 Pro为当前在售款)",
+        "闲鱼中位价_二手同款": 6388,
         "京东拍拍价": "无法搜索",
         "爱回收售价": "无法搜索",
         "爱回收回收报价": "无法搜索",
@@ -6482,9 +7091,9 @@
           "https://m.smzdm.com/p/179062104/",
           "https://tech.ifeng.com/c/8uHArBfwEGZ"
         ],
-        "搜索日期": "2026-08-26",
-        "置信度": "高(官方价+京东实付晒单符合5项标准)",
-        "备注": "iPhone 17 Pro 256G官方价8999元(2026-08-26经apple.com.cn复核未变;官网'8999起'即Pro款,勿与ProMax混淆)。京东国补到手7999元。以旧换新到手6999元。⚠️v4.7:17 Pro已于2026-09-10官网停产下架(18 Pro发布当日,MacRumors/ZOL证实);官方价8999转为停产前历史分母,京东第三方渠道库存仍报8999元(ZOL比价页2026-09-14核实),国补/以旧换新价随官网下架可能失效,下次校验时按渠道实价更新"
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价19样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "iPhone 17 Pro 256G官方价8999元(2026-08-26经apple.com.cn复核;官网\"8999起\"即Pro款,勿与ProMax混淆)。京东国补到手7999元。以旧换新到手6999元。⚠️v4.7:17 Pro已于2026-09-10官网停产下架(18 Pro发布当日,MacRumors/ZOL证实);官方价8999转为停产前历史分母。v4.10复核(2026-10-19):停产1月后官网已无此款,第三方渠道库存价8999元已失效仅作参考(9-14 ZOL比价页口径);苹果官方TradeIn对17 Pro最高折抵6400元(10-19官网直采),较16 Pro同档4300高约49%,体现次新代溢价;国补/以旧换新价随官网下架失效确认。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):19个有效样本(剔除11条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间5200-7105元,中位6388元。⚠️挂价非成交,实际成交价通常比挂价低5-10%"
       },
       "iPhone_16_Pro_256G_二手": {
         "官方价": null,
@@ -6507,15 +7116,17 @@
         "爱回收回收报价_线下95新": 4700,
         "爱回收回收报价_来源": "WebSearch:今日头条07月回收价目表(http://m.toutiao.com/group/7664136468475494953/, http://m.toutiao.com/group/7664488672234750500/)",
         "苹果官方TradeIn折抵": 4900,
-        "样本量": "5+个来源交叉验证",
+        "样本量": "8-26多源交叉+10-19官网TradeIn+9-21媒体回收行情",
         "搜索来源URL": [
           "https://post.m.smzdm.com/p/a0326n49/",
           "http://m.toutiao.com/group/7664488672234750500/",
           "https://m.suning.com/product/0070754031/000000012450636501.html"
         ],
-        "搜索日期": "2026-08-26",
-        "置信度": "中",
-        "备注": "闲鱼95新5200-5600元;转转严选/拍拍95新4500-5300元(8月口径,7月口径5800-6300);多抓鱼售价5568元;苏宁99新5506-5628元。爱回收线上回收4450元,线下4600-4800元。苹果官方折抵4900元。✅v4.7预测兑现:iPhone 18发布当日(9-9)TradeIn全面下调,16 Pro US口径$630→$510(-19.0%),为全系跌幅之最(9to5Mac);中国口径理论值待复核,闲鱼成交口径9-18发售后复采回填"
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价17样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "闲鱼95新5200-5600元;转转严选/拍拍95新4500-5300元(8月口径);多抓鱼售价5568元;苏宁99新5506-5628元(日期未标注)。v4.10复采(2026-10-19):18发售后3天16 Pro系二手跌800余元、16系回收价平均降约500元(上游新闻9-21);10月中旬挂价端95新5000-5600稳定,回收端仍偏弱——苹果官方折抵最高4300(教育商店4550)。SellCell口径:新品发布→发售10天窗口旧款回收损失最高20.2%,旧旗舰约两个月后企稳、11月中下旬或小幅回弹(上游新闻2026-09-21,趋势判断非已验证)。✅v4.7预测兑现:18发布当日US TradeIn 16 Pro $630→$510(-19.0%),中国口径10-19官网折抵4300。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):17个有效样本(剔除13条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间3999-5600元,中位4889元。⚠️挂价非成交,实际成交价通常比挂价低5-10%",
+        "爱回收回收报价": "苹果官方折抵最高4300(教育商店4550,2026-10-19官网)",
+        "闲鱼中位价_二手同款": 4889
       },
       "iPhone_15_Pro_256G_二手": {
         "官方价": null,
@@ -6538,9 +7149,10 @@
           "https://k.sina.cn/article_7879923039_1d5ae155f068015z9c.html",
           "http://m.toutiao.com/group/7663767428320526894/"
         ],
-        "搜索日期": "2026-07-26",
-        "置信度": "中",
-        "备注": "回收价3900-4400元(07-03)。爱回收到店实测4400元(07-09)。苹果官方折抵3750元。福州市场回收价从3400涨至3700元(存储芯片涨价)"
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价23样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "回收价3900-4400元(07-03)。爱回收到店实测4400元(07-09)。苹果官方折抵3750元。福州市场回收价从3400涨至3700元(存储芯片涨价)。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):23个有效样本(剔除7条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间3088-4000元,中位3639元。⚠️挂价非成交,实际成交价通常比挂价低5-10%",
+        "闲鱼中位价_二手同款": 3639
       },
       "iPhone_14_Pro_256G_二手": {
         "官方价": null,
@@ -6810,31 +7422,31 @@
       }
     },
     "iPhone_标准": {
-      "_说明": "iPhone 标准全系。当前在售iPhone 17(2025-09发布)。残值分母用iPhone 17 256G官方价6799元(2026-09-10随iPhone 18发布会全系上调800元后口径)",
+      "_说明": "iPhone 标准全系。当前在售iPhone 17(2025-09发布,2026-09-10随iPhone 18发布全系上调800元后256G 6799起)与iPhone 17e(5299起)/iPhone 16(5999起,128G,未随9-10调价)。iPhone 18标准版/18e/Air 2推迟2027春,故标准线残值口径仍以iPhone 17 256G官方价6799元为当前同品类新品价(仅类型B买入价预测与替代价值率;曲线分母见\"首发价目录\"同配置首发价cn-iphone-17-256=5999首发价)。注:iPhone Air为独立产品线(2026-09-10调价后8799起),不属本品类",
       "iPhone_17_256G_新品": {
         "官方价": 6799,
         "官方价_来源": "v4.7更新:2026-09-10苹果官网随iPhone 18发布全系上调,iPhone 17 256G从5999涨至6799(+800/+13.3%),512G从7999涨至8799。来源:九派新闻/新浪财经(2026-09-10,https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml)引苹果官网;MacRumors同日报道苹果上调16/17/Air/17e价格(https://www.macrumors.com/2026/09/09/apple-raises-iphone-17-prices/)",
-        "京东自营价": 5999,
+        "京东自营价": "5999(涨价前口径,2026-09-10官方上调800元后已失效,仅供历史参考)",
         "京东自营价_来源": "✅WebSearch可信二手资料:smzdm用户实付晒单(2026-07-16,https://m.smzdm.com/p/178710270/, 2026-07-19,https://m.smzdm.com/p/178865769/),京东自营页面价5999元。⚠️v4.7:此为2026-09-10官方涨价前口径,涨价后未复核,实际应约6799",
-        "京东国补到手价": "无法搜索(2026-09-10官方涨价+800元后国补到手价未复核,旧值5499已失效;引擎临时回退用官方价6799)",
+        "京东国补到手价": "涨价前口径5499已失效;2026-10-19复核:苹果官网6799元未再变动,京东国补到手价未采到新值(17为在售款,国补限≤6000元机型,6799元同样不在国家统一国补范围内)",
         "京东国补到手价_旧值": 5499,
         "京东国补到手价_旧值_来源": "✅WebSearch可信二手资料:smzdm用户实付晒单(2026-07-16,https://m.smzdm.com/p/178710270/),国补500,实付5499元。2026-09-10涨价前口径,已失效仅作历史记录",
         "京东以旧换新到手价": 4899,
         "京东以旧换新到手价_来源": "WebSearch:凤凰科技(2026-06-26,https://tech.ifeng.com/c/8uHArBfwEGZ),国补500+以旧换新600,实付4899元。⚠️v4.7:涨价前口径",
-        "闲鱼中位价_二手同款": "无法搜索(17为当前在售款)",
+        "闲鱼中位价_二手同款": 4488,
         "京东拍拍价": "无法搜索",
         "爱回收售价": "无法搜索",
         "爱回收回收报价": "无法搜索",
-        "样本量": "官方价(2026-09-10涨价后官网口径)+2个京东自营晒单+1凤凰科技对比(均为涨价前口径)",
+        "样本量": "官方价(2026-10-19官网直采)+苹果官方TradeIn(10-19)+媒体回收行情",
         "搜索来源URL": [
           "https://www.apple.com.cn/shop/buy-iphone",
           "https://finance.sina.com.cn/roll/2026-09-10/doc-inirixkq5299940.shtml",
           "https://m.smzdm.com/p/178710270/",
           "https://tech.ifeng.com/c/8uHArBfwEGZ"
         ],
-        "搜索日期": "2026-09-14",
-        "置信度": "高(官方涨价经官网+九派新闻/MacRumors双源核实)",
-        "备注": "iPhone 17 256G官方价6799元(2026-09-10随iPhone 18发布全系上调800元,较5999涨13.3%;v4.7更新)。京东国补/以旧换新价为涨价前口径已失效。⚠️二手市场反应:涨价后17回收价不降反涨(闲鱼上门回收+70元),转转17系列交易量环比+280%,标准版+700%——涨价+18标准版缺席使17成下半年二手热门(九派新闻2026-09-10)"
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价21样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "iPhone 17 256G官方价6799元(2026-09-10随iPhone 18发布全系上调800元,较5999涨13.3%;2026-10-19官网复核未变,512G 8799)。⚠️v4.10二手反应更新:9月\"涨价+抢购\"异常行情(闲鱼上门回收+70元、转转17系交易量环比+280%、标准版+700%)在一个月后消退——10-19苹果官方TradeIn对17最高折抵4050元,较9-14转转门店回收报价5200+(95%电池)明显回落,但两口径不同不可直接相减;17标准版为当前二手热门流通款(18标准版缺席),挂价端仍受6799官方价锚定支撑。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):21个有效样本(剔除9条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间3699-5400元,中位4488元。⚠️挂价非成交,实际成交价通常比挂价低5-10%"
       },
       "iPhone_16_256G_二手": {
         "官方价": null,
@@ -6856,11 +7468,12 @@
           "https://guangtao.taobao.com/product-013d732ded26d883da89085031bc017e33b75538c34cc8afc559ee377b91a68f.html",
           "https://www.sjpif.net/price/youpin-canvas.html"
         ],
-        "搜索日期": "2026-08-26",
-        "置信度": "中(多源交叉,含平台行情/成交/批发口径)",
-        "备注": "⚠️v4.2修正:原2026-07-27采样(闲鱼'iPhone 16 256 国行'列表页6样本4999-6500元,中位5875)判定为无效——该值与iPhone 16 Pro 256G二手价(5400)倒挂,不可能成立,疑似混入16 Pro/ProMax挂单或诈骗引流样本。修正后约4000元(挂价口径,实付约3600-3800)。iPhone18(2026-09-09发布)临近,转转行情预判发布后16系再降,当前为换机潮抛售前窗口",
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价15样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "⚠️v4.2修正:原2026-07-27采样(闲鱼6样本中位5875)判定无效——与iPhone 16 Pro 256G二手价(5400)倒挂,疑似混入16 Pro/ProMax挂单或诈骗引流样本。修正后约4000元(挂价口径,实付约3600-3800)。v4.10复采(2026-10-19):18发售后16系回收价平均降约500元(上游新闻2026-09-21),9月转转行情3768-4608、爱回收严选2300元样本疑低成色/非标样本不采用(与同代Pro 5200+价格体系不符);10月中旬无可靠带日期成交样本,沿用修正值约4000元(挂价口径)并标注待复采。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):15个有效样本(剔除15条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间2999-4450元,中位3599元。⚠️挂价非成交,实际成交价通常比挂价低5-10%",
         "闲鱼样本量": 3,
-        "_v4.2修正记录": "5875→4000(2026-08-26)。原值采样污染:与同容量16 Pro(5400)倒挂,逻辑不可能;新值3源交叉(转转95新3100-3700/淘宝成交4100/优品批发4150)"
+        "_v4.2修正记录": "5875→4000(2026-08-26)。原值采样污染:与同容量16 Pro(5400)倒挂,逻辑不可能;新值3源交叉(转转95新3100-3700/淘宝成交4100/优品批发4150)",
+        "闲鱼中位价_二手同款": 3599
       },
       "iPhone_15_256G_二手": {
         "官方价": null,
@@ -6882,14 +7495,15 @@
         "搜索来源URL": [
           "https://www.goofish.com/search?q=iPhone%2015%20256%20%E5%9B%BD%E8%A1%8C"
         ],
-        "搜索日期": "2026-07-27",
-        "置信度": "中(闲鱼挂单价,样本量8个)",
-        "备注": "闲鱼挂单价中位2859元(2026-07-27采集),较此前smzdm参考价4400元低(因当时为95新/99新报价,且时间略早)。⚠️闲鱼挂单价(非实付交易),实际成交价通常比挂单价低5-10%。数据从搜索结果列表页快照提取,未逐一验证商品详情。样本量充足,可作为参考",
+        "搜索日期": "2026-10-19",
+        "置信度": "中(闲鱼挂价23样本,2026-10-19列表页快照提取,未逐一验证商品详情)",
+        "备注": "闲鱼挂单价中位2859元(2026-07-27采集),较此前smzdm参考价4400元低(因当时为95新/99新报价,且时间略早)。⚠️闲鱼挂单价(非实付交易),实际成交价通常比挂单价低5-10%。数据从搜索结果列表页快照提取,未逐一验证商品详情。样本量充足,可作为参考。v4.10闲鱼直采(2026-10-19,www.goofish.com搜索列表页快照,关键词不带“国行”避免盒子类挂单刷屏,原始样本见scripts/debug/xianyu-2026-10-19-samples.json):23个有效样本(剔除7条:盒子/配件/模型、换屏漏液碎屏、非目标容量、美版有锁卡贴/韩版、全新未拆封、异常低挂价、错型号),挂价区间2288-3188元,中位2700元。⚠️挂价非成交,实际成交价通常比挂价低5-10%",
         "闲鱼价格区间": [
           2798,
           3399
         ],
-        "闲鱼样本量": 8
+        "闲鱼样本量": 8,
+        "闲鱼中位价_二手同款": 2700
       },
       "iPhone_14_256G_二手": {
         "官方价": null,
@@ -7849,7 +8463,8 @@
         "备注": "⚠️参考价为挂单价非实付交易。建议用户提供具体闲鱼链接"
       }
     },
-    "_快照更新说明_v4.5": "2026-09-08刷新:Mac_mini 5条二手价(用户实采,M6官宣后,含新建M2_8G_512G条目)+保值率曲线外推半衰期按品类拟合校准;其余条目沿用2026-08-26快照值"
+    "_快照更新说明_v4.5": "2026-09-08刷新:Mac_mini 5条二手价(用户实采,M6官宣后,含新建M2_8G_512G条目)+保值率曲线外推半衰期按品类拟合校准;其余条目沿用2026-08-26快照值",
+    "_快照更新说明_v4.10": "2026-10-19 iPhone产品线复核:iPhone_Pro/iPhone_proMax/iPhone_标准三品类按红色规则全量重搜(距上次采集>30天,且期间iPhone 18于2026-09-18发售)。其余品类沿用各自条目\"搜索日期\"采集值(Mac_mini 2026-09-24用户确认区间,MacBook/iPad/Watch等2026-08-26及更早)。18 Pro/ProMax二手稳定成交价为已知数据缺口,见对应条目备注。2026-10-19二批闲鱼直采已回写15~17全系256G挂价区间(样本明细见scripts/debug/xianyu-2026-10-19-samples.json)"
   },
   "design_tokens": {
     "_说明": "报告视觉与图表实现细节的唯一权威源。SKILL.md第6章仅保留纪律性条款,所有可复制代码(CSS token、组件伪代码、ECharts baseOption、图表模板)均在此字段。SKILL.md不再依赖.design_library/apple-report/等任何外部文件",
