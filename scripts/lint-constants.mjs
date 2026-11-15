@@ -76,7 +76,8 @@ if (violations.length === 0) {
 }
 
 // ---- L3: payload 体积 ----
-const payloadBytes = Buffer.byteLength(raw, 'utf-8');
+// 与 publish-constants.mjs 的紧凑 payload 保持同一体积口径。
+const payloadBytes = Buffer.byteLength(JSON.stringify(constants), 'utf-8');
 if (payloadBytes > MAX_PAYLOAD_BYTES) {
   fail('payload-size', '(payload)', `${payloadBytes} bytes`,
     `超过安全上限 ${MAX_PAYLOAD_BYTES} bytes (云数据库单文档 512KB)`);

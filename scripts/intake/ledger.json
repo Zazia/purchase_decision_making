@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "sourceCollection": "shared_results",
-  "watermark": 1789437029513,
+  "watermark": 1794315272259,
   "processedIds": [
     "shared_results:65af4ef16a78041401cab33b08d5cdf5",
     "shared_results:0e0afdc26a7808780167dac853b03bbc",
@@ -51,9 +51,41 @@
     "shared_results:783a596c6c3a305d675e6c3ee3d4587a",
     "shared_results:49bd15b4b657c351e5ee90315f6a085d",
     "shared_results:cc946c23abea8fb63d3f43f2ebbdf20b",
-    "shared_results:b39447ca39f0cfdb370fcdc7369ba525"
+    "shared_results:b39447ca39f0cfdb370fcdc7369ba525",
+    "shared_results:863a82122df0d6ff75340133afdba3f6",
+    "shared_results:964fbcc86aaa60ef005c61ae18ac1122",
+    "shared_results:2957a442279d23a2e554bc6ab3e214ba",
+    "shared_results:9639270b972042ae04dbe767ea08854c",
+    "shared_results:a450a5f973813930f67cf8d2c710faa3",
+    "shared_results:bd5421876ff768534825db92b692ab2d",
+    "shared_results:050bb70513c2c94d79ead5d275f69ff9",
+    "shared_results:49df25c8de1b947e72c21dda9be8b306"
   ],
-  "groups": {},
+  "groups": {
+    "{\"category\":\"iphone\",\"model\":\"iPhone 16 pro max_新品\",\"chip\":\"A19_Pro\",\"memoryGb\":8,\"storageGb\":1024,\"buyTiming\":\"new\",\"channel\":\"官网\",\"useSubsidy\":false}": {
+      "dimensions": {
+        "category": "iphone",
+        "model": "iPhone 16 pro max_新品",
+        "chip": "A19_Pro",
+        "memoryGb": 8,
+        "storageGb": 1024,
+        "buyTiming": "new",
+        "channel": "官网",
+        "useSubsidy": false
+      },
+      "prices": [
+        12999
+      ],
+      "grade": {
+        "eligible": false,
+        "reason": "样本不足(1/20)",
+        "count": 1,
+        "median": 12999,
+        "madRatio": 0,
+        "cv": 0
+      }
+    }
+  },
   "runs": [
     {
       "date": "2026-09-14T04:03:13.053Z",
@@ -200,6 +232,23 @@
       "groups": 0,
       "eligibleGroups": 0,
       "watermark": 1789437029513
+    },
+    {
+      "date": "2026-11-15T15:38:14.114Z",
+      "fetched": 55,
+      "newRecords": 8,
+      "newPoints": 1,
+      "skipped": {
+        "legacy": 1,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 6,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 1,
+      "eligibleGroups": 0,
+      "watermark": 1794315272259
     }
   ]
 }

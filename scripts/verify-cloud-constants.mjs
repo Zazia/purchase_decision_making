@@ -36,7 +36,8 @@ if (!existsSync(LOCAL_FILE)) {
   console.error(`[verify-constants] FAIL @ local-read: 本地文件不存在 ${LOCAL_FILE}`);
   process.exit(1);
 }
-const localPayload = readFileSync(LOCAL_FILE, 'utf-8');
+// 与发布器同口径：忽略源文件缩进，校验实际上云的紧凑 payload。
+const localPayload = JSON.stringify(JSON.parse(readFileSync(LOCAL_FILE, 'utf-8')));
 const localHash = sha256(localPayload);
 let localVersion;
 try {

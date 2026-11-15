@@ -192,13 +192,14 @@ test('constants配置、渠道和补贴口径不确定时不提供错误修正',
 test('维护发布编排在每个失败阶段中止，并透传干跑和环境参数', () => {
   const dir = dirname(pipelineFiles().ledgerFile);
   writeFileSync(join(dir, 'release-constants.mjs'), readFileSync(join(root, 'scripts/release-constants.mjs')));
-  for (const failed of ['lint', 'publish', 'verify', 'none']) {
-    for (const [stage, file] of [['lint', 'lint-constants.mjs'], ['publish', 'publish-constants.mjs'], ['verify', 'verify-cloud-constants.mjs']]) {
+  for (const failed of ['lint', 'curve-audit', 'publish', 'verify', 'none']) {
+    for (const [stage, file] of [['lint', 'lint-constants.mjs'], ['curve-audit', 'audit-curve-release.mjs'], ['publish', 'publish-constants.mjs'], ['verify', 'verify-cloud-constants.mjs']]) {
       writeFileSync(join(dir, file), `console.log('TEST_STAGE_${stage}', JSON.stringify(process.argv.slice(2)));process.exit(${failed === stage ? 7 : 0});`);
     }
     const res = spawnSync(process.execPath, [join(dir, 'release-constants.mjs'), '--dry-run', '--env', 'test-env'], { encoding: 'utf8' });
     assert.equal(res.status, failed === 'none' ? 0 : 7);
-    if (failed === 'lint') assert.ok(!res.stdout.includes('TEST_STAGE_publish'));
+    if (failed === 'lint') assert.ok(!res.stdout.includes('TEST_STAGE_curve-audit'));
+    if (failed === 'lint' || failed === 'curve-audit') assert.ok(!res.stdout.includes('TEST_STAGE_publish'));
     if (failed === 'publish') assert.ok(!res.stdout.includes('TEST_STAGE_verify'));
     if (failed === 'none') assert.ok(res.stdout.includes('["--dry-run","--env","test-env"]'));
   }
