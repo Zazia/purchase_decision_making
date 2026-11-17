@@ -62,7 +62,7 @@
     "shared_results:49df25c8de1b947e72c21dda9be8b306"
   ],
   "groups": {
-    "{\"category\":\"iphone\",\"model\":\"iPhone 16 pro max_新品\",\"chip\":\"A19_Pro\",\"memoryGb\":8,\"storageGb\":1024,\"buyTiming\":\"new\",\"channel\":\"官网\",\"useSubsidy\":false}": {
+    "{\"category\":\"iphone\",\"model\":\"iPhone 16 pro max_新品\",\"chip\":\"A19_Pro\",\"memoryGb\":8,\"storageGb\":1024,\"buyTiming\":\"new\",\"channel\":\"官方\",\"useSubsidy\":false}": {
       "dimensions": {
         "category": "iphone",
         "model": "iPhone 16 pro max_新品",
@@ -70,19 +70,24 @@
         "memoryGb": 8,
         "storageGb": 1024,
         "buyTiming": "new",
-        "channel": "官网",
+        "channel": "官方",
         "useSubsidy": false
       },
       "prices": [
         12999
       ],
       "grade": {
+        "policy": "price-evidence-v1",
         "eligible": false,
-        "reason": "样本不足(1/20)",
-        "count": 1,
-        "median": 12999,
-        "madRatio": 0,
-        "cv": 0
+        "tier": "线索",
+        "confidence": "低",
+        "count": 0,
+        "median": null,
+        "madRatio": null,
+        "cv": null,
+        "rejected": 1,
+        "recentCount": 0,
+        "reason": "型号与芯片冲突"
       }
     }
   },
@@ -243,6 +248,40 @@
         "consent": 0,
         "test": 0,
         "ordinary": 6,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 1,
+      "eligibleGroups": 0,
+      "watermark": 1794315272259
+    },
+    {
+      "date": "2026-11-17T12:05:35.304Z",
+      "fetched": 55,
+      "newRecords": 0,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 0,
+        "invalid": 0
+      },
+      "sourceCollection": "shared_results",
+      "groups": 2,
+      "eligibleGroups": 0,
+      "watermark": 1794315272259
+    },
+    {
+      "date": "2026-11-17T12:06:08.675Z",
+      "fetched": 55,
+      "newRecords": 0,
+      "newPoints": 0,
+      "skipped": {
+        "legacy": 0,
+        "consent": 0,
+        "test": 0,
+        "ordinary": 0,
         "invalid": 0
       },
       "sourceCollection": "shared_results",

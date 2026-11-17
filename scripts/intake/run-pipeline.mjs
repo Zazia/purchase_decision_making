@@ -19,6 +19,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import { gradeEvidence, recentGroups, validateReviewedSamples } from './sample-policy.mjs';
 import { createCloudClient, CloudApiError } from '../lib/wx-cloud-api.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -32,11 +33,9 @@ const COLLECTION = 'shared_results';
 const CONSENT_VERSION = 'share-price-analysis-v1';
 
 // ---- 置信度分级阈值 (对齐 openspec/specs/crowdsourced-price-intake 规范示例值) ----
-const MIN_SAMPLES = 20;      // 同组累计提交数门槛
+const MIN_SAMPLES = 5;      // 近30天同组独立无凭证填报门槛
 const MAX_MAD_RATIO = 0.15;  // 中位绝对偏差/中位价 (提交价与历史中位价的偏离度)
 const MAX_CV = 0.4;           // 标准差/均值 (价格离散度)
-// 渠道可信度: 当前小程序 PlanPoint 无渠道字段, 取中性因子 1.0 (待端上补齐后生效)
-const CHANNEL_CREDIBILITY = 1.0;
 
 function fail(step, message) {
   console.error(`[intake-pipeline] FAIL @ ${step}: ${message}`);
@@ -84,7 +83,7 @@ function loadLedger(ledgerFile) {
 export function dimensionsOf(p, category) {
   return { category, model: stripHoldingYearsSuffix(p.model), chip: p.chip,
     memoryGb: p.memoryGb ?? null, storageGb: p.storageGb ?? null, buyTiming: p.buyTiming,
-    channel: p.channel ?? null, useSubsidy: p.useSubsidy ?? null };
+    channel: p.channel === '官网' ? '官方' : (p.channel ?? null), useSubsidy: p.useSubsidy ?? null };
 }
 const groupKeyOf = (p, category) => JSON.stringify(dimensionsOf(p, category));
 export function skipReason(rec, includeTest = false) {
@@ -98,28 +97,6 @@ export function skipReason(rec, includeTest = false) {
     || p.predictedPrice !== false || !p.sourceId || typeof p.model !== 'string' || !p.model
     || typeof p.chip !== 'string' || !['new', 'used'].includes(p.buyTiming))) return 'invalid';
   return null;
-}
-
-/** 累计分组后统一分级; prices 为该组全部历史提交价 */
-function gradeGroup(group) {
-  const prices = group.prices;
-  if (prices.length === 0) return { eligible: false, reason: '无样本' };
-  const med = median(prices);
-  const mad = median(prices.map((p) => Math.abs(p - med)));
-  const madRatio = med > 0 ? mad / med : Infinity;
-  const cv = mean(prices) > 0 ? std(prices) / mean(prices) : Infinity;
-  const factors = [];
-  if (prices.length < MIN_SAMPLES) factors.push(`样本不足(${prices.length}/${MIN_SAMPLES})`);
-  if (madRatio > MAX_MAD_RATIO) factors.push(`偏离度过大(MAD比${round1(madRatio * 100)}%>${MAX_MAD_RATIO * 100}%)`);
-  if (cv > MAX_CV) factors.push(`离散度过大(CV${round1(cv * 100)}%>${MAX_CV * 100}%)`);
-  return {
-    eligible: factors.length === 0,
-    reason: factors.length === 0 ? '达标' : factors.join('; '),
-    count: prices.length,
-    median: med,
-    madRatio,
-    cv,
-  };
 }
 
 // ---------- constants 现值对照 (尽力匹配, D5) ----------
@@ -173,6 +150,8 @@ export async function runPipeline(options = {}) {
   const constantsFile = files.constantsFile ?? CONSTANTS_FILE;
 
   const ledger = loadLedger(ledgerFile);
+  const now = options.now ?? Date.now();
+  const reviewed = validateReviewedSamples(options.reviewedSamples ?? []);
   const today = new Date().toISOString().slice(0, 10);
   console.log(`[intake-pipeline] 共享方案离线管线启动 (${today})`);
   console.log(`[intake-pipeline] 台账: watermark=${ledger.watermark || '(无, 将全量消费)'}, `
@@ -250,19 +229,26 @@ export async function runPipeline(options = {}) {
   }
 
   // 5. 合并台账累计分组
-  const mergedGroups = JSON.parse(JSON.stringify(ledger.groups));
+  const mergedGroups = {};
+  for (const g of Object.values(ledger.groups)) {
+    const dimensions = dimensionsOf(g.dimensions, g.dimensions.category);
+    const key = JSON.stringify(dimensions);
+    (mergedGroups[key] ??= { dimensions, prices: [] }).prices.push(...g.prices);
+  }
   for (const [key, g] of Object.entries(newGroups)) {
     (mergedGroups[key] ??= { dimensions: g.dimensions, prices: [] });
     mergedGroups[key].prices.push(...g.prices);
   }
 
-  // 6. 分级
+  // 6. 仅从本次完整云导出与维护者审核输入重建近期分级；历史累计不充数。
+  const recent = recentGroups(records, reviewed, { dimensionsOf, skipReason, now });
+  for (const [key, g] of recent) mergedGroups[key] ??= { dimensions: g.dimensions, prices: [] };
   const graded = [];
   for (const [key, g] of Object.entries(mergedGroups)) {
     const dimensions = g.dimensions;
-    const grade = gradeGroup(g);
+    const grade = gradeEvidence(recent.get(key)?.samples ?? [], dimensions, now);
     g.grade = grade;
-    graded.push({ key, ...dimensions, ...grade });
+    graded.push({ key, ...dimensions, ...grade, historicalCount: g.prices.length });
   }
   graded.sort((a, b) => b.count - a.count);
   const eligibleGroups = graded.filter((g) => g.eligible);
@@ -276,7 +262,7 @@ export async function runPipeline(options = {}) {
   }
 
   const byCategoryCount = {};
-  for (const g of graded) byCategoryCount[g.category] = (byCategoryCount[g.category] || 0) + g.count;
+  for (const g of graded) byCategoryCount[g.category] = (byCategoryCount[g.category] || 0) + g.historicalCount;
 
   const devByCategory = {};
   for (const d of deviationPairs) {
@@ -287,7 +273,7 @@ export async function runPipeline(options = {}) {
   lines.push(`# 用户提交价修正建议报告 (${today})`);
   lines.push('');
   lines.push('> ⚠️ **仅供人工审核，禁止直接回写**——本报告由离线管线自动生成，'
-    + '「可纳入」组合须经人工复核后按既有 SOP 合入 constants.json，并走 constants:release 发布。');
+    + '各级建议须经人工复核后按既有 SOP 合入 constants.json，并走 constants:release 发布。');
   lines.push('');
   lines.push('## 1. 运行概览');
   lines.push('');
@@ -297,9 +283,9 @@ export async function runPipeline(options = {}) {
   lines.push(`- 拉取记录: ${fetchedCount} 条, 其中新增: ${newRecords.length} 条, 新增样本点: ${newPoints} 个`);
   lines.push(`- 水位线: ${ledger.watermark || '(无)'} → ${newRecords.length > 0
     ? newRecords.reduce((m, r) => (Number.isFinite(r.createdAt) && r.createdAt > m ? r.createdAt : m), ledger.watermark || 0) : ledger.watermark || '(无)'}`);
-  lines.push(`- 台账累计: 分组 ${graded.length} 个, 累计样本 ${graded.reduce((s, g) => s + g.count, 0)} 个`);
-  lines.push(`- 分级阈值: 样本 ≥${MIN_SAMPLES}, MAD/中位价 ≤${MAX_MAD_RATIO * 100}%, CV ≤${MAX_CV * 100}%`
-    + `, 渠道因子 ${CHANNEL_CREDIBILITY} (中性, 未核实渠道，按中性处理)`);
+  lines.push(`- 台账累计: 分组 ${graded.length} 个, 累计样本 ${graded.reduce((s, g) => s + g.historicalCount, 0)} 个`);
+  lines.push(`- 分级阈值: 近30天独立无凭证填报 ≥${MIN_SAMPLES}, MAD/中位价 ≤${MAX_MAD_RATIO * 100}%, CV ≤${MAX_CV * 100}%`
+    + `；官网1条高置信、成交凭证1–2条低置信/≥3条中置信；填报仅候选，均须人工复核。`);
   if (newPoints === 0) {
     lines.push('');
     lines.push('**本次无新增价格样本**。以下为既有台账累计汇总。');
@@ -319,15 +305,15 @@ export async function runPipeline(options = {}) {
   if (graded.length === 0) {
     lines.push('(尚无任何累计样本。)');
   } else {
-    lines.push('| 品类 | 机型 | 芯片 | 内存/存储 | 渠道/国补 | 买卖 | 累计样本 | 中位价 | MAD偏离度 | 离散度CV | 结论 |');
+    lines.push('| 品类 | 机型 | 芯片 | 内存/存储 | 渠道/国补 | 买卖 | 累计/近期独立样本 | 中位价 | MAD偏离度 | 离散度CV | 结论 |');
     lines.push('|------|------|------|------|------|------|---------|--------|----------|----------|------|');
     for (const g of graded) {
-      lines.push(`| ${g.category} | ${g.model} | ${g.chip} | ${g.memoryGb ?? '未知'}/${g.storageGb ?? '未知'} | ${g.channel ?? '未知'}/${g.useSubsidy ?? '未知'} | ${g.buyTiming} | ${g.count} | `
-        + `${Math.round(g.median)} | ${pct(g.madRatio)} | ${pct(g.cv)} | ${g.eligible ? '**可纳入**' : `样本不足/置信度低 (${g.reason})`} |`);
+      lines.push(`| ${g.category} | ${g.model} | ${g.chip} | ${g.memoryGb ?? '未知'}/${g.storageGb ?? '未知'} | ${g.channel ?? '未知'}/${g.useSubsidy ?? '未知'} | ${g.buyTiming} | ${g.historicalCount}/${g.count} | `
+        + `${g.median===null?'—':Math.round(g.median)} | ${g.madRatio===null?'—':pct(g.madRatio)} | ${g.cv===null?'—':pct(g.cv)} | ${g.eligible ? `**${g.tier} / ${g.confidence}置信度**` : g.reason} |`);
     }
   }
   lines.push('');
-  lines.push('## 4. 可纳入组合修正建议 (人工审核)');
+  lines.push('## 4. 分级价格建议 (人工审核)');
   lines.push('');
   if (eligibleGroups.length === 0) {
     lines.push('(无可纳入组合——未达标分组保留共享方案继续累积, 不丢弃。)');
@@ -339,7 +325,7 @@ export async function runPipeline(options = {}) {
       const current = matched ? (matched.value ?? '字段非数值') : '待核对（配置或价格口径不可比）';
       const path = matched ? `实时市场价快照.${matched.category}.${matched.entryKey}.${matched.field}` : '—';
       const action = matched && typeof matched.value === 'number'
-        ? `复核后将现值改为 ${Math.round(g.median)} (依据: ${g.count} 样本, MAD ${pct(g.madRatio)}, CV ${pct(g.cv)})`
+        ? `完成外部证据与口径复核后评估 ${Math.round(g.median)} (依据: ${g.count} 样本, MAD ${pct(g.madRatio)}, CV ${pct(g.cv)})`
         : '人工用 query-constants 查证键路径后评估';
       lines.push(`| ${g.category} | ${g.model} | ${g.chip || '未知'}/${g.memoryGb ?? '未知'}/${g.storageGb ?? '未知'}/${g.channel ?? '未知'}/${g.useSubsidy ?? '未知'} | ${g.buyTiming} | ${Math.round(g.median)} | ${current} | ${path} | ${action} |`);
     }
@@ -369,7 +355,7 @@ export async function runPipeline(options = {}) {
   lines.push('## 6. 声明');
   lines.push('');
   lines.push('- 本报告与台账不含匿名标识 (anonId) 等可关联个人的字段。');
-  lines.push('- 渠道维度: 已按渠道与国补口径分别聚合；未知值保留为未知，渠道可信度因子暂按中性处理。');
+  lines.push('- 渠道维度: 按配置、渠道与国补分组，未知信息不达标；云填报时间仅表示提交时间，成交日期须外部核实。');
   lines.push('- **红线**: 共享方案数据不自动回写快照; 合入须人工审核 + lint + 云端发布走 `pnpm constants:release`。');
   lines.push('');
   writeFileSync(reportPath, lines.join('\n'));
@@ -398,7 +384,7 @@ export async function runPipeline(options = {}) {
   console.log(`[intake-pipeline] 台账已更新: ${ledgerFile} (新增 ${newRecords.length} 条记录, ${newPoints} 个样本点)`);
 
   console.log(`[intake-pipeline] 完成: 分组 ${graded.length} 个 (可纳入 ${eligibleGroups.length}), `
-    + `累计样本 ${graded.reduce((s, g) => s + g.count, 0)} 个`);
+    + `累计样本 ${graded.reduce((s, g) => s + g.historicalCount, 0)} 个`);
   return { reportPath, newRecords: newRecords.length, newPoints, eligibleGroups: eligibleGroups.length, skipped };
 }
 
@@ -431,8 +417,10 @@ if (isDirectRun) {
     const envId = value('--env');
     const id = value('--diagnose');
     const ledgerPath = value('--ledger');
+    const reviewedPath = value('--reviewed-samples');
+    const reviewedSamples = reviewedPath ? JSON.parse(readFileSync(resolve(reviewedPath), 'utf8')) : [];
     const task = id ? diagnoseRecord(id, { envId }).then(result => console.log(JSON.stringify(result, null, 2)))
-      : runPipeline({ fetchRecords: () => fetchFromCloud(envId), files: ledgerPath ? { ledgerFile: resolve(ledgerPath) } : {} });
+      : runPipeline({ reviewedSamples, fetchRecords: () => fetchFromCloud(envId), files: ledgerPath ? { ledgerFile: resolve(ledgerPath) } : {} });
     task.catch(error => fail('run', error.message));
   } catch (error) { fail('arguments', error.message); }
 }

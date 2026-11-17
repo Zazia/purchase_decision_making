@@ -56,7 +56,7 @@ pnpm intake:report
 
 报告要点：
 
-- 按「品类 + 机型/芯片/内存/存储 + 买入时机 + 渠道 + 国补」分组，达标组合（样本 ≥20 / 偏离度 ≤15% / 离散度 ≤40%）标记为**可纳入**
+- 按「品类 + 机型/芯片/内存/存储 + 买入时机 + 渠道 + 国补」分组，近30天独立无凭证填报≥5且MAD/中位价≤15%、CV≤40%标记为**填报候选（须外部核验）**
 - 可纳入组合附「用户提交价中位数 vs constants 现值」对照与推荐 vs 用户提交价偏差分析
 - **shared_results 已建但为空时正常空跑**（退出码 0），报告标注「无新增样本」
 
@@ -120,3 +120,27 @@ v2 分享 30 天到期后不可访问，但过期扫码不删除分析记录；�
 分享落地修复（2026-09-16）：二维码scene及卡片shareId均读取保存时快照，不按当前价格重算。已发出的纯参数卡片无法恢复修改版，须重新生成；已有v2二维码待云函数与客户端更新后可读原快照。
 
 2026-09-16分享快照修复云函数已部署；模拟器scene/shareId两入口及完整报告均验证保持用户修改版。客户端尚未发布。验收见 `openspec/changes/archive/2026-09-16-fix-shared-result-snapshot/verification.md`。
+
+## 价格样本分级（2026-11-17）
+
+官网同配置1条为高置信官方价建议；核验成交凭证1–2条为低置信参考、3条起为中置信参考；无凭证云填报5个近期独立来源仅为候选。挂牌仅线索。各组MAD/中位价≤15%、CV≤40%，不混合官网/成交/填报计算中位数。所有建议均需人工复核，不自动发布。
+
+每次从完整云导出重建近30天分级，同一服务端身份同组取最新记录，原累计台账保留。提交时间不是成交日期；身份缺失、配置/渠道/补贴缺失、型号芯片冲突、未来和过期记录均不能达标。云端自带verified或official不受信任。身份只在内存/忽略目录缓存，不进入报告或台账。
+
+维护者审核外部凭证后，可将JSON数组保存至 scripts/debug/reviewed-prices.json（不得包含姓名/电话/订单号），运行：
+
+```sh
+node scripts/intake/run-pipeline.mjs --reviewed-samples scripts/debug/reviewed-prices.json
+```
+
+单项结构如下（示意数据，须替换为实际审核证据；observedAt为采样/成交时间毫秒）：
+
+```json
+{
+  "dimensions": {"category":"mac-mini","model":"M2_16G_256G_二手","chip":"M2","memoryGb":16,"storageGb":256,"buyTiming":"used","channel":"闲鱼","useSubsidy":false},
+  "region":"CN","currency":"CNY","price":3000,"observedAt":1794916800000,"kind":"verified_paid",
+  "sourceKey":"人工核对的独立来源代号","evidenceUrl":"https://example.com/replace-with-real-evidence","reviewed":true
+}
+```
+
+region必须为CN且currency为CNY，不混入其他地区/币种；kind允许official、verified_paid、listing；official仅接受apple.com.cn及其子域HTTPS、官方/官网渠道、新品无补贴。维护者须核对独立来源及同地区币种；同一卖家/订单多链接不可多计。样例外链不是有效成交证据，reviewed=true意味着维护者已完成核验，脚本不会替代人工真实性审核。没有证据文件时仅消费云端填报。

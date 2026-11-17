@@ -443,7 +443,7 @@ reference/performance-models.md §4):
 - 12-36月区间:置信度最高
 - 报告中必须标注各候选方案的置信度等级
 
-变量搜索规则与时效性(二手价样本量、优先级、30天时效、年度更新)见 market-sampling.md §6。
+变量搜索规则与时效性见 market-sampling.md §6–7：官网1条高置信；凭证1–2条低置信、≥3条中置信；无凭证填报≥5条仅候选，必须近期、独立、同配置并审核。
 
 ---
 
@@ -484,7 +484,7 @@ reference/performance-models.md §4):
 
 ## 7. 维护与版本
 
-- 当前SOP版本:**v5.3**(2026-09-25,保值率曲线统一首发价口径与发布门禁)。版本演进史、各版本变更明细与引擎同步记录见 [CHANGELOG.md](CHANGELOG.md)
+- 当前SOP版本:**v5.4**(2026-11-17,价格证据分级与近30天独立样本门槛)。版本演进史、各版本变更明细与引擎同步记录见 [CHANGELOG.md](CHANGELOG.md)
 - **版本演进规则**:SOP(方法论)与 constants.json(数据)版本号**独立演进**。SOP 版本仅在流程/公式/规则变更时升级;constants.json 版本随数据更新(约每周一次)递增,版本号可能高于 SOP 版本。是否拉取远程数据只看 `metadata.last_updated` 日期,不比对版本号
 - **远程仓库**(双源,Gitee 优先):主源 `https://gitee.com/zezia/purchase_decision_making`;备份源 `https://github.com/Zazia/purchase_decision_making`
 - **许可证**:本目录文档(SKILL.md + reference/ + examples.md + CHANGELOG.md + scripts/)采用 MIT;constants.json 采用 CC BY-NC 4.0
